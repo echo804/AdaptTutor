@@ -17,6 +17,24 @@ from app.persistence.db import get_session_factory
 from app.persistence.models import InviteCode, UserDomain
 
 
+
+@pytest.fixture(scope="session", autouse=True)
+def _cleanup_test_domains():
+    """测试结束后清理测试创建的 user_domains/generation_tasks（避免污染选择器/我的领域）。"""
+    yield
+    import asyncio as _aio
+    from sqlalchemy import text as _text
+    from app.persistence.db import get_session_factory as _gsf
+
+    async def _clean():
+        async with _gsf()() as db:
+            await db.execute(_text("DELETE FROM generation_tasks WHERE user_id IN (SELECT id FROM users WHERE username LIKE 'u_%')"))
+            await db.execute(_text("DELETE FROM user_domains WHERE user_id IN (SELECT id FROM users WHERE username LIKE 'u_%')"))
+            await db.commit()
+
+    _aio.run(_clean())
+
+
 @pytest.fixture
 async def client():
     transport = ASGITransport(app=app)

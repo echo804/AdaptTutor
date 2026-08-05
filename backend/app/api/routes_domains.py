@@ -48,13 +48,11 @@ async def api_domains(
             continue
         if d.pack_id in known:
             continue
-        label = d.name
-        if d.user_id != user.id:
-            label = f"{d.name}（{d.visibility == 'public' and '公开' or ''}）"
+        # 选择器直接显示领域名（他人公开领域同样只显示名称，简洁不标注可见性）
         packs.append(
             {
                 "id": d.pack_id,
-                "subject": label,
+                "subject": d.name,
                 "version": "0.1.0",
                 "owner": d.user_id == user.id,
                 "status": d.status,
