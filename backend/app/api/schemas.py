@@ -10,7 +10,11 @@ from pydantic import BaseModel, Field
 class RegisterRequest(BaseModel):
     username: str = Field(min_length=2, max_length=64)
     password: str = Field(min_length=6, max_length=128)
-    invite_code: str
+    invite_code: str | None = None  # 首用户可省略（04 v0.8）
+
+
+class BootstrapResponse(BaseModel):
+    needs_invite: bool  # users 表非空时需要邀请码
 
 
 class LoginRequest(BaseModel):

@@ -46,6 +46,13 @@ async def _register(client, username: str | None = None) -> tuple[str, int]:
 
 # ---- 认证 ----
 
+async def test_bootstrap_returns_needs_invite(client):
+    """当前库已有用户 → needs_invite=true（首用户免邀请码场景在空库生效）。"""
+    r = await client.get("/auth/bootstrap")
+    assert r.status_code == 200
+    assert r.json()["needs_invite"] is True
+
+
 async def test_register_and_login(client):
     code = await _make_invite_code()
     r = await client.post(

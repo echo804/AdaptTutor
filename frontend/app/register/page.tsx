@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { api, setToken, AuthResponse } from "@/lib/api";
@@ -10,8 +10,15 @@ export default function RegisterPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [inviteCode, setInviteCode] = useState("");
+  const [needsInvite, setNeedsInvite] = useState(true); // 首用户免邀请码
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    api<{ needs_invite: boolean }>("/auth/bootstrap", { token: null })
+      .then((b) => setNeedsInvite(b.needs_invite))
+      .catch(() => setNeedsInvite(true));
+  }, []);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -20,7 +27,11 @@ export default function RegisterPage() {
     try {
       const res = await api<AuthResponse>("/auth/register", {
         method: "POST",
-        body: { username, password, invite_code: inviteCode },
+        body: {
+          username,
+          password,
+          invite_code: needsInvite ? inviteCode : null,
+        },
         token: null,
       });
       setToken(res.token);
@@ -39,7 +50,7 @@ export default function RegisterPage() {
           注册账号
         </h1>
         <p className="mb-6 text-sm" style={{ color: "var(--muted)" }}>
-          需要邀请码，注册后请先在设置页配置 API key
+          {needsInvite ? "需要邀请码，注册后请先在设置页配置 API key" : "你是第一个用户（创建者），无需邀请码；注册后请先在设置页配置 API key"}
         </p>
 
         {error && (
@@ -71,16 +82,18 @@ export default function RegisterPage() {
           />
         </label>
 
-        <label className="mb-6 block text-sm" style={{ color: "var(--muted)" }}>
-          邀请码
-          <input
-            className="mt-1 w-full rounded border px-3 py-2 text-sm outline-none"
-            style={{ background: "var(--bg)", borderColor: "var(--border)", color: "var(--text)" }}
-            value={inviteCode}
-            onChange={(e) => setInviteCode(e.target.value)}
-            required
-          />
-        </label>
+        {needsInvite && (
+          <label className="mb-6 block text-sm" style={{ color: "var(--muted)" }}>
+            邀请码
+            <input
+              className="mt-1 w-full rounded border px-3 py-2 text-sm outline-none"
+              style={{ background: "var(--bg)", borderColor: "var(--border)", color: "var(--text)" }}
+              value={inviteCode}
+              onChange={(e) => setInviteCode(e.target.value)}
+              required
+            />
+          </label>
+        )}
 
         <button
           type="submit"

@@ -3,15 +3,31 @@
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user, get_db
-from app.api.schemas import AuthResponse, LoginRequest, MeResponse, RegisterRequest
+from app.api.schemas import (
+    AuthResponse,
+    BootstrapResponse,
+    LoginRequest,
+    MeResponse,
+    RegisterRequest,
+)
 from app.auth.security import create_token
 from app.auth.service import login, register
 from app.persistence.models import User
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+
+
+@router.get("/bootstrap", response_model=BootstrapResponse)
+async def api_bootstrap(db: AsyncSession = Depends(get_db)) -> BootstrapResponse:
+    """是否处于引导态（无任何用户）——前端据此决定邀请码字段显隐。"""
+    from sqlalchemy import func
+
+    count = (await db.execute(select(func.count()).select_from(User))).scalar_one()
+    return BootstrapResponse(needs_invite=count > 0)
 
 
 @router.post("/register", response_model=AuthResponse)
