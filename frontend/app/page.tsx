@@ -5,8 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getToken } from "@/lib/api";
 
-/** 欢迎页（M4r9j）：淡黄素描纸 + 精细单线手绘苏格拉底正面头像线稿（古希腊雕像质感，浅灰线条）+ 文字浮于其上。
- * 素材：AI 生成的矢量线稿风格苏格拉底头像（波浪卷发/长胡须/分层排线），透明背景。
+/** 欢迎页（M4r9k）：淡黄素描纸 + 精细单线手绘苏格拉底完整人物线稿（无文字）+ 文字浮于其上。
+ * 素材：用户从 AI 生成图中裁出的完整人物线稿（波浪卷发/长胡须/分层排线），透明背景。
  * 已登录 → 直接进入 /chat；未登录 → 展示欢迎页 + 登录/注册 CTA。
  */
 
@@ -45,7 +45,7 @@ export default function WelcomePage() {
       {/* 精细线稿水印（z-0，透明 PNG/WebP） */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src="/socrates-lineart-vertical.webp"
+        src="/socrates-full.webp"
         alt=""
         aria-hidden
         className="pointer-events-none absolute z-0 h-[92vh] w-auto max-w-none select-none"
