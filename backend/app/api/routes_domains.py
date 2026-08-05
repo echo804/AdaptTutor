@@ -61,6 +61,36 @@ async def api_domains(
     return {"packs": packs, "active": _active_pack(user)}
 
 
+@router.get("/market/domains")
+async def api_market_domains(
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """领域市场：所有已审核公开的领域（含作者/统计/创建时间）。"""
+    res = await db.execute(
+        select(UserDomain, User.username)
+        .join(User, User.id == UserDomain.user_id)
+        .where(UserDomain.visibility == "public", UserDomain.status == "published")
+        .order_by(UserDomain.id.desc())
+        .limit(100)
+    )
+    items = [
+        {
+            "id": d.id,
+            "pack_id": d.pack_id,
+            "name": d.name,
+            "description": d.description,
+            "username": uname,
+            "nodes_count": d.nodes_count,
+            "questions_count": d.questions_count,
+            "created_at": d.created_at.isoformat() if d.created_at else None,
+            "owner": d.user_id == user.id,
+        }
+        for d, uname in res.all()
+    ]
+    return {"items": items}
+
+
 class ActivePackRequest(BaseModel):
     pack_id: str = Field(min_length=1, max_length=64)
 
