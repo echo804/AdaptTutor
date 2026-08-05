@@ -6,11 +6,13 @@ import { Html, OrbitControls, Stars } from "@react-three/drei";
 import * as THREE from "three";
 import { hexToRgba, useThemeVar } from "@/lib/theme";
 
-/** 3D 宇宙星辰图（M4r6 需求 3）：
- * - 星系螺旋布局 + 中央恒星 + 星云粒子背景
- * - 行星节点：掌握度点亮（琥珀发光）/ 未完成暗沉冷灰
- * - 高级交互：OrbitControls 拖拽/旋转/缩放、hover 放大发光、点击信息卡
- * - 溯源：暖色发光路径 + 根因脉冲
+/** 3D 宇宙星辰图（M4r8c 重构）：
+ * - 聚类星系星团布局：按关联度（主题前缀）划分多个独立子星团，
+ *   各星团环绕中心月牙均匀分布；星团内部小型放射排列；
+ *   力导向迭代防节点重叠，关联越强的节点越靠近星团内侧/中心
+ * - 中央主节点：月牙样式（新月 Shape），暖色发光
+ * - 视觉：简约科技星空——浅白圆点节点、纤细浅色标签、细淡连接线
+ * - 交互：OrbitControls 拖拽/缩放、hover 放大、点击信息卡、溯源暖色路径 + 根因脉冲
  */
 
 export interface StarNode {
@@ -35,85 +37,161 @@ interface StarMap3DProps {
   traceRoot?: string;
 }
 
-// 05 配色（语义色不随色板；强调色 AMBER 由主题变量动态传入）
+// 05 配色（语义色不随色板；强调色由主题变量动态传入）
 const COLD = new THREE.Color("#94a3b8");
-const WARM_GREEN = new THREE.Color("#7ec8a0");
+const WHITE = new THREE.Color("#e8e6e3");
 
 function lerpColor(c1: THREE.Color, c2: THREE.Color, t: number) {
   return c1.clone().lerp(c2, Math.max(0, Math.min(1, t)));
 }
 
-// 星系布局：按主题前缀分组扇形（M4r8b 分散优化）
-// 每个主题（l/r/a/t/o…）占一个角度扇区，组内节点沿扇区半径递增 + 角度铺开，
-// y 方向分层错开——多领域大节点集（如 llm_app_dev 98 节点）不再挤成一条螺旋。
-function spiralPositions(nodes: StarNode[]) {
-  const pos: Record<string, [number, number, number]> = {};
-  if (nodes.length === 0) return pos;
+/** 聚类星系布局（M4r8c）：
+ * 1. 按 id 前缀聚类（主题 = 关联度簇）
+ * 2. 各簇中心均匀环绕中心（xz 平面大圆）
+ * 3. 簇内按关联度（度数 + importance）排序，强关联放内侧，初始小型放射
+ * 4. 力导向迭代（同簇强排斥/跨簇弱排斥 + 簇心引力）防节点重叠
+ */
+function clusterLayout(nodes: StarNode[], edges: StarEdge[]) {
+  const out: Record<string, [number, number, number]> = {};
+  if (nodes.length === 0) return out;
 
-  // 按 id 前缀分组（保留主题分组语义）
+  // 1) 聚类
   const groups: Record<string, StarNode[]> = {};
   nodes.forEach((n) => {
     const p = n.id.replace(/[0-9]/g, "") || "x";
     (groups[p] = groups[p] || []).push(n);
   });
   const keys = Object.keys(groups);
-  const SECTOR = (Math.PI * 2) / keys.length;
-  const SECTOR_PAD = 0.6; // 扇区两侧留空隙，避免相邻组粘连
-  const R0 = 4.2;
-  const DR = 0.72; // 组内半径递增步长
+  const N = keys.length;
 
-  keys.forEach((key, gi) => {
-    const g = groups[key];
-    const start = gi * SECTOR + SECTOR_PAD;
-    const span = SECTOR - SECTOR_PAD * 2;
+  // 2) 簇中心均匀环绕（xz 平面，半径 9.5）
+  const CLUSTER_R = 9.5;
+  const centers: Record<string, THREE.Vector3> = {};
+  keys.forEach((k, i) => {
+    const a = (i / N) * Math.PI * 2 - Math.PI / 2;
+    centers[k] = new THREE.Vector3(Math.cos(a) * CLUSTER_R, 0, Math.sin(a) * CLUSTER_R);
+  });
+
+  // 3) 关联度：importance + 边数加权
+  const degree: Record<string, number> = {};
+  nodes.forEach((n) => (degree[n.id] = n.importance));
+  edges.forEach((e) => {
+    if (degree[e.from] !== undefined) degree[e.from] += 0.4;
+    if (degree[e.to] !== undefined) degree[e.to] += 0.4;
+  });
+
+  // 4) 初始位置：簇内放射（强关联靠内）
+  const prefixOf = (id: string) => id.replace(/[0-9]/g, "") || "x";
+  const pos: Record<string, THREE.Vector3> = {};
+  keys.forEach((k) => {
+    const g = [...groups[k]].sort((a, b) => (degree[b.id] || 0) - (degree[a.id] || 0));
+    const c = centers[k];
     g.forEach((n, i) => {
       const t = g.length > 1 ? i / (g.length - 1) : 0;
-      const theta = start + t * span;
-      const r = R0 + i * DR;
-      // y 按 5 层错开（-3.0 … +3.0），z 收缩放宽，垂直投影显著拉开
-      pos[n.id] = [r * Math.cos(theta), (i % 5) * 1.5 - 3.0, r * Math.sin(theta) * 0.78];
+      const ang = t * Math.PI * 2 * 0.92;
+      const r = 1.3 + t * 4.2; // 排名靠前（强关联）→ 内侧
+      pos[n.id] = new THREE.Vector3(
+        c.x + Math.cos(ang) * r,
+        (i % 4) * 0.6 - 0.9,
+        c.z + Math.sin(ang) * r
+      );
     });
   });
-  return pos;
+
+  // 5) 力导向迭代（同簇强排斥 / 跨簇弱排斥 + 簇心引力）
+  const ids = Object.keys(pos);
+  const MIN_D = 2.0;
+  const ITERS = 110;
+  for (let it = 0; it < ITERS; it++) {
+    const damp = 1 - it / ITERS;
+    const fx: Record<string, number> = {}, fy: Record<string, number> = {}, fz: Record<string, number> = {};
+    ids.forEach((id) => ((fx[id] = 0), (fy[id] = 0), (fz[id] = 0)));
+    for (let i = 0; i < ids.length; i++) {
+      for (let j = i + 1; j < ids.length; j++) {
+        const a = pos[ids[i]], b = pos[ids[j]];
+        const dx = a.x - b.x, dy = a.y - b.y, dz = a.z - b.z;
+        const d2 = dx * dx + dy * dy + dz * dz;
+        if (d2 < 0.001) continue;
+        const d = Math.sqrt(d2);
+        const same = prefixOf(ids[i]) === prefixOf(ids[j]);
+        const f = (same ? 1.0 : 0.35) * Math.min(1, (MIN_D * MIN_D) / d2);
+        const ux = dx / d, uy = dy / d, uz = dz / d;
+        fx[ids[i]] += ux * f; fy[ids[i]] += uy * f; fz[ids[i]] += uz * f;
+        fx[ids[j]] -= ux * f; fy[ids[j]] -= uy * f; fz[ids[j]] -= uz * f;
+      }
+    }
+    ids.forEach((id) => {
+      const c = centers[prefixOf(id)];
+      fx[id] += (c.x - pos[id].x) * 0.02;
+      fy[id] += (0 - pos[id].y) * 0.05;
+      fz[id] += (c.z - pos[id].z) * 0.02;
+    });
+    ids.forEach((id) => {
+      const len = Math.hypot(fx[id], fy[id], fz[id]);
+      const step = Math.min(len, 0.14 * damp + 0.01);
+      if (len > 0) {
+        pos[id].x += (fx[id] / len) * step;
+        pos[id].y += (fy[id] / len) * step;
+        pos[id].z += (fz[id] / len) * step;
+      }
+    });
+  }
+
+  ids.forEach((id) => (out[id] = [pos[id].x, pos[id].y, pos[id].z]));
+  return out;
 }
 
-// 主题分组色（M4r8b）：按节点 id 前缀着色标签边框，视觉分群（不覆盖掌握度主色）
-const GROUP_COLORS: Record<string, string> = {
-  l: "#6c5ce7", // LLM 原理
-  r: "#1e6091", // RAG
-  a: "#2e6b4f", // Agent
-  t: "#c05b2e", // 工具链
-  o: "#8a7a5c", // 入门概览
-};
+/** 中央主节点：月牙（新月 Shape：外圆挖去偏移内圆） */
+function Crescent({ amberHex }: { amberHex: string }) {
+  const geometry = useMemo(() => {
+    const s = new THREE.Shape();
+    s.absarc(0, 0, 1.55, 0, Math.PI * 2);
+    const hole = new THREE.Path();
+    hole.absarc(-0.6, 0, 1.15, 0, Math.PI * 2);
+    s.holes.push(hole);
+    return new THREE.ShapeGeometry(s, 24);
+  }, []);
 
-function groupColorOf(id: string): string {
-  return GROUP_COLORS[id.replace(/[0-9]/g, "")] || "#d4a574";
+  return (
+    <group position={[0, 0, 0]}>
+      {/* 月牙平躺 xz 平面（绕 x 旋转 -90°），开口朝上 */}
+      <mesh geometry={geometry} rotation={[-Math.PI / 2, 0, 0]}>
+        <meshStandardMaterial
+          color={amberHex}
+          emissive={amberHex}
+          emissiveIntensity={0.85}
+          roughness={0.25}
+          metalness={0.1}
+          side={THREE.DoubleSide}
+        />
+      </mesh>
+      {/* 外层微光晕 */}
+      <mesh geometry={geometry} rotation={[-Math.PI / 2, 0, 0]} scale={1.18}>
+        <meshBasicMaterial color={amberHex} transparent opacity={0.12} side={THREE.DoubleSide} />
+      </mesh>
+      <pointLight color={amberHex} intensity={1.8} distance={34} />
+    </group>
+  );
 }
 
 function Planet({
   id,
   name,
-  mastery,
   lit,
   selected,
   hovered,
   onHover,
   onSelect,
   amberHex,
-  amberColor,
-  groupColor,
 }: {
   id: string;
   name: string;
-  mastery: number | undefined;
   lit: boolean;
   selected: boolean;
   hovered: boolean;
   onHover: (id: string | null) => void;
   onSelect: (id: string | null) => void;
   amberHex: string;
-  amberColor: THREE.Color;
-  groupColor: string;
 }) {
   const meshRef = useRef<THREE.Mesh>(null);
   const lightRef = useRef<THREE.PointLight>(null);
@@ -122,20 +200,17 @@ function Planet({
   useFrame(({ clock }) => {
     const t = reduce ? 0 : clock.getElapsedTime();
     if (meshRef.current) {
-      const s = hovered ? 1.45 : selected ? 1.25 : 1;
+      const s = hovered ? 1.5 : selected ? 1.3 : 1;
       meshRef.current.scale.lerp(new THREE.Vector3(s, s, s), 0.15);
-      meshRef.current.rotation.y += reduce ? 0 : 0.004;
     }
     if (lightRef.current && lit) {
-      lightRef.current.intensity = 1.2 + (reduce ? 0 : 0.5 * Math.sin(t * 2 + (id.charCodeAt(1) || 0)));
+      lightRef.current.intensity = 0.5 + (reduce ? 0 : 0.2 * Math.sin(t * 2 + (id.charCodeAt(1) || 0)));
     }
   });
 
-  // 掌握度色：点亮 → 琥珀→暖绿（按掌握度）；未点亮 → 冷灰暗沉
-  const color = lit
-    ? lerpColor(amberColor, WARM_GREEN, Math.max(0, Math.min(1, ((mastery ?? 0) - 0.5) / 0.4)))
-    : COLD.clone().multiplyScalar(0.6);
-  const emissive = lit ? new THREE.Color(amberHex) : new THREE.Color("#000000");
+  // 简约科技风：浅白圆点——点亮 = 白色微暖发光；未点亮 = 灰白暗淡
+  const color = lit ? WHITE : COLD.clone().multiplyScalar(0.55);
+  const emissive = lit ? lerpColor(WHITE, new THREE.Color(amberHex), 0.2) : new THREE.Color("#0a0f1e");
 
   return (
     <group>
@@ -155,32 +230,32 @@ function Planet({
           document.body.style.cursor = "default";
         }}
       >
-        <sphereGeometry args={[lit ? 0.68 : 0.5, 24, 24]} />
+        <sphereGeometry args={[lit ? 0.5 : 0.38, 24, 24]} />
         <meshStandardMaterial
           color={color}
           emissive={emissive}
-          emissiveIntensity={lit ? 0.7 : 0.12}
-          roughness={lit ? 0.35 : 0.8}
+          emissiveIntensity={lit ? 0.65 : 0.1}
+          roughness={0.5}
         />
       </mesh>
-      {/* 点亮光晕 */}
-      {lit && <pointLight ref={lightRef} color={amberHex} distance={6} intensity={1.2} />}
-      {/* 选中/悬停外环 */}
+      {lit && <pointLight ref={lightRef} color={amberHex} distance={4} intensity={0.5} />}
+      {/* 选中/悬停外环（细线） */}
       {(selected || hovered) && (
         <mesh>
-          <sphereGeometry args={[0.85, 16, 16]} />
-          <meshBasicMaterial color={amberHex} wireframe transparent opacity={0.55} />
+          <sphereGeometry args={[0.68, 16, 16]} />
+          <meshBasicMaterial color={amberHex} wireframe transparent opacity={0.5} />
         </mesh>
       )}
-      {/* 名称标签 */}
-      <Html position={[0, 1.1, 0]} center distanceFactor={10} zIndexRange={[20, 0]}>
+      {/* 纤细浅色标签 */}
+      <Html position={[0, 1.0, 0]} center distanceFactor={10} zIndexRange={[20, 0]}>
         <div
-          className="whitespace-nowrap rounded px-1.5 py-0.5 text-[11px]"
+          className="whitespace-nowrap px-1 py-0.5 text-[10px]"
           style={{
-            background: lit ? hexToRgba(amberHex, 0.15) : "rgba(15,23,42,0.6)",
-            color: lit ? "#e8e6e3" : "rgba(148,163,184,0.85)",
-            // 选中 → 主强调色边框；未选中 → 主题分组色细边框（M4r8b 视觉分群）
-            border: selected ? `1.5px solid ${amberHex}` : `1px solid ${hexToRgba(groupColor, 0.55)}`,
+            background: "rgba(10,15,30,0.38)",
+            color: lit ? "rgba(236,240,247,0.88)" : "rgba(148,163,184,0.7)",
+            fontWeight: 300,
+            letterSpacing: "0.02em",
+            borderRadius: 2,
             backdropFilter: "blur(2px)",
             userSelect: "none",
           }}
@@ -192,7 +267,7 @@ function Planet({
   );
 }
 
-function Galaxy({ nodes, edges, mastery, selected, onSelect, litThreshold, traceChain, traceRoot, positions, amberHex, amberColor }: {
+function Galaxy({ nodes, edges, mastery, selected, onSelect, litThreshold, traceChain, traceRoot, positions, amberHex }: {
   nodes: StarNode[];
   edges: StarEdge[];
   mastery: Record<string, number>;
@@ -203,7 +278,6 @@ function Galaxy({ nodes, edges, mastery, selected, onSelect, litThreshold, trace
   traceRoot?: string;
   positions: Record<string, [number, number, number]>;
   amberHex: string;
-  amberColor: THREE.Color;
 }) {
   const [hovered, setHovered] = useState<string | null>(null);
   const rootRef = useRef<THREE.Mesh>(null);
@@ -212,13 +286,12 @@ function Galaxy({ nodes, edges, mastery, selected, onSelect, litThreshold, trace
   useFrame(({ clock }) => {
     const t = reduce ? 0 : clock.getElapsedTime();
     if (rootRef.current) {
-      // 根因呼吸脉冲
       const s = 1 + (reduce ? 0 : 0.18 * Math.sin(t * 2.4));
       rootRef.current.scale.set(s, s, s);
     }
   });
 
-  // 边：暗色细线；溯源暖色发光（glow 用二次线段）
+  // 边：细淡浅色；溯源暖色
   const edgeLines = useMemo(() => {
     const lines: { key: string; from: [number, number, number]; to: [number, number, number]; traced: boolean }[] = [];
     for (const e of edges) {
@@ -237,7 +310,7 @@ function Galaxy({ nodes, edges, mastery, selected, onSelect, litThreshold, trace
 
   return (
     <group>
-      {/* 边 */}
+      {/* 边：细淡 */}
       {edgeLines.map((l) => (
         <line key={l.key}>
           <bufferGeometry>
@@ -247,9 +320,9 @@ function Galaxy({ nodes, edges, mastery, selected, onSelect, litThreshold, trace
             />
           </bufferGeometry>
           <lineBasicMaterial
-            color={l.traced ? amberHex : "#475569"}
+            color={l.traced ? amberHex : "#64748b"}
             transparent
-            opacity={l.traced ? 0.85 : 0.35}
+            opacity={l.traced ? 0.7 : 0.16}
           />
         </line>
       ))}
@@ -263,15 +336,12 @@ function Galaxy({ nodes, edges, mastery, selected, onSelect, litThreshold, trace
             <Planet
               id={n.id}
               name={n.name || n.id}
-              mastery={p}
               lit={lit}
               selected={selected === n.id}
               hovered={hovered === n.id}
               onHover={setHovered}
               onSelect={(id) => onSelect?.(id)}
               amberHex={amberHex}
-              amberColor={amberColor}
-              groupColor={groupColorOf(n.id)}
             />
           </group>
         );
@@ -280,8 +350,8 @@ function Galaxy({ nodes, edges, mastery, selected, onSelect, litThreshold, trace
       {/* 根因呼吸脉冲环 */}
       {traceRoot && positions[traceRoot] && (
         <mesh ref={rootRef} position={positions[traceRoot]}>
-          <sphereGeometry args={[1.1, 20, 20]} />
-          <meshBasicMaterial color={amberHex} wireframe transparent opacity={0.45} />
+          <sphereGeometry args={[0.9, 20, 20]} />
+          <meshBasicMaterial color={amberHex} wireframe transparent opacity={0.4} />
         </mesh>
       )}
     </group>
@@ -290,25 +360,19 @@ function Galaxy({ nodes, edges, mastery, selected, onSelect, litThreshold, trace
 
 export default function StarMap3D(props: StarMap3DProps) {
   const { nodes, edges, mastery, selected, onSelect, litThreshold = 0.5, traceChain = [], traceRoot } = props;
-  const positions = useMemo(() => spiralPositions(nodes), [nodes]);
+  const positions = useMemo(() => clusterLayout(nodes, edges), [nodes, edges]);
   const reduce = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  // 主题强调色（随色板/明暗切换自动刷新）
   const amberHex = useThemeVar("--amber", "#d4a574");
-  const amberColor = useMemo(() => new THREE.Color(amberHex), [amberHex]);
 
   return (
     <div className="h-full w-full" style={{ background: "radial-gradient(ellipse at 30% 30%, #0f172a 0%, #0b1120 60%, #060a14 100%)" }}>
-      <Canvas camera={{ position: [19, 9, 19], fov: 50 }} dpr={[1, 1.5]}>
-        <ambientLight intensity={0.35} />
-        <pointLight position={[0, 0, 0]} intensity={0.8} color={amberHex} />
+      <Canvas camera={{ position: [0, 14, 16], fov: 50 }} dpr={[1, 1.5]}>
+        <ambientLight intensity={0.4} />
+        <pointLight position={[0, 4, 0]} intensity={0.6} color="#e8e6e3" />
         <Stars radius={80} depth={40} count={2600} factor={3.2} saturation={0} fade speed={reduce ? 0 : 0.6} />
 
-        {/* 中央恒星 */}
-        <mesh position={[0, 0, 0]}>
-          <sphereGeometry args={[1.35, 32, 32]} />
-          <meshStandardMaterial color={amberHex} emissive={amberHex} emissiveIntensity={0.9} roughness={0.2} />
-        </mesh>
-        <pointLight position={[0, 0, 0]} color={amberHex} intensity={2.2} distance={40} />
+        {/* 中央月牙主节点 */}
+        <Crescent amberHex={amberHex} />
 
         <Galaxy
           nodes={nodes}
@@ -321,14 +385,13 @@ export default function StarMap3D(props: StarMap3DProps) {
           traceRoot={traceRoot}
           positions={positions}
           amberHex={amberHex}
-          amberColor={amberColor}
         />
 
         <OrbitControls
           enableDamping
           dampingFactor={0.08}
           enablePan={false}
-          minDistance={6}
+          minDistance={8}
           maxDistance={40}
           rotateSpeed={0.7}
           autoRotate={false}
