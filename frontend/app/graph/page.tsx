@@ -203,6 +203,7 @@ export default function GraphPage() {
               aria-hidden
             />
             <StarMap3D
+              key={open.id}
               nodes={graph.nodes}
               edges={graph.edges}
               mastery={mastery}
