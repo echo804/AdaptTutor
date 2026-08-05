@@ -1,6 +1,8 @@
-"""CLI：诊断 → 薄弱点 → 路径 闭环（M1b 验证，确定性 mock 作答，不依赖真实 LLM）。
+"""CLI：诊断 → 薄弱点 → 路径 闭环（M1b 验证）与 辅导闭环（M2 F2，mock LLM）。
 
-用法（backend 目录）：.venv\\Scripts\\python.exe -m app.cli [--pack junior_math_eq_ineq]
+用法（backend 目录）：
+  .venv\\Scripts\\python.exe -m app.cli [--pack junior_math_eq_ineq]        # 诊断闭环
+  .venv\\Scripts\\python.exe -m app.cli tutor [--pack junior_math_eq_ineq]  # 辅导闭环
 """
 
 import argparse
@@ -9,6 +11,7 @@ import random
 from app.domain.loader import load_pack
 from app.engine.diagnostic import bkt_update, select_next_question
 from app.engine.graph_engine import KnowledgeGraph, plan_path, trace_root
+from app.engine.tutor_orchestrator import TutorOrchestrator
 
 
 def run_diagnosis(pack_id: str, seed: int = 42) -> None:
@@ -62,8 +65,48 @@ def run_diagnosis(pack_id: str, seed: int = 42) -> None:
     print(f"根因(溯源): {root}")
 
 
+def run_tutor(pack_id: str) -> None:
+    """辅导闭环演示（M2 F2 冻结点，mock LLM，确定性场景）。
+
+    场景：诊断（答错暴露薄弱）→ 路径 → 四态辅导一轮（错→定位→提示→变式→对）→ 小结。
+    """
+    print("=== M2 辅导闭环演示（mock LLM，不依赖真实 key）===")
+    t = TutorOrchestrator(pack_id)
+
+    # 1. 诊断：确定性作答，第 2 题答错暴露薄弱
+    answers = [True, False, True]
+    for correct in answers:
+        st = t.diagnose(correct)
+        if st.get("terminated"):
+            break
+    weak = min(t.mastery, key=t.mastery.get)
+    print(f"[诊断] 作答后薄弱点: {weak}（置信度 {1 - t.mastery[weak]:.2f}）")
+
+    # 2. 路径
+    path = t.build_path()
+    print(f"[路径] 推荐学习路径: {path[:6]}")
+
+    # 3. 四态辅导一轮
+    r = t.tutor_start()
+    print(f"[辅导] ({r.state}) {r.message}")
+    r = t.tutor_step("我算出来是 7。", correct=False)
+    print(f"[辅导] ({r.state}) {r.message}")
+    r = t.tutor_step("我不确定第一步做什么。", correct=False)
+    print(f"[辅导] ({r.state}) {r.message}")
+    r = t.tutor_step("我再试试。", correct=True)
+    print(f"[辅导] ({r.state}) {r.message}")
+
+    # 4. 小结
+    print(f"[小结] {t.summary()}")
+    print("=== 辅导闭环可跑通（F2 冻结点达成）===")
+
+
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="AdaptTutor 诊断闭环 CLI（M1b 验证）")
+    parser = argparse.ArgumentParser(description="AdaptTutor 闭环 CLI（M1b 诊断 / M2 辅导）")
+    parser.add_argument("command", nargs="?", default="diagnose", choices=["diagnose", "tutor"])
     parser.add_argument("--pack", default="junior_math_eq_ineq")
     args = parser.parse_args()
-    run_diagnosis(args.pack)
+    if args.command == "tutor":
+        run_tutor(args.pack)
+    else:
+        run_diagnosis(args.pack)
