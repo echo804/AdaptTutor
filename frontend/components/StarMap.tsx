@@ -139,9 +139,22 @@ export default function StarMap({ nodes, edges, mastery, selected, onSelect, lit
         ctx.moveTo(a.x * W, a.y * H);
         ctx.lineTo(b.x * W, b.y * H);
         const traced = chainSet.has(e.from) && chainSet.has(e.to);
-        ctx.strokeStyle = traced ? "rgba(212,165,116,0.75)" : EDGE; // 溯源暖色路径
-        if (traced) ctx.lineWidth = 1.8;
+        if (traced) {
+          // 溯源路径：暖色 + 虚线流动（05 §6 路径绘制，reduced-motion 时实线）
+          ctx.strokeStyle = "rgba(212,165,116,0.75)";
+          ctx.lineWidth = 1.8;
+          if (reduceMotion) {
+            ctx.setLineDash([]);
+          } else {
+            ctx.setLineDash([6, 4]);
+            ctx.lineDashOffset = -((t / 40) % 10);
+          }
+        } else {
+          ctx.strokeStyle = EDGE;
+          ctx.setLineDash([]);
+        }
         ctx.stroke();
+        ctx.setLineDash([]);
         ctx.lineWidth = 1;
       }
 
