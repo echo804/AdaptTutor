@@ -26,3 +26,6 @@ Thumbs.db
 # 日志与备份
 *.log
 backups/
+
+# Python 构建产物
+*.egg-info/

@@ -1,0 +1,50 @@
+# AdaptTutor 本地开发栈（对齐 03 文档：postgres/api/web 三服务）
+# 端口避开上级项目占用的 5432（本栈 PG 用 5433）
+# 用法：docker compose -f docker-compose.local.yml up -d
+name: adapttutor-local
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: adapttutor-postgres
+    environment:
+      POSTGRES_USER: adapt
+      POSTGRES_PASSWORD: adapt_dev_pw
+      POSTGRES_DB: adapttutor
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U adapt -d adapttutor"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build: ./backend
+    container_name: adapttutor-api
+    env_file: ./backend/.env
+    environment:
+      # 容器内网直连 postgres 服务名；宿主侧访问用 5433（见 .env.example）
+      DATABASE_URL: postgresql+asyncpg://adapt:adapt_dev_pw@postgres:5432/adapttutor
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
+
+  # web（前端 M4 启用）：前端骨架就绪后取消注释
+  # web:
+  #   image: node:20-alpine
+  #   container_name: adapttutor-web
+  #   working_dir: /app
+  #   volumes:
+  #     - ./frontend:/app
+  #   ports:
+  #     - "3000:3000"
+  #   command: sh -c "npm install && npm run dev"
+
+volumes:
+  pgdata:

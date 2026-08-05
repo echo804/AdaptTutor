@@ -1,0 +1,31 @@
+[project]
+name = "adapttutor-backend"
+version = "0.1.0"
+description = "AdaptTutor 自适应学习引擎后端（FastAPI）"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi",
+    "uvicorn[standard]",
+    "sqlalchemy[asyncio]",
+    "asyncpg",
+    "alembic",
+    "pydantic",
+    "pydantic-settings",
+    "litellm",
+    "bcrypt",
+    "PyJWT",
+    "cryptography",
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "httpx"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["app*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
