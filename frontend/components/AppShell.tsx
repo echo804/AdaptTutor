@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { clearToken, getToken, api } from "@/lib/api";
 import { ACCENTS, MODES, applyTheme, loadThemePrefs, saveThemePrefs, type ThemeAccent, type ThemeMode } from "@/lib/theme";
+import { useDomain } from "@/lib/domain";
 
 const NAV = [
   { href: "/chat", label: "对话学习" },
@@ -22,6 +23,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const [themeOpen, setThemeOpen] = useState(false);
   const [mode, setMode] = useState<ThemeMode>("auto");
   const [accent, setAccent] = useState<ThemeAccent>("ink");
+  const { packs, active, ready, setActive } = useDomain();
 
   const isAuthPage = pathname === "/login" || pathname === "/register";
 
@@ -73,6 +75,26 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           <span className="text-xs" style={{ color: "var(--muted)" }}>
             自适应学习
           </span>
+          {/* 领域选择器（M4r8：领域学习空间） */}
+          {ready && packs.length > 0 && (
+            <select
+              aria-label="切换学习领域"
+              value={active ?? ""}
+              onChange={(e) => setActive(e.target.value)}
+              className="ml-2 rounded border px-2 py-0.5 text-xs"
+              style={{
+                background: "var(--surface)",
+                borderColor: "var(--border)",
+                color: "var(--text)",
+              }}
+            >
+              {packs.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.subject}
+                </option>
+              ))}
+            </select>
+          )}
         </div>
         <div className="flex items-center gap-3">
           {username && (

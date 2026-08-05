@@ -115,6 +115,10 @@ class MasteryState(Base):
     student_id: Mapped[int] = mapped_column(
         ForeignKey("users.id"), index=True
     )
+    # M4r8：领域包维度（多领域进度隔离；默认 junior_math_eq_ineq 兼容存量）
+    pack_id: Mapped[str] = mapped_column(
+        String(64), default="junior_math_eq_ineq", server_default="junior_math_eq_ineq"
+    )
     node_id: Mapped[str] = mapped_column(String(64))
     mastery_p: Mapped[float] = mapped_column(Float)
     confidence: Mapped[float] = mapped_column(Float, default=0.0)
@@ -124,7 +128,9 @@ class MasteryState(Base):
     decay_state: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
 
     __table_args__ = (
-        UniqueConstraint("student_id", "node_id", name="uq_mastery_states_student_node"),
+        UniqueConstraint(
+            "student_id", "pack_id", "node_id", name="uq_mastery_states_student_pack_node"
+        ),
     )
 
 
@@ -139,6 +145,10 @@ class LearningEvent(Base):
     )
     session_id: Mapped[int | None] = mapped_column(
         ForeignKey("sessions.id"), nullable=True
+    )
+    # M4r8：领域包维度（错题/趋势按领域隔离；存量默认 junior_math_eq_ineq）
+    pack_id: Mapped[str | None] = mapped_column(
+        String(64), default="junior_math_eq_ineq", server_default="junior_math_eq_ineq", nullable=True
     )
     event_type: Mapped[str] = mapped_column(String(32))
     node_id: Mapped[str | None] = mapped_column(String(64), nullable=True)

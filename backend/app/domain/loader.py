@@ -73,3 +73,25 @@ def load_pack(pack_id: str, base_dir: str | None = None) -> DomainPack:
 def get_active_pack() -> DomainPack:
     """启动全量内存加载当前激活领域包（04 1.6：图谱不可变 + 版本号）。"""
     return load_pack(get_settings().active_domain_pack)
+
+
+def list_packs(base_dir: str | None = None) -> list[dict]:
+    """扫描领域包目录，返回 [{id, subject, version}]（M4r8 多领域支持）。
+
+    只读 manifest，不做全量校验（fast fail 只针对被实际加载的包）。
+    manifest 校验失败的目录跳过。
+    """
+    root = Path(base_dir or get_settings().domain_pack_path)
+    packs: list[dict] = []
+    for d in sorted(root.iterdir()):
+        if not d.is_dir():
+            continue
+        mf = d / PACK_FILES["manifest"]
+        if not mf.is_file():
+            continue
+        try:
+            m = PackManifest.model_validate(_load_json(mf))
+        except Exception:
+            continue
+        packs.append({"id": m.id, "subject": m.subject, "version": m.version})
+    return packs

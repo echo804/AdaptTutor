@@ -17,8 +17,9 @@ import {
 import LearningPathTree from "@/components/LearningPathTree";
 import { api, MasteryOut, PathOut } from "@/lib/api";
 import { useThemeVar } from "@/lib/theme";
+import { useDomain } from "@/lib/domain";
 
-/** 仪表盘（M4r3，05 §5.4）：今日推荐 → 掌握度总览 → 最近会话 → 学习趋势 */
+/** 仪表盘（M4r3，05 §5.4）：今日推荐 → 掌握度总览 → 最近会话 → 学习趋势（M4r8 按领域） */
 export default function DashboardPage() {
   const [mastery, setMastery] = useState<Record<string, number>>({});
   const [path, setPath] = useState<string[]>([]);
@@ -27,15 +28,19 @@ export default function DashboardPage() {
   const [err, setErr] = useState<string | null>(null);
   // 主题强调色（图表色随色板切换）
   const amber = useThemeVar("--amber", "#d4a574");
+  // 领域学习空间（M4r8）：掌握度/路径/趋势随领域切换重载
+  const { active: activePack } = useDomain();
 
   useEffect(() => {
+    if (!activePack) return;
     (async () => {
       try {
         const me = await api<{ user_id: number }>("/auth/me");
+        const qp = `?pack_id=${activePack}`;
         const [m, p, t, sl] = await Promise.all([
-          api<MasteryOut>(`/api/v1/students/${me.user_id}/mastery`),
-          api<PathOut>(`/api/v1/students/${me.user_id}/path`),
-          api<{ trend: { date: string; count: number }[] }>(`/api/v1/students/${me.user_id}/trend`),
+          api<MasteryOut>(`/api/v1/students/${me.user_id}/mastery${qp}`),
+          api<PathOut>(`/api/v1/students/${me.user_id}/path${qp}`),
+          api<{ trend: { date: string; count: number }[] }>(`/api/v1/students/${me.user_id}/trend${qp}`),
           api<{ sessions: { id: number; type: string; created_at: string }[] }>("/api/v1/sessions"),
         ]);
         setMastery(m.mastery);
@@ -46,7 +51,7 @@ export default function DashboardPage() {
         setErr(e.message);
       }
     })();
-  }, []);
+  }, [activePack]);
 
   // 掌握度分布（六档）
   const dist = useMemo(() => {

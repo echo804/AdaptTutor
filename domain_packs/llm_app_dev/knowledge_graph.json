@@ -1,0 +1,1234 @@
+{
+  "nodes": [
+    {
+      "id": "l01",
+      "name": "解码策略原理",
+      "difficulty": 0.5,
+      "importance": 0.8,
+      "error_modes": [
+        "l01_e1"
+      ]
+    },
+    {
+      "id": "l02",
+      "name": "采样策略类型",
+      "difficulty": 0.6,
+      "importance": 0.75,
+      "error_modes": [
+        "l01_e2"
+      ]
+    },
+    {
+      "id": "l03",
+      "name": "KV Cache 管理",
+      "difficulty": 0.6,
+      "importance": 0.85,
+      "error_modes": [
+        "l03_e1"
+      ]
+    },
+    {
+      "id": "l04",
+      "name": "部署框架对比",
+      "difficulty": 0.55,
+      "importance": 0.8,
+      "error_modes": [
+        "l04_e1"
+      ]
+    },
+    {
+      "id": "l05",
+      "name": "对齐训练方法",
+      "difficulty": 0.65,
+      "importance": 0.8,
+      "error_modes": [
+        "l05_e1"
+      ]
+    },
+    {
+      "id": "l06",
+      "name": "大模型评测指标体系",
+      "difficulty": 0.5,
+      "importance": 0.7,
+      "error_modes": [
+        "l06_e1"
+      ]
+    },
+    {
+      "id": "l07",
+      "name": "业务专属测试集构建",
+      "difficulty": 0.6,
+      "importance": 0.8,
+      "error_modes": [
+        "l07_e1"
+      ]
+    },
+    {
+      "id": "l08",
+      "name": "微调方案选择与实现",
+      "difficulty": 0.6,
+      "importance": 0.75,
+      "error_modes": [
+        "l08_e1"
+      ]
+    },
+    {
+      "id": "l09",
+      "name": "幻觉成因与缓解策略",
+      "difficulty": 0.55,
+      "importance": 0.7,
+      "error_modes": [
+        "l09_e1"
+      ]
+    },
+    {
+      "id": "l10",
+      "name": "KV Cache 机制原理",
+      "difficulty": 0.5,
+      "importance": 0.8,
+      "error_modes": [
+        "l10_e1"
+      ]
+    },
+    {
+      "id": "l11",
+      "name": "Prompt Caching 工程应用",
+      "difficulty": 0.6,
+      "importance": 0.7,
+      "error_modes": [
+        "l11_e1"
+      ]
+    },
+    {
+      "id": "l12",
+      "name": "大模型训练三阶段",
+      "difficulty": 0.5,
+      "importance": 0.8,
+      "error_modes": [
+        "l12_e1"
+      ]
+    },
+    {
+      "id": "l13",
+      "name": "LoRA 参数高效微调",
+      "difficulty": 0.6,
+      "importance": 0.7,
+      "error_modes": [
+        "l13_e1"
+      ]
+    },
+    {
+      "id": "l14",
+      "name": "MHA 的显存与计算瓶颈",
+      "difficulty": 0.5,
+      "importance": 0.8,
+      "error_modes": [
+        "l14_e1"
+      ]
+    },
+    {
+      "id": "l15",
+      "name": "MQA/GQA 显存优化原理",
+      "difficulty": 0.6,
+      "importance": 0.75,
+      "error_modes": [
+        "l15_e1"
+      ]
+    },
+    {
+      "id": "l16",
+      "name": "Flash Attention 实现机制",
+      "difficulty": 0.6,
+      "importance": 0.8,
+      "error_modes": [
+        "l16_e1"
+      ]
+    },
+    {
+      "id": "l17",
+      "name": "模型路由策略设计",
+      "difficulty": 0.5,
+      "importance": 0.7,
+      "error_modes": [
+        "l17_e1"
+      ]
+    },
+    {
+      "id": "l18",
+      "name": "MoE 激活参数与总参数关系",
+      "difficulty": 0.6,
+      "importance": 0.8,
+      "error_modes": [
+        "l18_e1"
+      ]
+    },
+    {
+      "id": "l19",
+      "name": "位置编码的作用与设计目标",
+      "difficulty": 0.5,
+      "importance": 0.8,
+      "error_modes": [
+        "l19_e1"
+      ]
+    },
+    {
+      "id": "l20",
+      "name": "RoPE 的相对位置编码机制",
+      "difficulty": 0.6,
+      "importance": 0.9,
+      "error_modes": [
+        "l20_e1"
+      ]
+    },
+    {
+      "id": "l21",
+      "name": "Post-Training 的核心概念与目标",
+      "difficulty": 0.5,
+      "importance": 0.8,
+      "error_modes": [
+        "l21_e1"
+      ]
+    },
+    {
+      "id": "l22",
+      "name": "DPO 与 RLHF 的区别与优劣",
+      "difficulty": 0.6,
+      "importance": 0.8,
+      "error_modes": [
+        "l22_e1"
+      ]
+    },
+    {
+      "id": "l23",
+      "name": "Prompt 工程的五要素设计",
+      "difficulty": 0.5,
+      "importance": 0.8,
+      "error_modes": [
+        "l23_e1"
+      ]
+    },
+    {
+      "id": "l24",
+      "name": "量化（Quantization）",
+      "difficulty": 0.5,
+      "importance": 0.8,
+      "error_modes": [
+        "l24_e1"
+      ]
+    },
+    {
+      "id": "l25",
+      "name": "Scaling Law（缩放定律）",
+      "difficulty": 0.6,
+      "importance": 0.85,
+      "error_modes": [
+        "l25_e1"
+      ]
+    },
+    {
+      "id": "l26",
+      "name": "Temperature 参数",
+      "difficulty": 0.4,
+      "importance": 0.7,
+      "error_modes": [
+        "l26_e1"
+      ]
+    },
+    {
+      "id": "l27",
+      "name": "Top-P 与 Top-K 采样机制",
+      "difficulty": 0.5,
+      "importance": 0.7,
+      "error_modes": [
+        "l27_e1"
+      ]
+    },
+    {
+      "id": "l28",
+      "name": "模型规模与数据配比",
+      "difficulty": 0.6,
+      "importance": 0.8,
+      "error_modes": [
+        "l28_e1"
+      ]
+    },
+    {
+      "id": "l29",
+      "name": "涌现能力（Emergent Abilities）",
+      "difficulty": 0.5,
+      "importance": 0.75,
+      "error_modes": [
+        "l29_e1"
+      ]
+    },
+    {
+      "id": "l30",
+      "name": "Tokenizer 的作用与原理",
+      "difficulty": 0.5,
+      "importance": 0.8,
+      "error_modes": [
+        "l30_e1"
+      ]
+    },
+    {
+      "id": "l31",
+      "name": "BPE 算法与子词分词",
+      "difficulty": 0.6,
+      "importance": 0.75,
+      "error_modes": [
+        "l31_e1"
+      ]
+    },
+    {
+      "id": "l32",
+      "name": "Transformer 架构的核心思想",
+      "difficulty": 0.55,
+      "importance": 0.85,
+      "error_modes": [
+        "l32_e1"
+      ]
+    },
+    {
+      "id": "l33",
+      "name": "Self-Attention 机制",
+      "difficulty": 0.65,
+      "importance": 0.8,
+      "error_modes": [
+        "l33_e1"
+      ]
+    },
+    {
+      "id": "l34",
+      "name": "多头注意力与位置编码",
+      "difficulty": 0.6,
+      "importance": 0.75,
+      "error_modes": [
+        "l34_e1"
+      ]
+    },
+    {
+      "id": "l35",
+      "name": "大语言模型的本质与特点",
+      "difficulty": 0.5,
+      "importance": 0.8,
+      "error_modes": [
+        "l35_e1"
+      ]
+    },
+    {
+      "id": "l36",
+      "name": "Transformer 架构原理",
+      "difficulty": 0.5,
+      "importance": 0.8,
+      "error_modes": [
+        "l36_e1"
+      ]
+    },
+    {
+      "id": "l37",
+      "name": "训练流程与微调方法",
+      "difficulty": 0.6,
+      "importance": 0.85,
+      "error_modes": [
+        "l37_e1"
+      ]
+    },
+    {
+      "id": "l38",
+      "name": "推理优化技术",
+      "difficulty": 0.55,
+      "importance": 0.8,
+      "error_modes": [
+        "l38_e1"
+      ]
+    },
+    {
+      "id": "l39",
+      "name": "Prompt 工程基础",
+      "difficulty": 0.45,
+      "importance": 0.7,
+      "error_modes": [
+        "l39_e1"
+      ]
+    },
+    {
+      "id": "l40",
+      "name": "评测与选型标准",
+      "difficulty": 0.5,
+      "importance": 0.75,
+      "error_modes": [
+        "l40_e1"
+      ]
+    },
+    {
+      "id": "r01",
+      "name": "RAG 核心概念与作用",
+      "difficulty": 0.5,
+      "importance": 0.8,
+      "error_modes": [
+        "r01_e1"
+      ]
+    },
+    {
+      "id": "r02",
+      "name": "RAG 工作流程与阶段划分",
+      "difficulty": 0.6,
+      "importance": 0.8,
+      "error_modes": [
+        "r02_e1"
+      ]
+    },
+    {
+      "id": "r03",
+      "name": "文档切块策略",
+      "difficulty": 0.5,
+      "importance": 0.8,
+      "error_modes": [
+        "r03_e1"
+      ]
+    },
+    {
+      "id": "r04",
+      "name": "语义向量嵌入原理",
+      "difficulty": 0.6,
+      "importance": 0.85,
+      "error_modes": [
+        "r04_e1"
+      ]
+    },
+    {
+      "id": "r05",
+      "name": "Embedding 算法演进",
+      "difficulty": 0.5,
+      "importance": 0.8,
+      "error_modes": [
+        "r05_e1"
+      ]
+    },
+    {
+      "id": "r06",
+      "name": "向量数据库核心能力",
+      "difficulty": 0.6,
+      "importance": 0.9,
+      "error_modes": [
+        "r06_e1"
+      ]
+    },
+    {
+      "id": "r07",
+      "name": "Milvus 性能优化实践",
+      "difficulty": 0.65,
+      "importance": 0.85,
+      "error_modes": [
+        "r07_e1"
+      ]
+    },
+    {
+      "id": "r08",
+      "name": "RAG 在线流程步骤",
+      "difficulty": 0.5,
+      "importance": 0.8,
+      "error_modes": [
+        "r08_e1"
+      ]
+    },
+    {
+      "id": "r09",
+      "name": "向量检索与 BM25 混合策略",
+      "difficulty": 0.6,
+      "importance": 0.85,
+      "error_modes": [
+        "r09_e1"
+      ]
+    },
+    {
+      "id": "r10",
+      "name": "Query 预处理方法",
+      "difficulty": 0.55,
+      "importance": 0.75,
+      "error_modes": [
+        "r10_e1"
+      ]
+    },
+    {
+      "id": "r11",
+      "name": "Embedding 模型一致性要求",
+      "difficulty": 0.5,
+      "importance": 0.7,
+      "error_modes": [
+        "r11_e1"
+      ]
+    },
+    {
+      "id": "r12",
+      "name": "多路召回机制",
+      "difficulty": 0.5,
+      "importance": 0.8,
+      "error_modes": [
+        "r12_e1"
+      ]
+    },
+    {
+      "id": "r13",
+      "name": "RRF 算法融合",
+      "difficulty": 0.6,
+      "importance": 0.75,
+      "error_modes": [
+        "r13_e1"
+      ]
+    },
+    {
+      "id": "r14",
+      "name": "索引优化策略",
+      "difficulty": 0.55,
+      "importance": 0.8,
+      "error_modes": [
+        "r14_e1"
+      ]
+    },
+    {
+      "id": "r15",
+      "name": "查询优化方法",
+      "difficulty": 0.5,
+      "importance": 0.7,
+      "error_modes": [
+        "r15_e1"
+      ]
+    },
+    {
+      "id": "r16",
+      "name": "多粒度分层索引",
+      "difficulty": 0.6,
+      "importance": 0.7,
+      "error_modes": [
+        "r16_e1"
+      ]
+    },
+    {
+      "id": "r17",
+      "name": "RAG 范式演进",
+      "difficulty": 0.5,
+      "importance": 0.7,
+      "error_modes": [
+        "r17_e1"
+      ]
+    },
+    {
+      "id": "r18",
+      "name": "图数据库在RAG中的作用",
+      "difficulty": 0.5,
+      "importance": 0.8,
+      "error_modes": [
+        "r18_e1"
+      ]
+    },
+    {
+      "id": "r19",
+      "name": "RAG幻觉的类型与规避策略",
+      "difficulty": 0.6,
+      "importance": 0.85,
+      "error_modes": [
+        "r19_e1",
+        "r19_e2"
+      ]
+    },
+    {
+      "id": "r20",
+      "name": "RAG 知识库动态更新机制",
+      "difficulty": 0.5,
+      "importance": 0.8,
+      "error_modes": [
+        "r20_e1"
+      ]
+    },
+    {
+      "id": "r21",
+      "name": "文档预处理与结构化解析",
+      "difficulty": 0.6,
+      "importance": 0.75,
+      "error_modes": [
+        "r21_e1"
+      ]
+    },
+    {
+      "id": "a01",
+      "name": "Agent 核心概念",
+      "difficulty": 0.5,
+      "importance": 0.8,
+      "error_modes": [
+        "a01_e1"
+      ]
+    },
+    {
+      "id": "a02",
+      "name": "工具调用机制",
+      "difficulty": 0.6,
+      "importance": 0.75,
+      "error_modes": [
+        "a02_e1"
+      ]
+    },
+    {
+      "id": "a03",
+      "name": "记忆系统设计",
+      "difficulty": 0.55,
+      "importance": 0.7,
+      "error_modes": [
+        "a03_e1"
+      ]
+    },
+    {
+      "id": "a04",
+      "name": "规划模块功能",
+      "difficulty": 0.6,
+      "importance": 0.7,
+      "error_modes": [
+        "a04_e1"
+      ]
+    },
+    {
+      "id": "a05",
+      "name": "LLM 在 Agent 中的角色",
+      "difficulty": 0.5,
+      "importance": 0.8,
+      "error_modes": [
+        "a05_e1"
+      ]
+    },
+    {
+      "id": "a06",
+      "name": "Workflow 与 Agent 的区别",
+      "difficulty": 0.5,
+      "importance": 0.8,
+      "error_modes": [
+        "a06_e1"
+      ]
+    },
+    {
+      "id": "a07",
+      "name": "ReAct 设计范式",
+      "difficulty": 0.5,
+      "importance": 0.8,
+      "error_modes": [
+        "a07_e1"
+      ]
+    },
+    {
+      "id": "a08",
+      "name": "Plan-and-Execute 设计范式",
+      "difficulty": 0.5,
+      "importance": 0.8,
+      "error_modes": [
+        "a08_e1"
+      ]
+    },
+    {
+      "id": "a09",
+      "name": "Reflection 反思机制",
+      "difficulty": 0.5,
+      "importance": 0.8,
+      "error_modes": [
+        "a09_e1"
+      ]
+    },
+    {
+      "id": "a10",
+      "name": "任务拆分策略",
+      "difficulty": 0.5,
+      "importance": 0.7,
+      "error_modes": [
+        "a10_e1"
+      ]
+    },
+    {
+      "id": "a11",
+      "name": "记忆机制类型",
+      "difficulty": 0.6,
+      "importance": 0.8,
+      "error_modes": [
+        "a11_e1"
+      ]
+    },
+    {
+      "id": "a12",
+      "name": "多智能体系统架构",
+      "difficulty": 0.5,
+      "importance": 0.8,
+      "error_modes": [
+        "a12_e1"
+      ]
+    },
+    {
+      "id": "a13",
+      "name": "记忆压缩技术",
+      "difficulty": 0.5,
+      "importance": 0.75,
+      "error_modes": [
+        "a13_e1"
+      ]
+    },
+    {
+      "id": "a14",
+      "name": "Agent 框架的优缺点分析",
+      "difficulty": 0.5,
+      "importance": 0.75,
+      "error_modes": [
+        "a14_e1"
+      ]
+    },
+    {
+      "id": "a15",
+      "name": "手写 Agent 的优势",
+      "difficulty": 0.5,
+      "importance": 0.8,
+      "error_modes": [
+        "a15_e1"
+      ]
+    },
+    {
+      "id": "a16",
+      "name": "规划能力的实现方式",
+      "difficulty": 0.6,
+      "importance": 0.85,
+      "error_modes": [
+        "a16_e1"
+      ]
+    },
+    {
+      "id": "a17",
+      "name": "反思机制的作用与成本",
+      "difficulty": 0.6,
+      "importance": 0.8,
+      "error_modes": [
+        "a17_e1"
+      ]
+    },
+    {
+      "id": "a18",
+      "name": "多 Agent 协作机制",
+      "difficulty": 0.5,
+      "importance": 0.7,
+      "error_modes": [
+        "a18_e1"
+      ]
+    },
+    {
+      "id": "a19",
+      "name": "Orchestrator 路由策略",
+      "difficulty": 0.6,
+      "importance": 0.8,
+      "error_modes": [
+        "a19_e1"
+      ]
+    },
+    {
+      "id": "t01",
+      "name": "Function Calling 机制",
+      "difficulty": 0.5,
+      "importance": 0.8,
+      "error_modes": [
+        "t01_e1"
+      ]
+    },
+    {
+      "id": "t02",
+      "name": "工具定义与 schema 设计",
+      "difficulty": 0.6,
+      "importance": 0.75,
+      "error_modes": [
+        "t02_e1"
+      ]
+    },
+    {
+      "id": "t03",
+      "name": "SFT 监督微调阶段",
+      "difficulty": 0.6,
+      "importance": 0.7,
+      "error_modes": [
+        "t03_e1"
+      ]
+    },
+    {
+      "id": "t04",
+      "name": "RLHF 强化学习阶段",
+      "difficulty": 0.65,
+      "importance": 0.7,
+      "error_modes": [
+        "t04_e1"
+      ]
+    },
+    {
+      "id": "t05",
+      "name": "MCP 协议架构",
+      "difficulty": 0.5,
+      "importance": 0.8,
+      "error_modes": [
+        "t05_e1"
+      ]
+    },
+    {
+      "id": "t06",
+      "name": "MCP 与 Function Calling 区别",
+      "difficulty": 0.5,
+      "importance": 0.75,
+      "error_modes": [
+        "t06_e1"
+      ]
+    },
+    {
+      "id": "t07",
+      "name": "Function Calling 适用场景",
+      "difficulty": 0.5,
+      "importance": 0.7,
+      "error_modes": [
+        "t07_e1"
+      ]
+    },
+    {
+      "id": "t08",
+      "name": "MCP Server 优势分析",
+      "difficulty": 0.6,
+      "importance": 0.8,
+      "error_modes": [
+        "t08_e1"
+      ]
+    },
+    {
+      "id": "t09",
+      "name": "推理模型与工具调用冲突",
+      "difficulty": 0.6,
+      "importance": 0.75,
+      "error_modes": [
+        "t09_e1"
+      ]
+    },
+    {
+      "id": "t10",
+      "name": "Skill 结构与加载机制",
+      "difficulty": 0.55,
+      "importance": 0.7,
+      "error_modes": [
+        "t10_e1"
+      ]
+    },
+    {
+      "id": "t11",
+      "name": "MCP 工具标准化",
+      "difficulty": 0.5,
+      "importance": 0.8,
+      "error_modes": [
+        "t11_e1"
+      ]
+    },
+    {
+      "id": "t12",
+      "name": "Agent Skill 流程定义",
+      "difficulty": 0.6,
+      "importance": 0.85,
+      "error_modes": [
+        "t12_e1"
+      ]
+    },
+    {
+      "id": "t13",
+      "name": "Function Calling 协议",
+      "difficulty": 0.55,
+      "importance": 0.75,
+      "error_modes": [
+        "t13_e1"
+      ]
+    },
+    {
+      "id": "t14",
+      "name": "A2A 协议协作机制",
+      "difficulty": 0.6,
+      "importance": 0.8,
+      "error_modes": [
+        "t14_e1"
+      ]
+    },
+    {
+      "id": "t15",
+      "name": "LLM 网关功能与架构",
+      "difficulty": 0.5,
+      "importance": 0.8,
+      "error_modes": [
+        "t15_e1"
+      ]
+    },
+    {
+      "id": "t16",
+      "name": "多模型统一接口实现",
+      "difficulty": 0.6,
+      "importance": 0.7,
+      "error_modes": [
+        "t16_e1"
+      ]
+    },
+    {
+      "id": "o01",
+      "name": "Agent 概念与架构",
+      "difficulty": 0.5,
+      "importance": 0.8,
+      "error_modes": [
+        "o01_e1"
+      ]
+    },
+    {
+      "id": "o02",
+      "name": "Agent 设计范式",
+      "difficulty": 0.6,
+      "importance": 0.7,
+      "error_modes": [
+        "o02_e1"
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "from": "a01",
+      "to": "a02",
+      "type": "prerequisite"
+    },
+    {
+      "from": "a01",
+      "to": "a03",
+      "type": "prerequisite"
+    },
+    {
+      "from": "a01",
+      "to": "a04",
+      "type": "prerequisite"
+    },
+    {
+      "from": "a01",
+      "to": "a05",
+      "type": "prerequisite"
+    },
+    {
+      "from": "a06",
+      "to": "a07",
+      "type": "prerequisite"
+    },
+    {
+      "from": "a06",
+      "to": "a08",
+      "type": "prerequisite"
+    },
+    {
+      "from": "a06",
+      "to": "a09",
+      "type": "prerequisite"
+    },
+    {
+      "from": "a10",
+      "to": "a11",
+      "type": "prerequisite"
+    },
+    {
+      "from": "a12",
+      "to": "a13",
+      "type": "prerequisite"
+    },
+    {
+      "from": "a14",
+      "to": "a15",
+      "type": "prerequisite"
+    },
+    {
+      "from": "a14",
+      "to": "a16",
+      "type": "prerequisite"
+    },
+    {
+      "from": "a16",
+      "to": "a17",
+      "type": "prerequisite"
+    },
+    {
+      "from": "a18",
+      "to": "a19",
+      "type": "prerequisite"
+    },
+    {
+      "from": "l01",
+      "to": "l02",
+      "type": "prerequisite"
+    },
+    {
+      "from": "l01",
+      "to": "l03",
+      "type": "prerequisite"
+    },
+    {
+      "from": "l03",
+      "to": "l04",
+      "type": "prerequisite"
+    },
+    {
+      "from": "l05",
+      "to": "l01",
+      "type": "prerequisite"
+    },
+    {
+      "from": "l06",
+      "to": "l07",
+      "type": "prerequisite"
+    },
+    {
+      "from": "l06",
+      "to": "l08",
+      "type": "prerequisite"
+    },
+    {
+      "from": "l06",
+      "to": "l09",
+      "type": "prerequisite"
+    },
+    {
+      "from": "l10",
+      "to": "l11",
+      "type": "prerequisite"
+    },
+    {
+      "from": "l12",
+      "to": "l13",
+      "type": "prerequisite"
+    },
+    {
+      "from": "l14",
+      "to": "l15",
+      "type": "prerequisite"
+    },
+    {
+      "from": "l14",
+      "to": "l16",
+      "type": "prerequisite"
+    },
+    {
+      "from": "l15",
+      "to": "l16",
+      "type": "prerequisite"
+    },
+    {
+      "from": "l17",
+      "to": "l18",
+      "type": "prerequisite"
+    },
+    {
+      "from": "l19",
+      "to": "l20",
+      "type": "prerequisite"
+    },
+    {
+      "from": "l19",
+      "to": "l21",
+      "type": "prerequisite"
+    },
+    {
+      "from": "l21",
+      "to": "l22",
+      "type": "prerequisite"
+    },
+    {
+      "from": "l21",
+      "to": "l23",
+      "type": "prerequisite"
+    },
+    {
+      "from": "l24",
+      "to": "l25",
+      "type": "prerequisite"
+    },
+    {
+      "from": "l25",
+      "to": "l28",
+      "type": "prerequisite"
+    },
+    {
+      "from": "l25",
+      "to": "l29",
+      "type": "prerequisite"
+    },
+    {
+      "from": "l26",
+      "to": "l27",
+      "type": "prerequisite"
+    },
+    {
+      "from": "l30",
+      "to": "l31",
+      "type": "prerequisite"
+    },
+    {
+      "from": "l30",
+      "to": "l32",
+      "type": "prerequisite"
+    },
+    {
+      "from": "l30",
+      "to": "l35",
+      "type": "prerequisite"
+    },
+    {
+      "from": "l32",
+      "to": "l33",
+      "type": "prerequisite"
+    },
+    {
+      "from": "l33",
+      "to": "l34",
+      "type": "prerequisite"
+    },
+    {
+      "from": "l36",
+      "to": "l37",
+      "type": "prerequisite"
+    },
+    {
+      "from": "l36",
+      "to": "l39",
+      "type": "prerequisite"
+    },
+    {
+      "from": "l37",
+      "to": "l38",
+      "type": "prerequisite"
+    },
+    {
+      "from": "l39",
+      "to": "l40",
+      "type": "prerequisite"
+    },
+    {
+      "from": "o01",
+      "to": "o02",
+      "type": "prerequisite"
+    },
+    {
+      "from": "r01",
+      "to": "r02",
+      "type": "prerequisite"
+    },
+    {
+      "from": "r03",
+      "to": "r04",
+      "type": "prerequisite"
+    },
+    {
+      "from": "r05",
+      "to": "r06",
+      "type": "prerequisite"
+    },
+    {
+      "from": "r06",
+      "to": "r07",
+      "type": "prerequisite"
+    },
+    {
+      "from": "r08",
+      "to": "r09",
+      "type": "prerequisite"
+    },
+    {
+      "from": "r08",
+      "to": "r10",
+      "type": "prerequisite"
+    },
+    {
+      "from": "r08",
+      "to": "r11",
+      "type": "prerequisite"
+    },
+    {
+      "from": "r12",
+      "to": "r13",
+      "type": "prerequisite"
+    },
+    {
+      "from": "r12",
+      "to": "r14",
+      "type": "prerequisite"
+    },
+    {
+      "from": "r12",
+      "to": "r15",
+      "type": "prerequisite"
+    },
+    {
+      "from": "r14",
+      "to": "r16",
+      "type": "prerequisite"
+    },
+    {
+      "from": "r15",
+      "to": "r17",
+      "type": "prerequisite"
+    },
+    {
+      "from": "r18",
+      "to": "r19",
+      "type": "prerequisite"
+    },
+    {
+      "from": "r20",
+      "to": "r21",
+      "type": "prerequisite"
+    },
+    {
+      "from": "t01",
+      "to": "t02",
+      "type": "prerequisite"
+    },
+    {
+      "from": "t01",
+      "to": "t03",
+      "type": "prerequisite"
+    },
+    {
+      "from": "t03",
+      "to": "t04",
+      "type": "prerequisite"
+    },
+    {
+      "from": "t05",
+      "to": "t06",
+      "type": "prerequisite"
+    },
+    {
+      "from": "t07",
+      "to": "t08",
+      "type": "prerequisite"
+    },
+    {
+      "from": "t08",
+      "to": "t09",
+      "type": "prerequisite"
+    },
+    {
+      "from": "t09",
+      "to": "t10",
+      "type": "prerequisite"
+    },
+    {
+      "from": "t11",
+      "to": "t12",
+      "type": "prerequisite"
+    },
+    {
+      "from": "t12",
+      "to": "t13",
+      "type": "prerequisite"
+    },
+    {
+      "from": "t13",
+      "to": "t14",
+      "type": "prerequisite"
+    },
+    {
+      "from": "t15",
+      "to": "t16",
+      "type": "prerequisite"
+    }
+  ]
+}

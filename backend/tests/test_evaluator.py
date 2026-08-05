@@ -62,11 +62,20 @@ def test_judge_choice_accepts_full_work():
 
 
 def test_judge_choice_indeterminate_on_non_answer():
-    """M4r7f：choice 题非答案输入（"好"）→ indeterminate。"""
+    """M4r8：choice 题——选项内容匹配但选错 → 判错；
+    非选项内容的消息文本（"好"等）→ indeterminate 温和提示（不判错不给答案）。"""
     q = _q("c5", "choice", "1+1=?", "B", options=["0", "1", "2", "3"])
+    # 消息文本（非选项、非字母）→ indeterminate
     r = judge_choice("好，我知道了", q)
     assert r.indeterminate
     assert r.correct_answer is None
+    # 选项内容选错（"3"≠B）→ 判错，给正确答案
+    r2 = judge_choice("3", q)
+    assert not r2.indeterminate
+    assert not r2.correct
+    assert r2.correct_answer is not None
+    # 选对选项内容 → 对
+    assert judge_choice("1", q).correct
 
 
 # ---- 规则兜底 ----

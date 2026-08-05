@@ -60,6 +60,8 @@ class SessionCreateRequest(BaseModel):
     type: str = Field(pattern="^(diagnostic|tutor|review)$")
     # M4r5：诊断配置（用户自主选择题型/题量/难度）
     config: dict | None = None
+    # M4r8：领域包（默认取用户激活包，未设置回退系统默认）
+    pack_id: str | None = Field(default=None, max_length=64)
 
 
 class SessionCreated(BaseModel):

@@ -11,7 +11,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user, get_db
 from app.api.schemas import MasteryOut, PathOut, TraceOut
-from app.api.routes_sessions import PACK_ID, _new_orchestrator
+from app.api.routes_domains import _active_pack
+from app.api.routes_sessions import _new_orchestrator
 from app.engine.graph_engine import KnowledgeGraph, plan_path, trace_root_evidenced
 from app.engine.tutor_orchestrator import TutorOrchestrator
 from app.persistence import repositories as repo
@@ -30,9 +31,11 @@ async def api_mastery(
     sid: int,
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
+    pack_id: str | None = None,
 ) -> MasteryOut:
     _check_self(user.id, sid)
-    mastery = await repo.get_mastery_all(db, user.id)
+    pid = pack_id or _active_pack(user)
+    mastery = await repo.get_mastery_all(db, user.id, pid)
     weakest = min(mastery, key=mastery.get) if mastery else None
     return MasteryOut(mastery=mastery, weakest=weakest)
 
@@ -42,10 +45,12 @@ async def api_path(
     sid: int,
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
+    pack_id: str | None = None,
 ) -> PathOut:
     _check_self(user.id, sid)
-    t: TutorOrchestrator = _new_orchestrator()
-    mastery = await repo.get_mastery_all(db, user.id)
+    pid = pack_id or _active_pack(user)
+    t: TutorOrchestrator = _new_orchestrator(pid)
+    mastery = await repo.get_mastery_all(db, user.id, pid)
     if not mastery:
         return PathOut(path=[])
     t.mastery.update(mastery)
@@ -58,12 +63,14 @@ async def api_trace(
     node_id: str,
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
+    pack_id: str | None = None,
 ) -> TraceOut:
     _check_self(user.id, sid)
-    mastery = await repo.get_mastery_all(db, user.id)
+    pid = pack_id or _active_pack(user)
+    mastery = await repo.get_mastery_all(db, user.id, pid)
     if node_id not in mastery:
         raise HTTPException(status_code=404, detail="未知节点或尚未诊断该节点")
-    t = _new_orchestrator()
+    t = _new_orchestrator(pid)
     t.mastery.update(mastery)
     graph = KnowledgeGraph(t.pack.graph)
     chain = sorted(graph.ancestors(node_id))
@@ -77,10 +84,11 @@ async def api_trend(
     days: int = 14,
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
+    pack_id: str | None = None,
 ) -> dict:
-    """学习趋势（M4r3）：近 N 天每日作答事件数（learning_events，event_type='answer'）。"""
+    """学习趋势（M4r3）：近 N 天每日作答事件数（learning_events，event_type='answer'，M4r8 按领域）。"""
     _check_self(user.id, sid)
-    rows = await repo.get_trend(db, user.id, days)
+    rows = await repo.get_trend(db, user.id, days, pack_id or _active_pack(user))
     return {"trend": rows}
 
 
@@ -89,10 +97,11 @@ async def api_wrong_questions(
     sid: int,
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
+    pack_id: str | None = None,
 ) -> dict:
-    """错题集（M4r5 复盘抽卡）：按题去重，最新判错在前。"""
+    """错题集（M4r5 复盘抽卡）：按题去重，最新判错在前（M4r8 按领域）。"""
     _check_self(user.id, sid)
-    return {"items": await repo.list_wrong_questions(db, user.id)}
+    return {"items": await repo.list_wrong_questions(db, user.id, pack_id=pack_id or _active_pack(user))}
 
 
 @router.delete("/{sid}/wrong-questions/{qid}")
@@ -101,10 +110,11 @@ async def api_remove_wrong_question(
     qid: str,
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
+    pack_id: str | None = None,
 ) -> dict:
     """移出错题集（"已掌握"）。"""
     _check_self(user.id, sid)
-    ok = await repo.remove_wrong_question(db, user.id, qid)
+    ok = await repo.remove_wrong_question(db, user.id, qid, pack_id or _active_pack(user))
     if not ok:
         raise HTTPException(status_code=404, detail="该错题不存在或已移除")
     return {"removed": qid}

@@ -1,0 +1,5 @@
+{
+  "initial_strategy": "weakest_node",
+  "termination": { "confidence": 0.8, "max_questions": 2 },
+  "bkt": { "p_l0": 0.4, "p_t": 0.3, "p_g": 0.2, "p_s": 0.1 }
+}

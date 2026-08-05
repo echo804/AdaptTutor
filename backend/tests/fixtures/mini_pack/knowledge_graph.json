@@ -1,0 +1,9 @@
+{
+  "nodes": [
+    { "id": "a1", "name": "概念 A", "difficulty": 0.4, "importance": 0.8, "error_modes": ["a1_e1"] },
+    { "id": "b1", "name": "概念 B", "difficulty": 0.6, "importance": 0.6, "error_modes": ["b1_e1"] }
+  ],
+  "edges": [
+    { "from": "a1", "to": "b1", "type": "prerequisite" }
+  ]
+}

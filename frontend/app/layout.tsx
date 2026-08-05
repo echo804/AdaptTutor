@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import "katex/dist/katex.min.css";
 import AppShell from "@/components/AppShell";
+import { DomainProvider } from "@/lib/domain";
 
 export const metadata: Metadata = {
   title: "AdaptTutor 自适应学习",
@@ -20,7 +21,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body>
-        <AppShell>{children}</AppShell>
+        <DomainProvider>
+          <AppShell>{children}</AppShell>
+        </DomainProvider>
       </body>
     </html>
   );

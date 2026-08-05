@@ -106,13 +106,22 @@ async def list_messages_by_session(
 
 # ---------- mastery_states ----------
 
+DEFAULT_PACK_ID = "junior_math_eq_ineq"
+
+
 async def upsert_mastery(
-    db: AsyncSession, student_id: int, node_id: str, mastery_p: float, confidence: float
+    db: AsyncSession,
+    student_id: int,
+    node_id: str,
+    mastery_p: float,
+    confidence: float,
+    pack_id: str = DEFAULT_PACK_ID,
 ) -> None:
-    """BKT 掌握度 upsert（student_id, node_id 唯一）。"""
+    """BKT 掌握度 upsert（student_id, pack_id, node_id 唯一，M4r8 领域隔离）。"""
     res = await db.execute(
         select(MasteryState).where(
             MasteryState.student_id == student_id,
+            MasteryState.pack_id == pack_id,
             MasteryState.node_id == node_id,
         )
     )
@@ -120,6 +129,7 @@ async def upsert_mastery(
     if row is None:
         row = MasteryState(
             student_id=student_id,
+            pack_id=pack_id,
             node_id=node_id,
             mastery_p=mastery_p,
             confidence=confidence,
@@ -133,16 +143,26 @@ async def upsert_mastery(
     await db.commit()
 
 
-async def get_mastery_all(db: AsyncSession, student_id: int) -> dict[str, float]:
+async def get_mastery_all(
+    db: AsyncSession, student_id: int, pack_id: str = DEFAULT_PACK_ID
+) -> dict[str, float]:
     res = await db.execute(
-        select(MasteryState).where(MasteryState.student_id == student_id)
+        select(MasteryState).where(
+            MasteryState.student_id == student_id,
+            MasteryState.pack_id == pack_id,
+        )
     )
     return {row.node_id: row.mastery_p for row in res.scalars().all()}
 
 
-async def list_mastery_rows(db: AsyncSession, student_id: int) -> list[MasteryState]:
+async def list_mastery_rows(
+    db: AsyncSession, student_id: int, pack_id: str = DEFAULT_PACK_ID
+) -> list[MasteryState]:
     res = await db.execute(
-        select(MasteryState).where(MasteryState.student_id == student_id)
+        select(MasteryState).where(
+            MasteryState.student_id == student_id,
+            MasteryState.pack_id == pack_id,
+        )
     )
     return list(res.scalars().all())
 
@@ -156,10 +176,12 @@ async def add_event(
     node_id: str | None = None,
     session_id: int | None = None,
     payload: dict | None = None,
+    pack_id: str = DEFAULT_PACK_ID,
 ) -> LearningEvent:
     ev = LearningEvent(
         student_id=student_id,
         session_id=session_id,
+        pack_id=pack_id,
         event_type=event_type,
         node_id=node_id,
         payload=payload,
@@ -184,9 +206,9 @@ async def list_events_by_student(
 
 
 async def get_trend(
-    db: AsyncSession, student_id: int, days: int = 14
+    db: AsyncSession, student_id: int, days: int = 14, pack_id: str = DEFAULT_PACK_ID
 ) -> list[dict]:
-    """近 N 天每日作答事件数（M4r3 趋势图数据源）。"""
+    """近 N 天每日作答事件数（M4r3 趋势图数据源，M4r8 按领域隔离）。"""
     from datetime import timedelta
 
     since = _now() - timedelta(days=days)
@@ -197,6 +219,7 @@ async def get_trend(
         )
         .where(
             LearningEvent.student_id == student_id,
+            LearningEvent.pack_id == pack_id,
             LearningEvent.event_type == "answer",
             LearningEvent.ts >= since,
         )
@@ -207,13 +230,14 @@ async def get_trend(
 
 
 async def list_wrong_questions(
-    db: AsyncSession, student_id: int, limit: int = 100
+    db: AsyncSession, student_id: int, limit: int = 100, pack_id: str = DEFAULT_PACK_ID
 ) -> list[dict]:
-    """错题集（M4r5 复盘抽卡）：取每道错题最近一次判错记录，最新在前。"""
+    """错题集（M4r5 复盘抽卡）：取每道错题最近一次判错记录，最新在前（M4r8 按领域）。"""
     res = await db.execute(
         select(LearningEvent)
         .where(
             LearningEvent.student_id == student_id,
+            LearningEvent.pack_id == pack_id,
             LearningEvent.event_type == "wrong_answer",
             LearningEvent.payload.isnot(None),
         )
@@ -245,12 +269,13 @@ async def list_wrong_questions(
 
 
 async def remove_wrong_question(
-    db: AsyncSession, student_id: int, qid: str
+    db: AsyncSession, student_id: int, qid: str, pack_id: str = DEFAULT_PACK_ID
 ) -> bool:
-    """移出错题集（"已掌握"）：删除该题全部 wrong_answer 事件。"""
+    """移出错题集（"已掌握"）：删除该领域内该题全部 wrong_answer 事件。"""
     res = await db.execute(
         LearningEvent.__table__.delete().where(
             LearningEvent.student_id == student_id,
+            LearningEvent.pack_id == pack_id,
             LearningEvent.event_type == "wrong_answer",
             LearningEvent.payload["qid"].astext == qid,
         )

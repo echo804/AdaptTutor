@@ -54,14 +54,16 @@ def judge_choice(user_choice: str, question: Question) -> JudgeResult:
             if norm(o) == norm(u):
                 correct = chr(65 + i) == ans
                 break
-    if not correct and not re.search(r"[A-Z0-9]", u):
-        # M4r7f：非答案输入（"好"等）→ indeterminate，温和提示重答
-        return JudgeResult(
-            correct=False,
-            feedback=_FEEDBACK_INDETERMINATE,
-            method="choice",
-            indeterminate=True,
-        )
+        else:
+            # 不匹配任何选项内容：单个字母且在选项范围内 → 判错（选错选项）；
+            # 其余（中文/消息文本）→ indeterminate，温和提示重答（M4r7f）
+            if not (len(u) == 1 and u.isalpha() and ord(u) - 65 < len(question.options)):
+                return JudgeResult(
+                    correct=False,
+                    feedback=_FEEDBACK_INDETERMINATE,
+                    method="choice",
+                    indeterminate=True,
+                )
     idx = ord(ans) - 65 if len(ans) == 1 and ans.isalpha() else -1
     opt = question.options[idx] if 0 <= idx < len(question.options) else None
     return JudgeResult(

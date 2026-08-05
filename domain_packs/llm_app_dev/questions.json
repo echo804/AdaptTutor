@@ -1,0 +1,3247 @@
+[
+  {
+    "id": "lq001",
+    "type": "choice",
+    "content": "解码策略的本质是：从模型输出的 $\\text{vocabulary}$ 大小的概率分布中选择下一个 token。以下哪种策略属于确定性策略？",
+    "difficulty": 0.5,
+    "options": [
+      "A. Temperature 采样",
+      "B. Beam Search",
+      "C. Top-P 采样",
+      "D. 随机采样"
+    ],
+    "answer": "B",
+    "error_modes": [
+      "l01_e1"
+    ],
+    "tags": [
+      "llm_decoding_strategies.md"
+    ],
+    "step_node_map": {
+      "step1": "l01"
+    }
+  },
+  {
+    "id": "lq002",
+    "type": "blank",
+    "content": "在大模型生成过程中，每一步输出的 vocabulary 概率分布用于决定下一个 token 的选择，这被称为______。",
+    "difficulty": 0.5,
+    "options": [],
+    "answer": "解码策略",
+    "error_modes": [
+      "l01_e2"
+    ],
+    "tags": [
+      "llm_decoding_strategies.md"
+    ],
+    "step_node_map": {
+      "step1": "l01"
+    }
+  },
+  {
+    "id": "lq003",
+    "type": "open",
+    "content": "为什么 Beam Search 在 LLM 时代逐渐被弃用？请简要说明原因。",
+    "difficulty": 0.6,
+    "options": [],
+    "answer": "因为 Beam Search 优化的是整体概率最高的序列，但 LLM 任务没有单一最优答案，且容易导致重复和乏味内容。此外，它与现代推理优化不兼容。",
+    "error_modes": [
+      "l01_e3"
+    ],
+    "tags": [
+      "llm_decoding_strategies.md"
+    ],
+    "step_node_map": {
+      "step1": "l01"
+    }
+  },
+  {
+    "id": "lq004",
+    "type": "choice",
+    "content": "以下哪种策略通过控制概率分布的锐度来调节随机性强度？",
+    "difficulty": 0.55,
+    "options": [
+      "A. Top-K 采样",
+      "B. Beam Search",
+      "C. Temperature 采样",
+      "D. Top-P 采样"
+    ],
+    "answer": "C",
+    "error_modes": [
+      "l02_e1"
+    ],
+    "tags": [
+      "llm_decoding_strategies.md"
+    ],
+    "step_node_map": {
+      "step1": "l02"
+    }
+  },
+  {
+    "id": "lq005",
+    "type": "choice",
+    "content": "以下哪种策略能自适应截断长尾概率？",
+    "difficulty": 0.6,
+    "options": [
+      "A. Greedy Decoding",
+      "B. Temperature 采样",
+      "C. Top-K 采样",
+      "D. Top-P 采样"
+    ],
+    "answer": "D",
+    "error_modes": [
+      "l02_e2"
+    ],
+    "tags": [
+      "llm_decoding_strategies.md"
+    ],
+    "step_node_map": {
+      "step1": "l02"
+    }
+  },
+  {
+    "id": "lq006",
+    "type": "blank",
+    "content": "在 vLLM 中，KV Cache 通过 ______ 技术实现显存高效管理。",
+    "difficulty": 0.55,
+    "options": [],
+    "answer": "PagedAttention",
+    "error_modes": [
+      "l03_e1"
+    ],
+    "tags": [
+      "llm_deployment_frameworks.md"
+    ],
+    "step_node_map": {
+      "step1": "l03"
+    }
+  },
+  {
+    "id": "lq007",
+    "type": "choice",
+    "content": "SGLang 的 RadixAttention 主要解决什么问题？",
+    "difficulty": 0.6,
+    "options": [
+      "A. 显存碎片",
+      "B. 批量调度低效",
+      "C. 共享前缀复用",
+      "D. 重复计算"
+    ],
+    "answer": "C",
+    "error_modes": [
+      "l03_e2"
+    ],
+    "tags": [
+      "llm_deployment_frameworks.md"
+    ],
+    "step_node_map": {
+      "step1": "l03"
+    }
+  },
+  {
+    "id": "lq008",
+    "type": "choice",
+    "content": "以下哪个框架适合企业级 API 部署，并与 HuggingFace 生态深度集成？",
+    "difficulty": 0.5,
+    "options": [
+      "A. vLLM",
+      "B. SGLang",
+      "C. TGI",
+      "D. llama.cpp"
+    ],
+    "answer": "C",
+    "error_modes": [
+      "l04_e1"
+    ],
+    "tags": [
+      "llm_deployment_frameworks.md"
+    ],
+    "step_node_map": {
+      "step1": "l04"
+    }
+  },
+  {
+    "id": "lq009",
+    "type": "open",
+    "content": "DPO 和 PPO 在对齐训练中的主要区别是什么？请简要说明。",
+    "difficulty": 0.65,
+    "options": [],
+    "answer": "DPO 不需要单独训练奖励模型，直接利用偏好数据进行监督学习；而 PPO 需要先训练奖励模型再进行强化学习。",
+    "error_modes": [
+      "l05_e1"
+    ],
+    "tags": [
+      "llm_dpo_vs_ppo.md"
+    ],
+    "step_node_map": {
+      "step1": "l05"
+    }
+  },
+  {
+    "id": "lq010",
+    "type": "choice",
+    "content": "DPO 的核心思想是将 RLHF 目标转化为哪种形式？",
+    "difficulty": 0.6,
+    "options": [
+      "A. 强化学习",
+      "B. 监督学习",
+      "C. 无监督学习",
+      "D. 半监督学习"
+    ],
+    "answer": "B",
+    "error_modes": [
+      "l05_e2"
+    ],
+    "tags": [
+      "llm_dpo_vs_ppo.md"
+    ],
+    "step_node_map": {
+      "step1": "l05"
+    }
+  },
+  {
+    "id": "lq011",
+    "type": "choice",
+    "content": "以下哪项不是主流学术 Benchmark 的主要考查维度？$\\mathrm{A.} \\text{代码能力} \\quad \\mathrm{B.} \\text{数学推理} \\quad \\mathrm{C.} \\text{情感分析} \\quad \\mathrm{D.} \\text{对话理解}$",
+    "difficulty": 0.5,
+    "options": [
+      "A. 代码能力",
+      "B. 数学推理",
+      "C. 情感分析",
+      "D. 对话理解"
+    ],
+    "answer": "C",
+    "error_modes": [
+      "混淆不同 Benchmark 的设计目标"
+    ],
+    "tags": [
+      "llm_evaluation_metrics.md"
+    ],
+    "step_node_map": {
+      "step1": "l06"
+    }
+  },
+  {
+    "id": "lq012",
+    "type": "blank",
+    "content": "构建业务专属测试集时，建议采样数量范围是：__ 条。",
+    "difficulty": 0.6,
+    "options": [],
+    "answer": "50-200",
+    "error_modes": [
+      "未掌握实际项目中的测试集规模标准"
+    ],
+    "tags": [
+      "llm_evaluation_metrics.md"
+    ],
+    "step_node_map": {
+      "step1": "l07"
+    }
+  },
+  {
+    "id": "lq013",
+    "type": "open",
+    "content": "请简述 LoRA 微调的核心思想。",
+    "difficulty": 0.6,
+    "options": [],
+    "answer": "LoRA 通过在原始权重旁添加低秩矩阵进行微调，只更新少量参数，降低计算成本。",
+    "error_modes": [
+      "未能准确描述 LoRA 的技术原理"
+    ],
+    "tags": [
+      "llm_finetuning.md"
+    ],
+    "step_node_map": {
+      "step1": "l08"
+    }
+  },
+  {
+    "id": "lq014",
+    "type": "choice",
+    "content": "以下哪种方法可以有效缓解 LLM 的幻觉问题？$\\mathrm{A.} \\text{提高 Temperature 值} \\quad \\mathrm{B.} \\text{使用 RAG 技术} \\quad \\mathrm{C.} \\text{增加训练数据量} \\quad \\mathrm{D.} \\text{减少模型参数量}$",
+    "difficulty": 0.55,
+    "options": [
+      "A. 提高 Temperature 值",
+      "B. 使用 RAG 技术",
+      "C. 增加训练数据量",
+      "D. 减少模型参数量"
+    ],
+    "answer": "B",
+    "error_modes": [
+      "误认为 Temperature 调整能解决幻觉根本问题"
+    ],
+    "tags": [
+      "llm_hallucination.md"
+    ],
+    "step_node_map": {
+      "step1": "l09"
+    }
+  },
+  {
+    "id": "lq015",
+    "type": "blank",
+    "content": "幻觉的三类表现中，不包括：__。",
+    "difficulty": 0.5,
+    "options": [],
+    "answer": "上下文不一致",
+    "error_modes": [
+      "混淆幻觉分类标准"
+    ],
+    "tags": [
+      "llm_hallucination.md"
+    ],
+    "step_node_map": {
+      "step1": "l09"
+    }
+  },
+  {
+    "id": "lq016",
+    "type": "open",
+    "content": "请说明 SFT 和 DPO 在微调目标上的区别。",
+    "difficulty": 0.65,
+    "options": [],
+    "answer": "SFT 训练模型按指令回答，DPO 训练模型学习偏好对齐。",
+    "error_modes": [
+      "未能区分两种微调目标的核心差异"
+    ],
+    "tags": [
+      "llm_finetuning.md"
+    ],
+    "step_node_map": {
+      "step1": "l08"
+    }
+  },
+  {
+    "id": "lq017",
+    "type": "choice",
+    "content": "KV Cache 的主要作用是？$\\text{A. 提高模型参数量} \\quad \\text{B. 降低推理延迟} \\quad \\text{C. 增加模型训练数据} \\quad \\text{D. 提升模型输出质量}$",
+    "difficulty": 0.5,
+    "options": [
+      "A. 提高模型参数量",
+      "B. 降低推理延迟",
+      "C. 增加模型训练数据",
+      "D. 提升模型输出质量"
+    ],
+    "answer": "B",
+    "error_modes": [
+      "l10_e1"
+    ],
+    "tags": [
+      "llm_kv_cache_prompt_caching.md"
+    ],
+    "step_node_map": {
+      "step1": "l10"
+    }
+  },
+  {
+    "id": "lq018",
+    "type": "blank",
+    "content": "Prompt Caching 的核心目标是复用什么内容？",
+    "difficulty": 0.6,
+    "options": [],
+    "answer": "KV Cache",
+    "error_modes": [
+      "l11_e1"
+    ],
+    "tags": [
+      "llm_kv_cache_prompt_caching.md"
+    ],
+    "step_node_map": {
+      "step1": "l11"
+    }
+  },
+  {
+    "id": "lq019",
+    "type": "open",
+    "content": "简述大模型训练的三个阶段分别解决什么问题。",
+    "difficulty": 0.5,
+    "options": [],
+    "answer": "预训练解决基础语言和知识能力，SFT解决对话格式适配，对齐解决价值观和安全问题。",
+    "error_modes": [
+      "l12_e1"
+    ],
+    "tags": [
+      "llm_llm_training.md"
+    ],
+    "step_node_map": {
+      "step1": "l12"
+    }
+  },
+  {
+    "id": "lq020",
+    "type": "choice",
+    "content": "LoRA 微调的主要优势是？$\\text{A. 显存占用高} \\quad \\text{B. 训练速度慢} \\quad \\text{C. 推理零开销} \\quad \\text{D. 灾难性遗忘严重}$",
+    "difficulty": 0.6,
+    "options": [
+      "A. 显存占用高",
+      "B. 训练速度慢",
+      "C. 推理零开销",
+      "D. 灾难性遗忘严重"
+    ],
+    "answer": "C",
+    "error_modes": [
+      "l13_e1"
+    ],
+    "tags": [
+      "llm_lora.md"
+    ],
+    "step_node_map": {
+      "step1": "l13"
+    }
+  },
+  {
+    "id": "lq021",
+    "type": "blank",
+    "content": "LoRA 微调中，原始权重在训练过程中是？",
+    "difficulty": 0.5,
+    "options": [],
+    "answer": "冻结",
+    "error_modes": [
+      "l13_e1"
+    ],
+    "tags": [
+      "llm_lora.md"
+    ],
+    "step_node_map": {
+      "step1": "l13"
+    }
+  },
+  {
+    "id": "lq022",
+    "type": "open",
+    "content": "为什么 Prompt Caching 要求前缀固定内容在前、动态内容在后？",
+    "difficulty": 0.6,
+    "options": [],
+    "answer": "因为只有前缀完全相同才能命中缓存，否则会失效。",
+    "error_modes": [
+      "l11_e1"
+    ],
+    "tags": [
+      "llm_kv_cache_prompt_caching.md"
+    ],
+    "step_node_map": {
+      "step1": "l11"
+    }
+  },
+  {
+    "id": "lq023",
+    "type": "choice",
+    "content": "MHA 在推理阶段的主要显存占用来源是？$\\text{KV Cache}$",
+    "difficulty": 0.5,
+    "options": [
+      "A. Q 矩阵",
+      "B. K 和 V 矩阵",
+      "C. 注意力分数矩阵",
+      "D. 输出矩阵"
+    ],
+    "answer": "B",
+    "error_modes": [
+      "l14_e1"
+    ],
+    "tags": [
+      "llm_mha_mqa_gqa_flash_attention.md"
+    ],
+    "step_node_map": {
+      "step1": "l14"
+    }
+  },
+  {
+    "id": "lq024",
+    "type": "choice",
+    "content": "MQA 相比 MHA 的主要优势是？",
+    "difficulty": 0.6,
+    "options": [
+      "A. 提高表达能力",
+      "B. 降低显存占用",
+      "C. 增加计算复杂度",
+      "D. 提升训练速度"
+    ],
+    "answer": "B",
+    "error_modes": [
+      "l15_e1"
+    ],
+    "tags": [
+      "llm_mha_mqa_gqa_flash_attention.md"
+    ],
+    "step_node_map": {
+      "step1": "l15"
+    }
+  },
+  {
+    "id": "lq025",
+    "type": "blank",
+    "content": "Flash Attention 通过将注意力矩阵分块，将显存占用从 $O(N^2)$ 降低到 $\\boxed{O(N)}$。",
+    "difficulty": 0.6,
+    "options": [],
+    "answer": "O(N)",
+    "error_modes": [
+      "l16_e1"
+    ],
+    "tags": [
+      "llm_mha_mqa_gqa_flash_attention.md"
+    ],
+    "step_node_map": {
+      "step1": "l16"
+    }
+  },
+  {
+    "id": "lq026",
+    "type": "open",
+    "content": "在企业级 RAG 系统中，为什么不能仅凭模型跑分选择模型？",
+    "difficulty": 0.5,
+    "options": [],
+    "answer": "因为模型跑分不代表在特定业务场景中的表现，还需考虑合规、成本、延迟和能力匹配等因素。",
+    "error_modes": [
+      "l17_e1"
+    ],
+    "tags": [
+      "llm_model_selection.md"
+    ],
+    "step_node_map": {
+      "step1": "l17"
+    }
+  },
+  {
+    "id": "lq027",
+    "type": "choice",
+    "content": "MoE 模型的激活参数与总参数的关系是？",
+    "difficulty": 0.6,
+    "options": [
+      "A. 激活参数大于总参数",
+      "B. 激活参数等于总参数",
+      "C. 激活参数小于总参数",
+      "D. 两者无关"
+    ],
+    "answer": "C",
+    "error_modes": [
+      "l18_e1"
+    ],
+    "tags": [
+      "llm_moe.md"
+    ],
+    "step_node_map": {
+      "step1": "l18"
+    }
+  },
+  {
+    "id": "lq028",
+    "type": "blank",
+    "content": "MoE 中的 Router 负责决定每个 token 进入哪个 \\boxed{专家}。",
+    "difficulty": 0.6,
+    "options": [],
+    "answer": "专家",
+    "error_modes": [
+      "l18_e1"
+    ],
+    "tags": [
+      "llm_moe.md"
+    ],
+    "step_node_map": {
+      "step1": "l18"
+    }
+  },
+  {
+    "id": "lq029",
+    "type": "choice",
+    "content": "位置编码的核心作用是解决 Self-Attention 的什么问题？$\\text{A.} \\text{计算效率低}$ $\\text{B.} \\text{无法处理长序列}$ $\\text{C.} \\text{位置盲}$$\\text{D.} \\text{参数过多}$",
+    "difficulty": 0.5,
+    "options": [
+      "A. 计算效率低",
+      "B. 无法处理长序列",
+      "C. 位置盲",
+      "D. 参数过多"
+    ],
+    "answer": "C",
+    "error_modes": [
+      "混淆位置编码的初衷和实际应用场景"
+    ],
+    "tags": [
+      "llm_position_encoding.md"
+    ],
+    "step_node_map": {
+      "step1": "l19"
+    }
+  },
+  {
+    "id": "lq030",
+    "type": "blank",
+    "content": "RoPE 的核心思想是通过__操作将相对位置信息编入 Q/K 向量。",
+    "difficulty": 0.6,
+    "options": [],
+    "answer": "旋转",
+    "error_modes": [
+      "对 RoPE 的实现方式理解不清"
+    ],
+    "tags": [
+      "llm_position_encoding.md"
+    ],
+    "step_node_map": {
+      "step1": "l20"
+    }
+  },
+  {
+    "id": "lq031",
+    "type": "open",
+    "content": "简述 Post-Training 的主要目标是什么？",
+    "difficulty": 0.5,
+    "options": [],
+    "answer": "提升模型质量，解决 SFT 后的有害回答、价值观偏差等问题，优化回答质量与安全性。",
+    "error_modes": [
+      "未能准确把握 Post-Training 的核心目的"
+    ],
+    "tags": [
+      "llm_post_training.md"
+    ],
+    "step_node_map": {
+      "step1": "l21"
+    }
+  },
+  {
+    "id": "lq032",
+    "type": "choice",
+    "content": "DPO 和 RLHF 的关键区别在于：$\\text{A.} \\text{是否使用奖励模型}$ $\\text{B.} \\text{是否需要参考模型}$ $\\text{C.} \\text{是否依赖人类反馈}$ $\\text{D.} \\text{是否进行强化学习}$",
+    "difficulty": 0.6,
+    "options": [
+      "A. 是否使用奖励模型",
+      "B. 是否需要参考模型",
+      "C. 是否依赖人类反馈",
+      "D. 是否进行强化学习"
+    ],
+    "answer": "A",
+    "error_modes": [
+      "混淆 DPO 和 RLHF 的技术实现差异"
+    ],
+    "tags": [
+      "llm_post_training.md"
+    ],
+    "step_node_map": {
+      "step1": "l22"
+    }
+  },
+  {
+    "id": "lq033",
+    "type": "blank",
+    "content": "Prompt 工程的五要素包括角色设定、任务描述、背景信息、输出格式和__。",
+    "difficulty": 0.5,
+    "options": [],
+    "answer": "示例",
+    "error_modes": [
+      "遗漏 Prompt 工程的关键要素"
+    ],
+    "tags": [
+      "llm_prompt_engineering.md"
+    ],
+    "step_node_map": {
+      "step1": "l23"
+    }
+  },
+  {
+    "id": "lq034",
+    "type": "open",
+    "content": "为什么 Prompt 中的格式约束对程序解析非常重要？",
+    "difficulty": 0.5,
+    "options": [],
+    "answer": "格式约束确保输出结构统一，便于下游程序自动解析和处理。",
+    "error_modes": [
+      "未认识到格式约束的实际影响"
+    ],
+    "tags": [
+      "llm_prompt_engineering.md"
+    ],
+    "step_node_map": {
+      "step1": "l23"
+    }
+  },
+  {
+    "id": "lq035",
+    "type": "choice",
+    "content": "量化的核心目标是将模型参数从高精度浮点数映射到低精度整数，其主要收益包括：$\\boxed{\\text{A. 显存占用降低}}$、$\\boxed{\\text{B. 推理速度提升}}$、$\\boxed{\\text{C. 模型体积减小}}$、$\\boxed{\\text{D. 精度损失增加}}$",
+    "difficulty": 0.5,
+    "options": [
+      "A. 显存占用降低",
+      "B. 推理速度提升",
+      "C. 模型体积减小",
+      "D. 精度损失增加"
+    ],
+    "answer": "ABC",
+    "error_modes": [
+      "l24_e1"
+    ],
+    "tags": [
+      "llm_quantization.md"
+    ],
+    "step_node_map": {
+      "step1": "l24"
+    }
+  },
+  {
+    "id": "lq036",
+    "type": "blank",
+    "content": "根据 Scaling Law，模型的损失值随模型规模、训练数据量和训练算力按__幂律__下降。",
+    "difficulty": 0.6,
+    "options": [],
+    "answer": "幂律",
+    "error_modes": [
+      "l25_e1"
+    ],
+    "tags": [
+      "llm_scaling_law_emergence.md"
+    ],
+    "step_node_map": {
+      "step1": "l25"
+    }
+  },
+  {
+    "id": "lq037",
+    "type": "open",
+    "content": "在代码生成任务中，建议将 Temperature 调至什么范围？为什么？",
+    "difficulty": 0.4,
+    "options": [],
+    "answer": "0~0.2；因为低温能提高输出的稳定性和可复现性，避免模型乱发挥。",
+    "error_modes": [
+      "l26_e1"
+    ],
+    "tags": [
+      "llm_temperature_top_p_top_k.md"
+    ],
+    "step_node_map": {
+      "step1": "l26"
+    }
+  },
+  {
+    "id": "lq038",
+    "type": "choice",
+    "content": "以下哪些是 GPTQ 的特点？$\\boxed{\\text{A. 支持极端低位量化}}$、$\\boxed{\\text{B. 量化耗时短}}$、$\\boxed{\\text{C. 不依赖模型结构}}$、$\\boxed{\\text{D. 误差补偿机制}}$",
+    "difficulty": 0.5,
+    "options": [
+      "A. 支持极端低位量化",
+      "B. 量化耗时短",
+      "C. 不依赖模型结构",
+      "D. 误差补偿机制"
+    ],
+    "answer": "ACD",
+    "error_modes": [
+      "l24_e1"
+    ],
+    "tags": [
+      "llm_quantization.md"
+    ],
+    "step_node_map": {
+      "step1": "l24"
+    }
+  },
+  {
+    "id": "lq039",
+    "type": "choice",
+    "content": "关于 Scaling Law 的描述，哪一项是正确的？$\\boxed{\\text{A. 模型规模越大，损失值一定越小}}$、$\\boxed{\\text{B. 损失值随模型规模、数据量、算力按幂律下降}}$、$\\boxed{\\text{C. 模型规模没有上限}}$、$\\boxed{\\text{D. 数据量越多效果越好}}$",
+    "difficulty": 0.6,
+    "options": [
+      "A. 模型规模越大，损失值一定越小",
+      "B. 损失值随模型规模、数据量、算力按幂律下降",
+      "C. 模型规模没有上限",
+      "D. 数据量越多效果越好"
+    ],
+    "answer": "BC",
+    "error_modes": [
+      "l25_e1"
+    ],
+    "tags": [
+      "llm_scaling_law_emergence.md"
+    ],
+    "step_node_map": {
+      "step1": "l25"
+    }
+  },
+  {
+    "id": "lq040",
+    "type": "blank",
+    "content": "在 Llama 3 中，参数与数据的配比达到__1:1875__，远超 Chinchilla 推荐的 1:20。",
+    "difficulty": 0.6,
+    "options": [],
+    "answer": "1:1875",
+    "error_modes": [
+      "l28_e1"
+    ],
+    "tags": [
+      "llm_scaling_law_emergence.md"
+    ],
+    "step_node_map": {
+      "step1": "l28"
+    }
+  },
+  {
+    "id": "lq041",
+    "type": "choice",
+    "content": "关于 Top-P 和 Top-K 的区别，哪一项是正确的？$\\boxed{\\text{A. Top-P 是固定截断}}$、$\\boxed{\\text{B. Top-K 是自适应截断}}$、$\\boxed{\\text{C. Top-P 根据概率分布自动调整候选池大小}}$、$\\boxed{\\text{D. Top-K 更适合开放性任务}}$",
+    "difficulty": 0.5,
+    "options": [
+      "A. Top-P 是固定截断",
+      "B. Top-K 是自适应截断",
+      "C. Top-P 根据概率分布自动调整候选池大小",
+      "D. Top-K 更适合开放性任务"
+    ],
+    "answer": "C",
+    "error_modes": [
+      "l27_e1"
+    ],
+    "tags": [
+      "llm_temperature_top_p_top_k.md"
+    ],
+    "step_node_map": {
+      "step1": "l27"
+    }
+  },
+  {
+    "id": "lq042",
+    "type": "open",
+    "content": "在创意写作任务中，推荐的 Temperature 和 Top-P 配置是什么？为什么？",
+    "difficulty": 0.5,
+    "options": [],
+    "answer": "Temperature=0.8~1.2，Top-P=0.95；高温能提高多样性，Top-P 自适应截断能保留更多可能性，同时避免长尾噪声词。",
+    "error_modes": [
+      "l26_e1"
+    ],
+    "tags": [
+      "llm_temperature_top_p_top_k.md"
+    ],
+    "step_node_map": {
+      "step1": "l26"
+    }
+  },
+  {
+    "id": "lq043",
+    "type": "choice",
+    "content": "以下哪些是涌现能力的特点？$\\boxed{\\text{A. 随着模型规模增加而突变出现}}$、$\\boxed{\\text{B. 与数据量无关}}$、$\\boxed{\\text{C. 在 50B-100B 参数时出现}}$、$\\boxed{\\text{D. 只出现在大模型中}}$",
+    "difficulty": 0.5,
+    "options": [
+      "A. 随着模型规模增加而突变出现",
+      "B. 与数据量无关",
+      "C. 在 50B-100B 参数时出现",
+      "D. 只出现在大模型中"
+    ],
+    "answer": "AC",
+    "error_modes": [
+      "l29_e1"
+    ],
+    "tags": [
+      "llm_scaling_law_emergence.md"
+    ],
+    "step_node_map": {
+      "step1": "l29"
+    }
+  },
+  {
+    "id": "lq044",
+    "type": "choice",
+    "content": "Tokenizer 的主要作用是？$\\boxed{\\text{A. 将文本转换为数字 ID 序列}}$ $\\boxed{\\text{B. 生成代码}}$ $\\boxed{\\text{C. 计算损失函数}}$ $\\boxed{\\text{D. 优化模型参数}}$",
+    "difficulty": 0.5,
+    "options": [
+      "A. 将文本转换为数字 ID 序列",
+      "B. 生成代码",
+      "C. 计算损失函数",
+      "D. 优化模型参数"
+    ],
+    "answer": "A",
+    "error_modes": [
+      "l30_e1"
+    ],
+    "tags": [
+      "llm_tokenizer.md"
+    ],
+    "step_node_map": {
+      "step1": "l30"
+    }
+  },
+  {
+    "id": "lq045",
+    "type": "choice",
+    "content": "以下哪种分词方式能有效处理新词问题？$\\boxed{\\text{A. 字符级分词}}$ $\\boxed{\\text{B. 词级分词}}$ $\\boxed{\\text{C. 子词分词}}$ $\\boxed{\\text{D. 无分词}}$",
+    "difficulty": 0.55,
+    "options": [
+      "A. 字符级分词",
+      "B. 词级分词",
+      "C. 子词分词",
+      "D. 无分词"
+    ],
+    "answer": "C",
+    "error_modes": [
+      "l31_e1"
+    ],
+    "tags": [
+      "llm_tokenizer.md"
+    ],
+    "step_node_map": {
+      "step1": "l31"
+    }
+  },
+  {
+    "id": "lq046",
+    "type": "blank",
+    "content": "Transformer 解决了 RNN 的两个主要问题：顺序计算和长距离信息衰减。其中，顺序计算问题通过 ___ 实现。",
+    "difficulty": 0.5,
+    "answer": "并行计算",
+    "error_modes": [
+      "l32_e1"
+    ],
+    "tags": [
+      "llm_transformer_architecture.md"
+    ],
+    "step_node_map": {
+      "step1": "l32"
+    },
+    "options": []
+  },
+  {
+    "id": "lq047",
+    "type": "open",
+    "content": "请简述 Self-Attention 的核心思想。",
+    "difficulty": 0.6,
+    "answer": "Self-Attention 让每个 token 能直接关注序列中任意其他位置的 token，计算出相关程度后加权聚合信息。",
+    "error_modes": [
+      "l33_e1"
+    ],
+    "tags": [
+      "llm_transformer_architecture.md"
+    ],
+    "step_node_map": {
+      "step1": "l33"
+    },
+    "options": []
+  },
+  {
+    "id": "lq048",
+    "type": "choice",
+    "content": "以下哪项不是 Transformer 的组成部分？$\\boxed{\\text{A. Multi-Head Attention}}$ $\\boxed{\\text{B. 位置编码}}$ $\\boxed{\\text{C. LSTM}}$ $\\boxed{\\text{D. 前馈网络}}$",
+    "difficulty": 0.55,
+    "options": [
+      "A. Multi-Head Attention",
+      "B. 位置编码",
+      "C. LSTM",
+      "D. 前馈网络"
+    ],
+    "answer": "C",
+    "error_modes": [
+      "l34_e1"
+    ],
+    "tags": [
+      "llm_transformer_architecture.md"
+    ],
+    "step_node_map": {
+      "step1": "l34"
+    }
+  },
+  {
+    "id": "lq049",
+    "type": "blank",
+    "content": "大语言模型的本质是通过海量语料预训练，实现 ___ 生成。",
+    "difficulty": 0.5,
+    "answer": "文本",
+    "error_modes": [
+      "l35_e1"
+    ],
+    "tags": [
+      "llm_what_is_llm.md"
+    ],
+    "step_node_map": {
+      "step1": "l35"
+    },
+    "options": []
+  },
+  {
+    "id": "lq050",
+    "type": "choice",
+    "content": "Transformer 中 Attention 公式为什么除以 $\\sqrt{d_k}$？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 为了防止梯度消失",
+      "B. 为了控制向量的尺度",
+      "C. 为了加速计算",
+      "D. 为了增强模型容量"
+    ],
+    "answer": "B",
+    "error_modes": [
+      "l36_e1"
+    ],
+    "tags": [
+      "llm_llm_info.md"
+    ],
+    "step_node_map": {
+      "step1": "l36"
+    }
+  },
+  {
+    "id": "lq051",
+    "type": "blank",
+    "content": "MHA 的优化方式包括哪些？（答案不超过12字）",
+    "difficulty": 0.6,
+    "options": [],
+    "answer": "MQA、GQA、Flash Attention",
+    "error_modes": [
+      "l36_e1"
+    ],
+    "tags": [
+      "llm_llm_info.md"
+    ],
+    "step_node_map": {
+      "step1": "l36"
+    }
+  },
+  {
+    "id": "lq052",
+    "type": "open",
+    "content": "简述预训练 + SFT + 对齐三阶段的作用。",
+    "difficulty": 0.6,
+    "options": [],
+    "answer": "预训练学习通用语言表示；SFT 微调适应特定任务；对齐确保输出符合人类价值观。",
+    "error_modes": [
+      "l37_e1"
+    ],
+    "tags": [
+      "llm_llm_info.md"
+    ],
+    "step_node_map": {
+      "step1": "l37"
+    }
+  },
+  {
+    "id": "lq053",
+    "type": "choice",
+    "content": "LoRA 微调的核心思想是？",
+    "difficulty": 0.55,
+    "options": [
+      "A. 修改全部参数",
+      "B. 只更新低秩矩阵",
+      "C. 重新训练整个模型",
+      "D. 使用更大数据集"
+    ],
+    "answer": "B",
+    "error_modes": [
+      "l37_e1"
+    ],
+    "tags": [
+      "llm_llm_info.md"
+    ],
+    "step_node_map": {
+      "step1": "l37"
+    }
+  },
+  {
+    "id": "lq054",
+    "type": "choice",
+    "content": "为什么大模型不使用 Beam Search？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 计算成本高",
+      "B. 生成文本太长",
+      "C. 无法并行处理",
+      "D. 会降低多样性"
+    ],
+    "answer": "A",
+    "error_modes": [
+      "l38_e1"
+    ],
+    "tags": [
+      "llm_llm_info.md"
+    ],
+    "step_node_map": {
+      "step1": "l38"
+    }
+  },
+  {
+    "id": "lq055",
+    "type": "blank",
+    "content": "CoT 的核心目的是什么？（答案不超过12字）",
+    "difficulty": 0.45,
+    "options": [],
+    "answer": "提升推理能力",
+    "error_modes": [
+      "l39_e1"
+    ],
+    "tags": [
+      "llm_llm_info.md"
+    ],
+    "step_node_map": {
+      "step1": "l39"
+    }
+  },
+  {
+    "id": "lq056",
+    "type": "open",
+    "content": "简述幻觉产生的根本原因。",
+    "difficulty": 0.5,
+    "options": [],
+    "answer": "LLM 是续写器而非数据库，缺乏真实知识存储机制。",
+    "error_modes": [
+      "l39_e1"
+    ],
+    "tags": [
+      "llm_llm_info.md"
+    ],
+    "step_node_map": {
+      "step1": "l39"
+    }
+  },
+  {
+    "id": "lq057",
+    "type": "choice",
+    "content": "实际项目中选择模型时主要考虑哪些维度？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 参数量和速度",
+      "B. 合规 + 成本 + 延迟 + 能力",
+      "C. 模型大小和价格",
+      "D. 训练数据和架构"
+    ],
+    "answer": "B",
+    "error_modes": [
+      "l40_e1"
+    ],
+    "tags": [
+      "llm_llm_info.md"
+    ],
+    "step_node_map": {
+      "step1": "l40"
+    }
+  },
+  {
+    "id": "rq001",
+    "type": "choice",
+    "content": "RAG 的全称是？",
+    "difficulty": 0.5,
+    "options": [
+      "A. Retrieval-Augmented Generation",
+      "B. Retrieval-Adjusted Generation",
+      "C. Retrieval-Added Generation",
+      "D. Retrieval-Adapted Generation"
+    ],
+    "answer": "A",
+    "error_modes": [
+      "r01_e1"
+    ],
+    "tags": [
+      "rag_01_whatisrag.md"
+    ],
+    "step_node_map": {
+      "step1": "r01"
+    }
+  },
+  {
+    "id": "rq002",
+    "type": "blank",
+    "content": "RAG 的核心思想是将知识存储在______，并在生成答案前实时检索注入。",
+    "difficulty": 0.5,
+    "answer": "外部知识库",
+    "error_modes": [
+      "r01_e1"
+    ],
+    "tags": [
+      "rag_01_whatisrag.md"
+    ],
+    "step_node_map": {
+      "step1": "r01"
+    },
+    "options": []
+  },
+  {
+    "id": "rq003",
+    "type": "open",
+    "content": "RAG 解决了 LLM 的哪些核心问题？请简要说明。",
+    "difficulty": 0.6,
+    "answer": "知识时效性、私有知识覆盖不足、幻觉问题。RAG 通过外部知识库实时检索，避免模型依赖固定参数知识，提升答案准确性与可溯源性。",
+    "error_modes": [
+      "r01_e1"
+    ],
+    "tags": [
+      "rag_02_rag_problems.md"
+    ],
+    "step_node_map": {
+      "step1": "r01"
+    },
+    "options": []
+  },
+  {
+    "id": "rq004",
+    "type": "choice",
+    "content": "以下哪项不是 RAG 的优势？",
+    "difficulty": 0.6,
+    "options": [
+      "A. 知识可热更新",
+      "B. 答案可溯源",
+      "C. 不需要额外训练",
+      "D. 无需检索步骤"
+    ],
+    "answer": "D",
+    "error_modes": [
+      "r02_e1"
+    ],
+    "tags": [
+      "rag_01_whatisrag.md"
+    ],
+    "step_node_map": {
+      "step1": "r02"
+    }
+  },
+  {
+    "id": "rq005",
+    "type": "blank",
+    "content": "RAG 在线阶段的第二步是______。",
+    "difficulty": 0.5,
+    "answer": "Query 处理",
+    "error_modes": [
+      "r02_e1"
+    ],
+    "tags": [
+      "rag_01_whatisrag.md"
+    ],
+    "step_node_map": {
+      "step1": "r02"
+    },
+    "options": []
+  },
+  {
+    "id": "rq006",
+    "type": "open",
+    "content": "RAG 和微调的主要区别是什么？请简要说明。",
+    "difficulty": 0.7,
+    "answer": "微调是修改模型参数以融入新知识，而 RAG 是在推理时从外部知识库中检索并注入知识，不改变模型本身。微调适合定制输出风格，RAG 适合动态知识更新和答案溯源。",
+    "error_modes": [
+      "r02_e1"
+    ],
+    "tags": [
+      "rag_03_rag_vs_finetune.md"
+    ],
+    "step_node_map": {
+      "step1": "r02"
+    },
+    "options": []
+  },
+  {
+    "id": "rq007",
+    "type": "choice",
+    "content": "在 RAG 系统中，文档不能直接存入向量库的原因不包括以下哪项？$\\text{A.} $ 向量模型输入长度限制$\\text{B.} $ 检索精度要求$\\text{C.} $ 文档内容过长导致信息被平均化$\\text{D.} $ 向量无法表示文本内容",
+    "difficulty": 0.5,
+    "options": [
+      "A. ",
+      "B. ",
+      "C. ",
+      "D. "
+    ],
+    "answer": "D",
+    "error_modes": [
+      "r03_e1"
+    ],
+    "tags": [
+      "rag_04_chunking.md"
+    ],
+    "step_node_map": {
+      "step1": "r03"
+    }
+  },
+  {
+    "id": "rq008",
+    "type": "blank",
+    "content": "文档切块时，通常建议的粒度范围是 ___ token。",
+    "difficulty": 0.5,
+    "options": [],
+    "answer": "500-1000",
+    "error_modes": [
+      "r03_e2"
+    ],
+    "tags": [
+      "rag_04_chunking.md"
+    ],
+    "step_node_map": {
+      "step1": "r03"
+    }
+  },
+  {
+    "id": "rq009",
+    "type": "choice",
+    "content": "以下哪种文档切割策略最适合有明确标题结构的 Markdown 文件？$\\text{A.} $ 固定大小切割$\\text{B.} $ 语义边界切割$\\text{C.} $ 标题层级切割$\\text{D.} $ 父子切割",
+    "difficulty": 0.6,
+    "options": [
+      "A. ",
+      "B. ",
+      "C. ",
+      "D. "
+    ],
+    "answer": "C",
+    "error_modes": [
+      "r03_e3"
+    ],
+    "tags": [
+      "rag_04_chunking.md"
+    ],
+    "step_node_map": {
+      "step1": "r03"
+    }
+  },
+  {
+    "id": "rq010",
+    "type": "open",
+    "content": "请简述 Embedding 模型的核心特性。",
+    "difficulty": 0.6,
+    "options": [],
+    "answer": "Embedding 模型的核心特性是将语义相近的文本映射为数学空间中距离相近的向量。",
+    "error_modes": [
+      "r04_e1"
+    ],
+    "tags": [
+      "rag_06_embedding.md"
+    ],
+    "step_node_map": {
+      "step1": "r04"
+    }
+  },
+  {
+    "id": "rq011",
+    "type": "choice",
+    "content": "在选择 Embedding 模型时，以下哪个因素不是主要考量？$\\text{A.} $ 中文支持$\\text{B.} $ 向量维度$\\text{C.} $ 最大输入长度$\\text{D.} $ 模型训练数据量",
+    "difficulty": 0.5,
+    "options": [
+      "A. ",
+      "B. ",
+      "C. ",
+      "D. "
+    ],
+    "answer": "D",
+    "error_modes": [
+      "r04_e2"
+    ],
+    "tags": [
+      "rag_06_embedding.md"
+    ],
+    "step_node_map": {
+      "step1": "r04"
+    }
+  },
+  {
+    "id": "rq012",
+    "type": "blank",
+    "content": "Embedding 模型使用余弦相似度而不是直线距离的主要原因是避免受 ___ 影响。",
+    "difficulty": 0.5,
+    "options": [],
+    "answer": "文本长度",
+    "error_modes": [
+      "r04_e3"
+    ],
+    "tags": [
+      "rag_06_embedding.md"
+    ],
+    "step_node_map": {
+      "step1": "r04"
+    }
+  },
+  {
+    "id": "rq013",
+    "type": "choice",
+    "content": "第一代 Embedding 算法的主要缺陷是？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 无法处理多义词",
+      "B. 检索速度慢",
+      "C. 不支持中文",
+      "D. 无法生成句子级向量"
+    ],
+    "answer": "A",
+    "error_modes": [
+      "混淆不同代算法的优缺点"
+    ],
+    "tags": [
+      "rag_07_embedding_algos.md"
+    ],
+    "step_node_map": {
+      "step1": "r05"
+    }
+  },
+  {
+    "id": "rq014",
+    "type": "choice",
+    "content": "第三代 Embedding 算法主要解决的问题是？",
+    "difficulty": 0.55,
+    "options": [
+      "A. 多义词处理",
+      "B. 检索速度和效率",
+      "C. 中文支持",
+      "D. 语义相似度计算"
+    ],
+    "answer": "B",
+    "error_modes": [
+      "未理解各代算法的核心改进点"
+    ],
+    "tags": [
+      "rag_07_embedding_algos.md"
+    ],
+    "step_node_map": {
+      "step1": "r05"
+    }
+  },
+  {
+    "id": "rq015",
+    "type": "blank",
+    "content": "向量数据库的核心操作是______。",
+    "difficulty": 0.6,
+    "options": [],
+    "answer": "近似最近邻搜索",
+    "error_modes": [
+      "混淆向量数据库与传统数据库的功能差异"
+    ],
+    "tags": [
+      "rag_08_vectordb.md"
+    ],
+    "step_node_map": {
+      "step1": "r06"
+    }
+  },
+  {
+    "id": "rq016",
+    "type": "open",
+    "content": "请简述 HNSW 索引的工作原理。",
+    "difficulty": 0.65,
+    "options": [],
+    "answer": "HNSW 是一种分层图结构，通过多层导航快速定位最近邻，从顶层稀疏图开始逐步细化到底层，提高检索效率。",
+    "error_modes": [
+      "未能准确描述 HNSW 的分层机制"
+    ],
+    "tags": [
+      "rag_08_vectordb.md"
+    ],
+    "step_node_map": {
+      "step1": "r06"
+    }
+  },
+  {
+    "id": "rq017",
+    "type": "choice",
+    "content": "Milvus 的 Segment 合并机制可能导致什么问题？",
+    "difficulty": 0.6,
+    "options": [
+      "A. 查询延迟增加",
+      "B. 数据丢失",
+      "C. 索引失效",
+      "D. 内存不足"
+    ],
+    "answer": "A",
+    "error_modes": [
+      "不了解 Milvus 的内部机制"
+    ],
+    "tags": [
+      "rag_09_vectordb_practice.md"
+    ],
+    "step_node_map": {
+      "step1": "r07"
+    }
+  },
+  {
+    "id": "rq018",
+    "type": "blank",
+    "content": "开启标量量化后，向量存储空间可减少至原来的______。",
+    "difficulty": 0.5,
+    "options": [],
+    "answer": "四分之一",
+    "error_modes": [
+      "未掌握量化技术对存储的影响"
+    ],
+    "tags": [
+      "rag_09_vectordb_practice.md"
+    ],
+    "step_node_map": {
+      "step1": "r07"
+    }
+  },
+  {
+    "id": "rq019",
+    "type": "choice",
+    "content": "RAG 在线流程的第六步是？$\\text{A.} $ Prompt 拼装 $\\text{B.} $ 大模型生成 + 溯源 $\\text{C.} $ Query 预处理 $\\text{D.} $ 向量检索",
+    "difficulty": 0.5,
+    "options": [
+      "A. Prompt 拼装",
+      "B. 大模型生成 + 溯源",
+      "C. Query 预处理",
+      "D. 向量检索"
+    ],
+    "answer": "B",
+    "error_modes": [
+      "r08_e1"
+    ],
+    "tags": [
+      "rag_10_online_workflow.md"
+    ],
+    "step_node_map": {
+      "step1": "r08"
+    }
+  },
+  {
+    "id": "rq020",
+    "type": "blank",
+    "content": "在 RAG 中，使用向量检索和 BM25 检索时，需要通过 ______ 算法合并结果。",
+    "difficulty": 0.6,
+    "options": [],
+    "answer": "RRF",
+    "error_modes": [
+      "r09_e1"
+    ],
+    "tags": [
+      "rag_11_retrieval_types.md"
+    ],
+    "step_node_map": {
+      "step1": "r09"
+    }
+  },
+  {
+    "id": "rq021",
+    "type": "open",
+    "content": "为什么在 RAG 流程中，Query 预处理是必要的？请简要说明原因。",
+    "difficulty": 0.55,
+    "options": [],
+    "answer": "因为用户原始提问的质量决定了后续所有环节的天花板。如果输入就差，后面再怎么精排、再怎么拼 Prompt 都是白搭。",
+    "error_modes": [
+      "r10_e1"
+    ],
+    "tags": [
+      "rag_12_query_rewrite.md"
+    ],
+    "step_node_map": {
+      "step1": "r10"
+    }
+  },
+  {
+    "id": "rq022",
+    "type": "choice",
+    "content": "在 RAG 中，使用 Embedding 模型时，必须满足什么条件？$\\text{A.} $ 与离线建库时使用相同的模型 $\\text{B.} $ 使用任意 Embedding 模型 $\\text{C.} $ 使用更高级的模型 $\\text{D.} $ 使用更小的模型",
+    "difficulty": 0.5,
+    "options": [
+      "A. 与离线建库时使用相同的模型",
+      "B. 使用任意 Embedding 模型",
+      "C. 使用更高级的模型",
+      "D. 使用更小的模型"
+    ],
+    "answer": "A",
+    "error_modes": [
+      "r11_e1"
+    ],
+    "tags": [
+      "rag_10_online_workflow.md"
+    ],
+    "step_node_map": {
+      "step1": "r11"
+    }
+  },
+  {
+    "id": "rq023",
+    "type": "choice",
+    "content": "以下哪种方法用于解决用户问题与文档表述风格差异的问题？$\\text{A.} $ 直接改写 $\\text{B.} $ HyDE $\\text{C.} $ Step-back Prompting $\\text{D.} $ 多 Query 扩展",
+    "difficulty": 0.55,
+    "options": [
+      "A. 直接改写",
+      "B. HyDE",
+      "C. Step-back Prompting",
+      "D. 多 Query 扩展"
+    ],
+    "answer": "B",
+    "error_modes": [
+      "r10_e1"
+    ],
+    "tags": [
+      "rag_12_query_rewrite.md"
+    ],
+    "step_node_map": {
+      "step1": "r10"
+    }
+  },
+  {
+    "id": "rq024",
+    "type": "blank",
+    "content": "在 RAG 中，BM25 检索擅长捕捉 ______ 信息。",
+    "difficulty": 0.6,
+    "options": [],
+    "answer": "精确词",
+    "error_modes": [
+      "r09_e1"
+    ],
+    "tags": [
+      "rag_11_retrieval_types.md"
+    ],
+    "step_node_map": {
+      "step1": "r09"
+    }
+  },
+  {
+    "id": "rq025",
+    "type": "choice",
+    "content": "多路召回的核心目的是什么？$\\text{A. 提高检索速度} \\quad \\text{B. 提升召回质量} \\quad \\text{C. 降低模型复杂度} \\quad \\text{D. 减少数据存储量}$",
+    "difficulty": 0.5,
+    "options": [
+      "A. 提高检索速度",
+      "B. 提升召回质量",
+      "C. 降低模型复杂度",
+      "D. 减少数据存储量"
+    ],
+    "answer": "B",
+    "error_modes": [
+      "r12_e1"
+    ],
+    "tags": [
+      "rag_13_multi_retrieval.md"
+    ],
+    "step_node_map": {
+      "step1": "r12"
+    }
+  },
+  {
+    "id": "rq026",
+    "type": "blank",
+    "content": "RRF 算法主要依据各路结果的 ___ 进行融合。",
+    "difficulty": 0.6,
+    "options": [],
+    "answer": "排名",
+    "error_modes": [
+      "r13_e1"
+    ],
+    "tags": [
+      "rag_13_multi_retrieval.md"
+    ],
+    "step_node_map": {
+      "step1": "r13"
+    }
+  },
+  {
+    "id": "rq027",
+    "type": "open",
+    "content": "请简述索引优化的核心目标。",
+    "difficulty": 0.55,
+    "options": [],
+    "answer": "提升检索精度，同时保证 LLM 阅读时的上下文完整性。",
+    "error_modes": [
+      "r14_e1"
+    ],
+    "tags": [
+      "rag_14_retrieval_opt.md"
+    ],
+    "step_node_map": {
+      "step1": "r14"
+    }
+  },
+  {
+    "id": "rq028",
+    "type": "choice",
+    "content": "以下哪种方法用于解决用户提问与文档表述角度不一致的问题？$\\text{A. 多 Query 扩展} \\quad \\text{B. BM25 关键词检索} \\quad \\text{C. 向量检索} \\quad \\text{D. Rerank}$",
+    "difficulty": 0.5,
+    "options": [
+      "A. 多 Query 扩展",
+      "B. BM25 关键词检索",
+      "C. 向量检索",
+      "D. Rerank"
+    ],
+    "answer": "A",
+    "error_modes": [
+      "r15_e1"
+    ],
+    "tags": [
+      "rag_13_multi_retrieval.md"
+    ],
+    "step_node_map": {
+      "step1": "r15"
+    }
+  },
+  {
+    "id": "rq029",
+    "type": "choice",
+    "content": "多粒度分层索引的主要优势是：$\\text{A. 提高检索速度} \\quad \\text{B. 适应不同问题类型} \\quad \\text{C. 降低存储成本} \\quad \\text{D. 简化模型结构}$",
+    "difficulty": 0.6,
+    "options": [
+      "A. 提高检索速度",
+      "B. 适应不同问题类型",
+      "C. 降低存储成本",
+      "D. 简化模型结构"
+    ],
+    "answer": "B",
+    "error_modes": [
+      "r16_e1"
+    ],
+    "tags": [
+      "rag_14_retrieval_opt.md"
+    ],
+    "step_node_map": {
+      "step1": "r16"
+    }
+  },
+  {
+    "id": "rq030",
+    "type": "open",
+    "content": "请说明 Self-RAG 的核心特点。",
+    "difficulty": 0.5,
+    "options": [],
+    "answer": "Self-RAG 让 LLM 自主决定是否需要检索，并评估检索内容的相关性和答案质量。",
+    "error_modes": [
+      "r17_e1"
+    ],
+    "tags": [
+      "rag_15_advanced_paradigms.md"
+    ],
+    "step_node_map": {
+      "step1": "r17"
+    }
+  },
+  {
+    "id": "rq031",
+    "type": "choice",
+    "content": "当业务问题涉及多个实体之间的关联推理时，应该采用什么技术来增强？$\\text{A.} $ 向量检索 $\\text{B.} $ 图数据库 $\\text{C.} $ 混合模型 $\\text{D.} $ 纯文本匹配",
+    "difficulty": 0.5,
+    "options": [
+      "A. 向量检索",
+      "B. 图数据库",
+      "C. 混合模型",
+      "D. 纯文本匹配"
+    ],
+    "answer": "B",
+    "error_modes": [
+      "r18_e1"
+    ],
+    "tags": [
+      "rag_16_graph_db.md"
+    ],
+    "step_node_map": {
+      "step1": "r18"
+    }
+  },
+  {
+    "id": "rq032",
+    "type": "blank",
+    "content": "RAG系统中，幻觉的主要来源包括检索失败导致LLM编造答案和__。",
+    "difficulty": 0.6,
+    "options": [],
+    "answer": "检索内容被LLM超发挥",
+    "error_modes": [
+      "r19_e1"
+    ],
+    "tags": [
+      "rag_17_hallucination.md"
+    ],
+    "step_node_map": {
+      "step1": "r19"
+    }
+  },
+  {
+    "id": "rq033",
+    "type": "open",
+    "content": "请简述如何通过Prompt约束减少RAG系统中的幻觉。",
+    "difficulty": 0.6,
+    "options": [],
+    "answer": "在Prompt中明确要求只能使用提供的资料回答，不得引入外部知识，且对无法回答的问题应直接说明不知道。",
+    "error_modes": [
+      "r19_e2"
+    ],
+    "tags": [
+      "rag_17_hallucination.md"
+    ],
+    "step_node_map": {
+      "step1": "r19"
+    }
+  },
+  {
+    "id": "rq034",
+    "type": "choice",
+    "content": "以下哪项是评估RAG系统生成层的核心指标？$\\text{A.} $ Hit@K $\\text{B.} $ MRR $\\text{C.} $ Faithfulness $\\text{D.} $ Context Recall",
+    "difficulty": 0.5,
+    "options": [
+      "A. Hit@K",
+      "B. MRR",
+      "C. Faithfulness",
+      "D. Context Recall"
+    ],
+    "answer": "C",
+    "error_modes": [
+      "r19_e1"
+    ],
+    "tags": [
+      "rag_18_evaluation.md"
+    ],
+    "step_node_map": {
+      "step1": "r19"
+    }
+  },
+  {
+    "id": "rq035",
+    "type": "blank",
+    "content": "在RAG评估中，用于衡量检索结果是否包含必要信息的指标是__。",
+    "difficulty": 0.5,
+    "options": [],
+    "answer": "Context Recall",
+    "error_modes": [
+      "r19_e1"
+    ],
+    "tags": [
+      "rag_18_evaluation.md"
+    ],
+    "step_node_map": {
+      "step1": "r19"
+    }
+  },
+  {
+    "id": "rq036",
+    "type": "open",
+    "content": "为什么说线上指标（如用户点踩率）是RAG系统最终的衡量标准？",
+    "difficulty": 0.6,
+    "options": [],
+    "answer": "因为离线指标不能完全反映真实用户满意度，线上指标能直接体现用户的实际反馈和系统表现。",
+    "error_modes": [
+      "r19_e1"
+    ],
+    "tags": [
+      "rag_18_evaluation.md"
+    ],
+    "step_node_map": {
+      "step1": "r19"
+    }
+  },
+  {
+    "id": "rq037",
+    "type": "choice",
+    "content": "在 RAG 系统中，当文档内容发生变化时，正确的知识库更新策略是？$\\text{A.} \\text{直接更新对应 chunk 的内容}$ $\\text{B.} \\text{先删除旧 chunk，再重新切割入库}$ $\\text{C.} \\text{仅修改变化的 chunk}$ $\\text{D.} \\text{不处理，等待下一次轮询}$",
+    "difficulty": 0.5,
+    "options": [
+      "A. 直接更新对应 chunk 的内容",
+      "B. 先删除旧 chunk，再重新切割入库",
+      "C. 仅修改变化的 chunk",
+      "D. 不处理，等待下一次轮询"
+    ],
+    "answer": "B",
+    "error_modes": [
+      "r20_e1"
+    ],
+    "tags": [
+      "rag_19_dynamic_update.md"
+    ],
+    "step_node_map": {
+      "step1": "r20"
+    }
+  },
+  {
+    "id": "rq038",
+    "type": "blank",
+    "content": "RAG 系统中检测文档是否变更的核心方法是通过计算文档的 ___。",
+    "difficulty": 0.6,
+    "options": [],
+    "answer": "内容 hash",
+    "error_modes": [
+      "r20_e1"
+    ],
+    "tags": [
+      "rag_19_dynamic_update.md"
+    ],
+    "step_node_map": {
+      "step1": "r20"
+    }
+  },
+  {
+    "id": "rq039",
+    "type": "open",
+    "content": "为什么不能对 RAG 知识库中的 chunk 做局部更新？请简要说明原因。",
+    "difficulty": 0.6,
+    "options": [],
+    "answer": "因为文档内容变化会导致 chunk 切割边界改变，无法准确匹配旧 chunk 和新 chunk，导致数据不一致。",
+    "error_modes": [
+      "r20_e1"
+    ],
+    "tags": [
+      "rag_19_dynamic_update.md"
+    ],
+    "step_node_map": {
+      "step1": "r20"
+    }
+  },
+  {
+    "id": "rq040",
+    "type": "choice",
+    "content": "以下哪种工具适合处理复杂排版的 PDF 文档？$\\text{A.} \\text{pypdf}$ $\\text{B.} \\text{pdfplumber}$ $\\text{C.} \\text{unstructured}$ $\\text{D.} \\text{以上都是}$",
+    "difficulty": 0.6,
+    "options": [
+      "A. pypdf",
+      "B. pdfplumber",
+      "C. unstructured",
+      "D. 以上都是"
+    ],
+    "answer": "D",
+    "error_modes": [
+      "r21_e1"
+    ],
+    "tags": [
+      "rag_20_hardest_parts.md"
+    ],
+    "step_node_map": {
+      "step1": "r21"
+    }
+  },
+  {
+    "id": "rq041",
+    "type": "blank",
+    "content": "RAG 系统中，为了提高检索质量，通常会结合 ___ 检索和向量检索。",
+    "difficulty": 0.5,
+    "options": [],
+    "answer": "关键词",
+    "error_modes": [
+      "r21_e1"
+    ],
+    "tags": [
+      "rag_20_hardest_parts.md"
+    ],
+    "step_node_map": {
+      "step1": "r21"
+    }
+  },
+  {
+    "id": "rq042",
+    "type": "open",
+    "content": "文档预处理在 RAG 系统中起到什么作用？请简要说明。",
+    "difficulty": 0.5,
+    "options": [],
+    "answer": "文档预处理确保输入数据的质量，避免因格式混乱或解析错误导致后续环节失效。",
+    "error_modes": [
+      "r21_e1"
+    ],
+    "tags": [
+      "rag_20_hardest_parts.md"
+    ],
+    "step_node_map": {
+      "step1": "r21"
+    }
+  },
+  {
+    "id": "aq001",
+    "type": "choice",
+    "content": "Agent 与传统大模型的核心区别在于什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 更大的参数量",
+      "B. 更高的训练数据量",
+      "C. 自主性和能行动",
+      "D. 更快的响应速度"
+    ],
+    "answer": "C",
+    "error_modes": [
+      "a01_e1"
+    ],
+    "tags": [
+      "agent_01_whatisagent.md"
+    ],
+    "step_node_map": {
+      "step1": "a01"
+    }
+  },
+  {
+    "id": "aq002",
+    "type": "choice",
+    "content": "以下哪项不是普通大模型的局限性？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 知识被冻结",
+      "B. 不能行动",
+      "C. 没有持续状态",
+      "D. 需要人工输入指令"
+    ],
+    "answer": "D",
+    "error_modes": [
+      "a01_e1"
+    ],
+    "tags": [
+      "agent_01_whatisagent.md"
+    ],
+    "step_node_map": {
+      "step1": "a01"
+    }
+  },
+  {
+    "id": "aq003",
+    "type": "blank",
+    "content": "Agent 的核心运作闭环是：感知 -> __ -> 行动 -> 再感知。",
+    "difficulty": 0.5,
+    "answer": "规划",
+    "error_modes": [
+      "a01_e1"
+    ],
+    "tags": [
+      "agent_01_whatisagent.md"
+    ],
+    "step_node_map": {
+      "step1": "a01"
+    },
+    "options": []
+  },
+  {
+    "id": "aq004",
+    "type": "choice",
+    "content": "工具调用的关键作用是什么？",
+    "difficulty": 0.6,
+    "options": [
+      "A. 提高模型推理能力",
+      "B. 让 Agent 能真正执行任务",
+      "C. 增加模型参数",
+      "D. 优化模型训练过程"
+    ],
+    "answer": "B",
+    "error_modes": [
+      "a02_e1"
+    ],
+    "tags": [
+      "agent_01_whatisagent.md"
+    ],
+    "step_node_map": {
+      "step1": "a02"
+    }
+  },
+  {
+    "id": "aq005",
+    "type": "open",
+    "content": "简述 Agent 的记忆系统的作用。",
+    "difficulty": 0.55,
+    "answer": "记忆系统让 Agent 在任务执行过程中保持状态，不会失忆。它包括短期记忆和长期记忆，分别用于当前任务和跨任务的存储。",
+    "error_modes": [
+      "a03_e1"
+    ],
+    "tags": [
+      "agent_02_components.md"
+    ],
+    "step_node_map": {
+      "step1": "a03"
+    },
+    "options": []
+  },
+  {
+    "id": "aq006",
+    "type": "choice",
+    "content": "以下哪项是 LLM 在 Agent 中的主要职责？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 执行外部工具调用",
+      "B. 管理记忆存储",
+      "C. 做决策和理解任务",
+      "D. 提供 API 接口"
+    ],
+    "answer": "C",
+    "error_modes": [
+      "a05_e1"
+    ],
+    "tags": [
+      "agent_02_components.md"
+    ],
+    "step_node_map": {
+      "step1": "a05"
+    }
+  },
+  {
+    "id": "aq007",
+    "type": "blank",
+    "content": "Agent 的规划模块负责将复杂目标拆解为__。",
+    "difficulty": 0.6,
+    "answer": "可执行步骤",
+    "error_modes": [
+      "a04_e1"
+    ],
+    "tags": [
+      "agent_02_components.md"
+    ],
+    "step_node_map": {
+      "step1": "a04"
+    },
+    "options": []
+  },
+  {
+    "id": "aq008",
+    "type": "choice",
+    "content": "在 Agent 和 Workflow 的对比中，哪一项是 Agent 的核心特点？$\\text{A.} $ 流程固定，每一步由开发者决定；$\\text{B.} $ LLM 自主决定下一步操作；$\\text{C.} $ 所有步骤都依赖外部工具；$\\text{D.} $ 无法处理未预见的情况。",
+    "difficulty": 0.5,
+    "options": [
+      "A. 流程固定，每一步由开发者决定",
+      "B. LLM 自主决定下一步操作",
+      "C. 所有步骤都依赖外部工具",
+      "D. 无法处理未预见的情况"
+    ],
+    "answer": "B",
+    "error_modes": [
+      "a06_e1"
+    ],
+    "tags": [
+      "agent_04_patterns.md"
+    ],
+    "step_node_map": {
+      "step1": "a06"
+    }
+  },
+  {
+    "id": "aq009",
+    "type": "blank",
+    "content": "ReAct 的核心循环包括 Thought、Action 和 ______。",
+    "difficulty": 0.5,
+    "options": [],
+    "answer": "Observation",
+    "error_modes": [
+      "a07_e1"
+    ],
+    "tags": [
+      "agent_05_react.md"
+    ],
+    "step_node_map": {
+      "step1": "a07"
+    }
+  },
+  {
+    "id": "aq010",
+    "type": "open",
+    "content": "Plan-and-Execute 范式的最大优势是什么？请简要说明。",
+    "difficulty": 0.5,
+    "options": [],
+    "answer": "Plan-and-Execute 的最大优势是能够保持全局视野，避免任务执行过程中跑偏，适合复杂多步骤的任务。",
+    "error_modes": [
+      "a08_e1"
+    ],
+    "tags": [
+      "agent_06_three_patterns.md"
+    ],
+    "step_node_map": {
+      "step1": "a08"
+    }
+  },
+  {
+    "id": "aq011",
+    "type": "choice",
+    "content": "Reflection 机制的主要作用是什么？$\\text{A.} $ 提高任务执行效率；$\\text{B.} $ 增加系统灵活性；$\\text{C.} $ 提升输出质量；$\\text{D.} $ 减少 token 消耗。",
+    "difficulty": 0.5,
+    "options": [
+      "A. 提高任务执行效率",
+      "B. 增加系统灵活性",
+      "C. 提升输出质量",
+      "D. 减少 token 消耗"
+    ],
+    "answer": "C",
+    "error_modes": [
+      "a09_e1"
+    ],
+    "tags": [
+      "agent_06_three_patterns.md"
+    ],
+    "step_node_map": {
+      "step1": "a09"
+    }
+  },
+  {
+    "id": "aq012",
+    "type": "blank",
+    "content": "ReAct 与纯 CoT 的主要区别在于是否包含 ______。",
+    "difficulty": 0.5,
+    "options": [],
+    "answer": "Action",
+    "error_modes": [
+      "a07_e1"
+    ],
+    "tags": [
+      "agent_05_react.md"
+    ],
+    "step_node_map": {
+      "step1": "a07"
+    }
+  },
+  {
+    "id": "aq013",
+    "type": "open",
+    "content": "为什么说 Reflection 不是一套独立的完整流程？请简要解释。",
+    "difficulty": 0.5,
+    "options": [],
+    "answer": "Reflection 是对其他范式的增强机制，不是独立的流程，它只是在原有流程基础上增加自我检查和修正环节。",
+    "error_modes": [
+      "a09_e1"
+    ],
+    "tags": [
+      "agent_06_three_patterns.md"
+    ],
+    "step_node_map": {
+      "step1": "a09"
+    }
+  },
+  {
+    "id": "aq014",
+    "type": "choice",
+    "content": "任务拆分的主要目的是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 提高模型计算速度",
+      "B. 降低任务复杂度，提升准确性",
+      "C. 增加模型参数量",
+      "D. 减少用户输入内容"
+    ],
+    "answer": "B",
+    "error_modes": [
+      "a10_e1"
+    ],
+    "tags": [
+      "agent_07_tasksplit.md"
+    ],
+    "step_node_map": {
+      "step1": "a10"
+    }
+  },
+  {
+    "id": "aq015",
+    "type": "blank",
+    "content": "任务拆分后，步骤之间可能存在的关系是______。",
+    "difficulty": 0.6,
+    "options": [],
+    "answer": "依赖关系",
+    "error_modes": [
+      "a10_e1"
+    ],
+    "tags": [
+      "agent_07_tasksplit.md"
+    ],
+    "step_node_map": {
+      "step1": "a10"
+    }
+  },
+  {
+    "id": "aq016",
+    "type": "open",
+    "content": "动态拆分和静态拆分的主要区别是什么？",
+    "difficulty": 0.6,
+    "options": [],
+    "answer": "静态拆分是提前设计好任务流程，而动态拆分是由LLM根据目标规划步骤。",
+    "error_modes": [
+      "a10_e1"
+    ],
+    "tags": [
+      "agent_07_tasksplit.md"
+    ],
+    "step_node_map": {
+      "step1": "a10"
+    }
+  },
+  {
+    "id": "aq017",
+    "type": "choice",
+    "content": "长期记忆的存储方式主要依赖于以下哪种技术？",
+    "difficulty": 0.6,
+    "options": [
+      "A. 关系数据库",
+      "B. 向量数据库",
+      "C. 文件系统",
+      "D. 内存缓存"
+    ],
+    "answer": "B",
+    "error_modes": [
+      "a11_e1"
+    ],
+    "tags": [
+      "agent_08_memory.md"
+    ],
+    "step_node_map": {
+      "step1": "a11"
+    }
+  },
+  {
+    "id": "aq018",
+    "type": "blank",
+    "content": "短期记忆的生命周期是______。",
+    "difficulty": 0.5,
+    "options": [],
+    "answer": "一次任务",
+    "error_modes": [
+      "a11_e1"
+    ],
+    "tags": [
+      "agent_08_memory.md"
+    ],
+    "step_node_map": {
+      "step1": "a11"
+    }
+  },
+  {
+    "id": "aq019",
+    "type": "open",
+    "content": "实体记忆的主要特点是什么？",
+    "difficulty": 0.6,
+    "options": [],
+    "answer": "结构化提取关键事实，信息密度高，查询快。",
+    "error_modes": [
+      "a11_e1"
+    ],
+    "tags": [
+      "agent_08_memory.md"
+    ],
+    "step_node_map": {
+      "step1": "a11"
+    }
+  },
+  {
+    "id": "aq020",
+    "type": "choice",
+    "content": "多智能体系统的核心优势不包括以下哪项？$\\mathrm{A.} $ 提高任务处理效率 $\\mathrm{B.} $ 降低 context window 压力 $\\mathrm{C.} $ 实现完全去中心化协作 $\\mathrm{D.} $ 提升专业分工能力",
+    "difficulty": 0.5,
+    "options": [
+      "A. 提高任务处理效率",
+      "B. 降低 context window 压力",
+      "C. 实现完全去中心化协作",
+      "D. 提升专业分工能力"
+    ],
+    "answer": "C",
+    "error_modes": [
+      "a12_e1"
+    ],
+    "tags": [
+      "agent_10_multiagent.md"
+    ],
+    "step_node_map": {
+      "step1": "a12"
+    }
+  },
+  {
+    "id": "aq021",
+    "type": "blank",
+    "content": "多智能体系统中，调度者 Agent 的主要职责是：__。",
+    "difficulty": 0.5,
+    "options": [],
+    "answer": "任务拆分与分配",
+    "error_modes": [
+      "a12_e1"
+    ],
+    "tags": [
+      "agent_10_multiagent.md"
+    ],
+    "step_node_map": {
+      "step1": "a12"
+    }
+  },
+  {
+    "id": "aq022",
+    "type": "open",
+    "content": "请简述为什么在实际工程中，大多数 Multi-Agent 系统采用中心化方案而非去中心化方案。",
+    "difficulty": 0.6,
+    "options": [],
+    "answer": "中心化方案具有清晰的调度逻辑和责任归属，便于调试和问题排查，而去中心化方案容易出现任务分配无协调、执行顺序无保证等问题。",
+    "error_modes": [
+      "a12_e1"
+    ],
+    "tags": [
+      "agent_11_single_multi.md"
+    ],
+    "step_node_map": {
+      "step1": "a12"
+    }
+  },
+  {
+    "id": "aq023",
+    "type": "choice",
+    "content": "以下哪种记忆压缩方法会丢失细节信息？$\\mathrm{A.} $ 摘要压缩 $\\mathrm{B.} $ 滑动窗口 $\\mathrm{C.} $ 重要性过滤 $\\mathrm{D.} $ 结构化抽取",
+    "difficulty": 0.5,
+    "options": [
+      "A. 摘要压缩",
+      "B. 滑动窗口",
+      "C. 重要性过滤",
+      "D. 结构化抽取"
+    ],
+    "answer": "A",
+    "error_modes": [
+      "a13_e1"
+    ],
+    "tags": [
+      "agent_12_memcompress.md"
+    ],
+    "step_node_map": {
+      "step1": "a13"
+    }
+  },
+  {
+    "id": "aq024",
+    "type": "blank",
+    "content": "结构化抽取的核心思想是将对话中的关键信息转换为__形式存储。",
+    "difficulty": 0.5,
+    "options": [],
+    "answer": "结构化字段",
+    "error_modes": [
+      "a13_e1"
+    ],
+    "tags": [
+      "agent_12_memcompress.md"
+    ],
+    "step_node_map": {
+      "step1": "a13"
+    }
+  },
+  {
+    "id": "aq025",
+    "type": "open",
+    "content": "请说明主动压缩（Proactive Compression）的主要应用场景及优势。",
+    "difficulty": 0.6,
+    "options": [],
+    "answer": "主动压缩适用于工具调用频繁的场景，能提前压缩中间结果，避免 context 超限，提升整体效率。",
+    "error_modes": [
+      "a13_e1"
+    ],
+    "tags": [
+      "agent_12_memcompress.md"
+    ],
+    "step_node_map": {
+      "step1": "a13"
+    }
+  },
+  {
+    "id": "aq026",
+    "type": "choice",
+    "content": "以下哪项不是 Agent 框架的主要痛点？$\\text{A.} $ 抽象层过多导致调试困难$\\text{B.} $ 版本升级频繁且破坏性变更$\\text{C.} $ 手写代码更易优化性能$\\text{D.} $ 框架通用设计与业务需求偏差",
+    "difficulty": 0.5,
+    "options": [
+      "A. 抽象层过多导致调试困难",
+      "B. 版本升级频繁且破坏性变更",
+      "C. 手写代码更易优化性能",
+      "D. 框架通用设计与业务需求偏差"
+    ],
+    "answer": "C",
+    "error_modes": [
+      "混淆框架痛点和手写优势"
+    ],
+    "tags": [
+      "agent_13_handcode.md"
+    ],
+    "step_node_map": {
+      "step1": "a14"
+    }
+  },
+  {
+    "id": "aq027",
+    "type": "blank",
+    "content": "手写 Agent 的核心优势是______。",
+    "difficulty": 0.5,
+    "options": [],
+    "answer": "完全掌控",
+    "error_modes": [
+      "未抓住核心控制权概念"
+    ],
+    "tags": [
+      "agent_13_handcode.md"
+    ],
+    "step_node_map": {
+      "step1": "a15"
+    }
+  },
+  {
+    "id": "aq028",
+    "type": "choice",
+    "content": "以下哪种规划方式能解决 CoT 走错方向的问题？$\\text{A.} $ CoT$\\text{B.} $ ToT$\\text{C.} $ GoT$\\text{D.} $ Plan-and-Execute",
+    "difficulty": 0.6,
+    "options": [
+      "A. CoT",
+      "B. ToT",
+      "C. GoT",
+      "D. Plan-and-Execute"
+    ],
+    "answer": "B",
+    "error_modes": [
+      "混淆不同规划方式的功能"
+    ],
+    "tags": [
+      "agent_14_planning.md"
+    ],
+    "step_node_map": {
+      "step1": "a16"
+    }
+  },
+  {
+    "id": "aq029",
+    "type": "open",
+    "content": "反思机制的核心流程是什么？请简要说明。",
+    "difficulty": 0.6,
+    "options": [],
+    "answer": "生成 -> 评估 -> 改进",
+    "error_modes": [
+      "遗漏关键步骤或描述不清"
+    ],
+    "tags": [
+      "agent_15_reflection.md"
+    ],
+    "step_node_map": {
+      "step1": "a17"
+    }
+  },
+  {
+    "id": "aq030",
+    "type": "choice",
+    "content": "以下哪种场景不适合使用反思机制？$\\text{A.} $ 生成最终报告$\\text{B.} $ 简单问答$\\text{C.} $ 复杂推理任务$\\text{D.} $ 重要决策分析",
+    "difficulty": 0.5,
+    "options": [
+      "A. 生成最终报告",
+      "B. 简单问答",
+      "C. 复杂推理任务",
+      "D. 重要决策分析"
+    ],
+    "answer": "B",
+    "error_modes": [
+      "误判反思机制适用场景"
+    ],
+    "tags": [
+      "agent_15_reflection.md"
+    ],
+    "step_node_map": {
+      "step1": "a17"
+    }
+  },
+  {
+    "id": "aq031",
+    "type": "blank",
+    "content": "ToT 的调用成本通常是 CoT 的______倍。",
+    "difficulty": 0.5,
+    "options": [],
+    "answer": "3-5",
+    "error_modes": [
+      "数字记忆错误"
+    ],
+    "tags": [
+      "agent_14_planning.md"
+    ],
+    "step_node_map": {
+      "step1": "a16"
+    }
+  },
+  {
+    "id": "aq032",
+    "type": "choice",
+    "content": "多 Agent 系统中，Agent 之间传递信息的两种方式是？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 消息传递和共享内存",
+      "B. 消息传递和共享状态",
+      "C. 共享内存和状态同步",
+      "D. 状态同步和消息队列"
+    ],
+    "answer": "B",
+    "error_modes": [
+      "a18_e1"
+    ],
+    "tags": [
+      "agent_16_collab.md"
+    ],
+    "step_node_map": {
+      "step1": "a18"
+    }
+  },
+  {
+    "id": "aq033",
+    "type": "choice",
+    "content": "在多 Agent 系统中，以下哪种情况更适合使用共享状态？",
+    "difficulty": 0.6,
+    "options": [
+      "A. Agent 之间依赖关系强且需要直接传递结果",
+      "B. Agent 之间高度解耦且不需要知道彼此存在",
+      "C. 需要避免任何可能的数据冲突",
+      "D. 系统需要极高的扩展性"
+    ],
+    "answer": "A",
+    "error_modes": [
+      "a18_e1"
+    ],
+    "tags": [
+      "agent_16_collab.md"
+    ],
+    "step_node_map": {
+      "step1": "a18"
+    }
+  },
+  {
+    "id": "aq034",
+    "type": "blank",
+    "content": "静态路由的核心特点是__。",
+    "difficulty": 0.5,
+    "answer": "提前定义规则",
+    "error_modes": [
+      "a19_e1"
+    ],
+    "tags": [
+      "agent_16_collab.md"
+    ],
+    "step_node_map": {
+      "step1": "a19"
+    },
+    "options": []
+  },
+  {
+    "id": "aq035",
+    "type": "open",
+    "content": "动态路由相比静态路由有哪些优缺点？",
+    "difficulty": 0.6,
+    "answer": "优点：灵活，能处理未预设路径；缺点：增加延迟和成本，LLM 可能出错",
+    "error_modes": [
+      "a19_e1"
+    ],
+    "tags": [
+      "agent_16_collab.md"
+    ],
+    "step_node_map": {
+      "step1": "a19"
+    },
+    "options": []
+  },
+  {
+    "id": "aq036",
+    "type": "choice",
+    "content": "以下哪项不是多 Agent 协作模式？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 流水线模式",
+      "B. 层级模式",
+      "C. 协商模式",
+      "D. 分布式模式"
+    ],
+    "answer": "D",
+    "error_modes": [
+      "a18_e1"
+    ],
+    "tags": [
+      "agent_16_collab.md"
+    ],
+    "step_node_map": {
+      "step1": "a18"
+    }
+  },
+  {
+    "id": "tq001",
+    "type": "choice",
+    "content": "Function Calling 的核心设计是模型全程只做 $\\boxed{\\text{决策}}$，执行的事情由宿主代码完成。",
+    "difficulty": 0.5,
+    "options": [
+      "A. 执行",
+      "B. 决策",
+      "C. 调试",
+      "D. 训练"
+    ],
+    "answer": "B",
+    "error_modes": [
+      "t01_e1"
+    ],
+    "tags": [
+      "tools_01_function_calling.md"
+    ],
+    "step_node_map": {
+      "step1": "t01"
+    }
+  },
+  {
+    "id": "tq002",
+    "type": "blank",
+    "content": "工具 schema 中最关键的字段是 $\\boxed{\\text{description}}$。",
+    "difficulty": 0.5,
+    "options": [],
+    "answer": "description",
+    "error_modes": [
+      "t02_e1"
+    ],
+    "tags": [
+      "tools_01_function_calling.md"
+    ],
+    "step_node_map": {
+      "step1": "t02"
+    }
+  },
+  {
+    "id": "tq003",
+    "type": "open",
+    "content": "SFT 阶段的主要目标是什么？",
+    "difficulty": 0.6,
+    "options": [],
+    "answer": "让模型学会识别工具定义、判断是否需要调用工具，并输出结构化的 JSON 请求。",
+    "error_modes": [
+      "t03_e1"
+    ],
+    "tags": [
+      "tools_03_fc_training.md"
+    ],
+    "step_node_map": {
+      "step1": "t03"
+    }
+  },
+  {
+    "id": "tq004",
+    "type": "choice",
+    "content": "RLHF 的主要作用是帮助模型建立 $\\boxed{\\text{边界感}}$。",
+    "difficulty": 0.6,
+    "options": [
+      "A. 执行能力",
+      "B. 边界感",
+      "C. 语言理解",
+      "D. 数据存储"
+    ],
+    "answer": "B",
+    "error_modes": [
+      "t04_e1"
+    ],
+    "tags": [
+      "tools_02_llm_tool_learning.md"
+    ],
+    "step_node_map": {
+      "step1": "t04"
+    }
+  },
+  {
+    "id": "tq005",
+    "type": "blank",
+    "content": "在 Function Calling 流程中，模型输出的 JSON 格式称为 $\\boxed{\\text{tool_calls}}$。",
+    "difficulty": 0.5,
+    "options": [],
+    "answer": "tool_calls",
+    "error_modes": [
+      "t01_e1"
+    ],
+    "tags": [
+      "tools_01_function_calling.md"
+    ],
+    "step_node_map": {
+      "step1": "t01"
+    }
+  },
+  {
+    "id": "tq006",
+    "type": "open",
+    "content": "为什么 SFT 阶段后模型可能过度调用工具？",
+    "difficulty": 0.6,
+    "options": [],
+    "answer": "因为 SFT 训练数据中大部分样本是需要调用工具的场景，模型可能形成‘遇到问题就调工具’的惯性。",
+    "error_modes": [
+      "t03_e1"
+    ],
+    "tags": [
+      "tools_03_fc_training.md"
+    ],
+    "step_node_map": {
+      "step1": "t03"
+    }
+  },
+  {
+    "id": "tq007",
+    "type": "choice",
+    "content": "MCP 的核心目标是解决什么问题？$\\text{A.} \\text{模型输出格式标准化}$ $\\text{B.} \\text{工具接入碎片化}$ $\\text{C.} \\text{模型训练效率}$ $\\text{D.} \\text{数据存储结构}$",
+    "difficulty": 0.5,
+    "options": [
+      "A. 模型输出格式标准化",
+      "B. 工具接入碎片化",
+      "C. 模型训练效率",
+      "D. 数据存储结构"
+    ],
+    "answer": "B",
+    "error_modes": [
+      "t05_e1"
+    ],
+    "tags": [
+      "tools_04_what_is_mcp.md"
+    ],
+    "step_node_map": {
+      "step1": "t05"
+    }
+  },
+  {
+    "id": "tq008",
+    "type": "blank",
+    "content": "MCP 的底层通信协议是 __________。",
+    "difficulty": 0.5,
+    "answer": "JSON-RPC 2.0",
+    "error_modes": [
+      "t05_e2"
+    ],
+    "tags": [
+      "tools_04_what_is_mcp.md"
+    ],
+    "step_node_map": {
+      "step1": "t05"
+    },
+    "options": []
+  },
+  {
+    "id": "tq009",
+    "type": "open",
+    "content": "请简述 MCP 与 Function Calling 的主要区别。",
+    "difficulty": 0.5,
+    "answer": "MCP 解决的是工具生态的标准化和复用问题，而 Function Calling 解决的是单次调用的格式问题。",
+    "error_modes": [
+      "t06_e1"
+    ],
+    "tags": [
+      "tools_06_mcp_vs_fc.md"
+    ],
+    "step_node_map": {
+      "step1": "t06"
+    },
+    "options": []
+  },
+  {
+    "id": "tq010",
+    "type": "choice",
+    "content": "MCP 的 Server 负责什么功能？$\\text{A.} \\text{提供只读数据}$ $\\text{B.} \\text{执行有副作用的操作}$ $\\text{C.} \\text{管理多个 Client 连接}$ $\\text{D.} \\text{定义提示词模板}$",
+    "difficulty": 0.5,
+    "options": [
+      "A. 提供只读数据",
+      "B. 执行有副作用的操作",
+      "C. 管理多个 Client 连接",
+      "D. 定义提示词模板"
+    ],
+    "answer": "B",
+    "error_modes": [
+      "t05_e3"
+    ],
+    "tags": [
+      "tools_05_mcp_components.md"
+    ],
+    "step_node_map": {
+      "step1": "t05"
+    }
+  },
+  {
+    "id": "tq011",
+    "type": "blank",
+    "content": "MCP 的传输方式包括 stdio 和 __________。",
+    "difficulty": 0.5,
+    "answer": "Streamable HTTP",
+    "error_modes": [
+      "t05_e4"
+    ],
+    "tags": [
+      "tools_04_what_is_mcp.md"
+    ],
+    "step_node_map": {
+      "step1": "t05"
+    },
+    "options": []
+  },
+  {
+    "id": "tq012",
+    "type": "open",
+    "content": "为什么说 MCP 是工具生态的标准接口？",
+    "difficulty": 0.5,
+    "answer": "因为 MCP 标准化了工具的接入方式，使得工具只需实现一次即可被所有支持 MCP 的 AI 客户端使用。",
+    "error_modes": [
+      "t05_e5"
+    ],
+    "tags": [
+      "tools_04_what_is_mcp.md"
+    ],
+    "step_node_map": {
+      "step1": "t05"
+    },
+    "options": []
+  },
+  {
+    "id": "tq013",
+    "type": "choice",
+    "content": "以下哪种场景更适合使用 Function Calling？$\\text{A.} $ 工具需要跨项目复用 $\\text{B.} $ 工具只为单一应用服务 $\\text{C.} $ 工具数量较多且需统一管理 $\\text{D.} $ 需要精细控制执行逻辑",
+    "difficulty": 0.5,
+    "options": [
+      "A. 工具需要跨项目复用",
+      "B. 工具只为单一应用服务",
+      "C. 工具数量较多且需统一管理",
+      "D. 需要精细控制执行逻辑"
+    ],
+    "answer": "B",
+    "error_modes": [
+      "t07_e1"
+    ],
+    "tags": [
+      "tools_07_fc_vs_mcp_usage.md"
+    ],
+    "step_node_map": {
+      "step1": "t07"
+    }
+  },
+  {
+    "id": "tq014",
+    "type": "choice",
+    "content": "MCP Server 的主要优势是？$\\text{A.} $ 简单直接，无需额外配置 $\\text{B.} $ 工具生命周期与应用解耦 $\\text{C.} $ 适合快速原型开发 $\\text{D.} $ 部署环境限制更小",
+    "difficulty": 0.55,
+    "options": [
+      "A. 简单直接，无需额外配置",
+      "B. 工具生命周期与应用解耦",
+      "C. 适合快速原型开发",
+      "D. 部署环境限制更小"
+    ],
+    "answer": "B",
+    "error_modes": [
+      "t08_e1"
+    ],
+    "tags": [
+      "tools_07_fc_vs_mcp_usage.md"
+    ],
+    "step_node_map": {
+      "step1": "t08"
+    }
+  },
+  {
+    "id": "tq015",
+    "type": "blank",
+    "content": "推理模型在生成答案前会先进行__。",
+    "difficulty": 0.6,
+    "answer": "思维链",
+    "error_modes": [
+      "t09_e1"
+    ],
+    "tags": [
+      "tools_08_reasoning_no_mcp.md"
+    ],
+    "step_node_map": {
+      "step1": "t09"
+    },
+    "options": []
+  },
+  {
+    "id": "tq016",
+    "type": "open",
+    "content": "为什么推理模型不能支持工具调用？请简述核心原因。",
+    "difficulty": 0.65,
+    "answer": "推理模型的思考链是一次性连续生成的，不能中途打断。而工具调用需要暂停等待外部执行，导致推理过程断开。",
+    "error_modes": [
+      "t09_e1"
+    ],
+    "tags": [
+      "tools_08_reasoning_no_mcp.md"
+    ],
+    "step_node_map": {
+      "step1": "t09"
+    },
+    "options": []
+  },
+  {
+    "id": "tq017",
+    "type": "choice",
+    "content": "Skill 与普通 prompt 的最大区别是？$\\text{A.} $ 可以打包脚本和模板 $\\text{B.} $ 能被 Agent 自动发现和加载 $\\text{C.} $ 包含参考文档 $\\text{D.} $ 支持多语言",
+    "difficulty": 0.5,
+    "options": [
+      "A. 可以打包脚本和模板",
+      "B. 能被 Agent 自动发现和加载",
+      "C. 包含参考文档",
+      "D. 支持多语言"
+    ],
+    "answer": "B",
+    "error_modes": [
+      "t10_e1"
+    ],
+    "tags": [
+      "tools_09_skill.md"
+    ],
+    "step_node_map": {
+      "step1": "t10"
+    }
+  },
+  {
+    "id": "tq018",
+    "type": "blank",
+    "content": "Skill 的渐进式加载机制分为三层：第一层是__，第二层是翻开详细资料，第三层是需要时再取。",
+    "difficulty": 0.55,
+    "answer": "只看简历",
+    "error_modes": [
+      "t10_e1"
+    ],
+    "tags": [
+      "tools_09_skill.md"
+    ],
+    "step_node_map": {
+      "step1": "t10"
+    },
+    "options": []
+  },
+  {
+    "id": "tq019",
+    "type": "choice",
+    "content": "MCP 的主要作用是解决 Agent 的什么问题？$\\text{A.} \\text{如何与用户交互} \\quad \\text{B.} \\text{如何获取外部能力} \\quad \\text{C.} \\text{如何生成文本} \\quad \\text{D.} \\text{如何执行复杂任务}$",
+    "difficulty": 0.5,
+    "options": [
+      "A. 如何与用户交互",
+      "B. 如何获取外部能力",
+      "C. 如何生成文本",
+      "D. 如何执行复杂任务"
+    ],
+    "answer": "B",
+    "error_modes": [
+      "t11_e1"
+    ],
+    "tags": [
+      "tools_10_mcp_vs_skill.md"
+    ],
+    "step_node_map": {
+      "step1": "t11"
+    }
+  },
+  {
+    "id": "tq020",
+    "type": "choice",
+    "content": "Skill 的核心作用是解决 Agent 的什么问题？$\\text{A.} \\text{如何调用工具} \\quad \\text{B.} \\text{如何执行流程} \\quad \\text{C.} \\text{如何访问数据库} \\quad \\text{D.} \\text{如何处理上下文}$",
+    "difficulty": 0.55,
+    "options": [
+      "A. 如何调用工具",
+      "B. 如何执行流程",
+      "C. 如何访问数据库",
+      "D. 如何处理上下文"
+    ],
+    "answer": "B",
+    "error_modes": [
+      "t12_e1"
+    ],
+    "tags": [
+      "tools_10_mcp_vs_skill.md"
+    ],
+    "step_node_map": {
+      "step1": "t12"
+    }
+  },
+  {
+    "id": "tq021",
+    "type": "blank",
+    "content": "Function Calling 是模型与___之间通信的协议。",
+    "difficulty": 0.5,
+    "options": [],
+    "answer": "函数",
+    "error_modes": [
+      "t13_e1"
+    ],
+    "tags": [
+      "tools_11_fc_skill_mcp.md"
+    ],
+    "step_node_map": {
+      "step1": "t13"
+    }
+  },
+  {
+    "id": "tq022",
+    "type": "open",
+    "content": "请简述 A2A 协议的核心目标。",
+    "difficulty": 0.6,
+    "options": [],
+    "answer": "解决多个 AI Agent 之间的通信协作问题，支持异步长任务和流式结果推送。",
+    "error_modes": [
+      "t14_e1"
+    ],
+    "tags": [
+      "tools_12_a2a_protocol.md"
+    ],
+    "step_node_map": {
+      "step1": "t14"
+    }
+  },
+  {
+    "id": "tq023",
+    "type": "choice",
+    "content": "以下哪项是 MCP 和 Skill 的关系？$\\text{A.} \\text{MCP 提供工具，Skill 定义流程} \\quad \\text{B.} \\text{MCP 是 Skill 的子集} \\quad \\text{C.} \\text{Skill 提供工具，MCP 定义流程} \\quad \\text{D.} \\text{两者互不相关}$",
+    "difficulty": 0.6,
+    "options": [
+      "A. MCP 提供工具，Skill 定义流程",
+      "B. MCP 是 Skill 的子集",
+      "C. Skill 提供工具，MCP 定义流程",
+      "D. 两者互不相关"
+    ],
+    "answer": "A",
+    "error_modes": [
+      "t11_e1"
+    ],
+    "tags": [
+      "tools_10_mcp_vs_skill.md"
+    ],
+    "step_node_map": {
+      "step1": "t11",
+      "step2": "t12"
+    }
+  },
+  {
+    "id": "tq024",
+    "type": "blank",
+    "content": "A2A 协议中，Agent 通过 ___ 发布自身能力信息。",
+    "difficulty": 0.5,
+    "options": [],
+    "answer": "Agent Card",
+    "error_modes": [
+      "t14_e1"
+    ],
+    "tags": [
+      "tools_12_a2a_protocol.md"
+    ],
+    "step_node_map": {
+      "step1": "t14"
+    }
+  },
+  {
+    "id": "tq025",
+    "type": "choice",
+    "content": "以下哪项不是 LLM 网关的核心功能？$\\text{A.} $ 多模型统一接口$\\text{B.} $ API Key 集中管理$\\text{C.} $ 用户身份验证$\\text{D.} $ 成本追踪",
+    "difficulty": 0.5,
+    "options": [
+      "A. 多模型统一接口",
+      "B. API Key 集中管理",
+      "C. 用户身份验证",
+      "D. 成本追踪"
+    ],
+    "answer": "C",
+    "error_modes": [
+      "t15_e1"
+    ],
+    "tags": [
+      "tools_16_llm_gateway.md"
+    ],
+    "step_node_map": {
+      "step1": "t15"
+    }
+  },
+  {
+    "id": "tq026",
+    "type": "blank",
+    "content": "LLM 网关通过__机制实现多模型切换，业务代码无需修改。",
+    "difficulty": 0.6,
+    "answer": "路由配置",
+    "error_modes": [
+      "t16_e1"
+    ],
+    "tags": [
+      "tools_16_llm_gateway.md"
+    ],
+    "step_node_map": {
+      "step1": "t16"
+    },
+    "options": []
+  },
+  {
+    "id": "tq027",
+    "type": "open",
+    "content": "简述语义缓存的工作原理及适用场景。",
+    "difficulty": 0.6,
+    "answer": "语义缓存将用户问题向量化后在向量数据库中搜索相似问题，若匹配则直接返回历史答案，避免调用 LLM。适用于高频重复问答场景，如客服机器人。",
+    "error_modes": [
+      "t15_e1"
+    ],
+    "tags": [
+      "tools_16_llm_gateway.md"
+    ],
+    "step_node_map": {
+      "step1": "t15"
+    },
+    "options": []
+  },
+  {
+    "id": "tq028",
+    "type": "choice",
+    "content": "以下哪种情况适合使用语义缓存？$\\text{A.} $ 实时股票查询$\\text{B.} $ 产品 FAQ 问答$\\text{C.} $ 个性化推荐$\\text{D.} $ 每日天气预报",
+    "difficulty": 0.5,
+    "options": [
+      "A. 实时股票查询",
+      "B. 产品 FAQ 问答",
+      "C. 个性化推荐",
+      "D. 每日天气预报"
+    ],
+    "answer": "B",
+    "error_modes": [
+      "t15_e1"
+    ],
+    "tags": [
+      "tools_16_llm_gateway.md"
+    ],
+    "step_node_map": {
+      "step1": "t15"
+    }
+  },
+  {
+    "id": "tq029",
+    "type": "blank",
+    "content": "LLM 网关的配额管理可以防止__问题。",
+    "difficulty": 0.5,
+    "answer": "一个团队消耗全部额度",
+    "error_modes": [
+      "t15_e1"
+    ],
+    "tags": [
+      "tools_16_llm_gateway.md"
+    ],
+    "step_node_map": {
+      "step1": "t15"
+    },
+    "options": []
+  },
+  {
+    "id": "tq030",
+    "type": "open",
+    "content": "说明 LLM 网关如何提升系统可靠性。",
+    "difficulty": 0.6,
+    "answer": "网关支持负载均衡和故障转移，当主模型失败时自动切换到备用模型，确保业务无感知。",
+    "error_modes": [
+      "t15_e1"
+    ],
+    "tags": [
+      "tools_16_llm_gateway.md"
+    ],
+    "step_node_map": {
+      "step1": "t15"
+    },
+    "options": []
+  },
+  {
+    "id": "oq001",
+    "type": "choice",
+    "content": "Agent 与普通 LLM 调用的本质区别是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. Agent 具备自主决策能力",
+      "B. Agent 只能执行固定指令",
+      "C. Agent 无法与外部交互",
+      "D. Agent 依赖人工输入"
+    ],
+    "answer": "A",
+    "error_modes": [
+      "o01_e1"
+    ],
+    "tags": [
+      "overview_index.md"
+    ],
+    "step_node_map": {
+      "step1": "o01"
+    }
+  },
+  {
+    "id": "oq002",
+    "type": "choice",
+    "content": "ReAct、Plan-and-Execute、Reflection 三种 Agent 设计范式的共同点是什么？",
+    "difficulty": 0.6,
+    "options": [
+      "A. 都依赖外部工具调用",
+      "B. 都强调自主规划能力",
+      "C. 都不支持多 Agent 协作",
+      "D. 都需要大量标注数据"
+    ],
+    "answer": "B",
+    "error_modes": [
+      "o02_e1"
+    ],
+    "tags": [
+      "overview_index.md"
+    ],
+    "step_node_map": {
+      "step1": "o02"
+    }
+  },
+  {
+    "id": "oq003",
+    "type": "blank",
+    "content": "Agent 的核心组件通常包括 ________、记忆模块和工具调用接口。",
+    "difficulty": 0.5,
+    "answer": "推理引擎",
+    "tags": [
+      "overview_index.md"
+    ],
+    "step_node_map": {
+      "step1": "o01"
+    },
+    "error_modes": [],
+    "options": []
+  },
+  {
+    "id": "oq004",
+    "type": "open",
+    "content": "请简述为什么有时候需要手搓 Agent 而不是直接使用成熟框架？",
+    "difficulty": 0.6,
+    "answer": "可以更灵活地定制功能，适应特定业务需求，避免框架限制",
+    "tags": [
+      "overview_index.md"
+    ],
+    "step_node_map": {
+      "step1": "o02"
+    },
+    "error_modes": [],
+    "options": []
+  }
+]

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { api } from "@/lib/api";
+import { useDomain } from "@/lib/domain";
 import MathText from "@/components/Math";
 
 /** 复盘错题集 · 抽卡（M4r5c 需求 2）：正面题目 / 翻面见答案；"已掌握"移出 */
@@ -24,12 +25,15 @@ export default function ReviewPage() {
   const [flipped, setFlipped] = useState(false);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
+  // 领域学习空间（M4r8）：错题集按领域隔离
+  const { active: activePack } = useDomain();
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
       const me = await api<{ user_id: number }>("/auth/me");
-      const r = await api<{ items: WrongQuestion[] }>(`/api/v1/students/${me.user_id}/wrong-questions`);
+      const qp = activePack ? `?pack_id=${activePack}` : "";
+      const r = await api<{ items: WrongQuestion[] }>(`/api/v1/students/${me.user_id}/wrong-questions${qp}`);
       setItems(r.items || []);
       setIdx(0);
       setFlipped(false);
@@ -38,7 +42,7 @@ export default function ReviewPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [activePack]);
   useEffect(() => {
     load();
   }, [load]);
@@ -49,7 +53,8 @@ export default function ReviewPage() {
     if (!current) return;
     try {
       const me = await api<{ user_id: number }>("/auth/me");
-      await api<{ removed: string }>(`/api/v1/students/${me.user_id}/wrong-questions/${current.qid}`, { method: "DELETE" });
+      const qp = activePack ? `?pack_id=${activePack}` : "";
+      await api<{ removed: string }>(`/api/v1/students/${me.user_id}/wrong-questions/${current.qid}${qp}`, { method: "DELETE" });
       setItems((list) => list.filter((i) => i.qid !== current.qid));
       setFlipped(false);
       // idx 指向下一张（若删的是最后一张则回到开头）

@@ -1,0 +1,21 @@
+[
+  {
+    "id": "m001",
+    "type": "choice",
+    "content": "概念 A 的定义是？",
+    "difficulty": 0.4,
+    "options": ["甲", "乙", "丙"],
+    "answer": "甲",
+    "error_modes": ["a1_e1"],
+    "step_node_map": { "step1": "a1" }
+  },
+  {
+    "id": "m002",
+    "type": "blank",
+    "content": "概念 B 依赖概念 ___。",
+    "difficulty": 0.6,
+    "answer": "A",
+    "error_modes": ["b1_e1"],
+    "step_node_map": { "step1": "b1" }
+  }
+]

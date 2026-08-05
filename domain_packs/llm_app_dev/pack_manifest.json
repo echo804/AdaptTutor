@@ -1,0 +1,6 @@
+{
+  "id": "llm_app_dev",
+  "version": "0.1.0",
+  "subject": "大模型应用开发",
+  "engine_version": ">=0.1"
+}

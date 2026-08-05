@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 
-from app.api import routes_auth, routes_keys, routes_sessions, routes_students
+from app.api import routes_auth, routes_domains, routes_keys, routes_sessions, routes_students
 from app.config import Settings, get_settings
 from app.persistence.db import get_engine
 
@@ -29,6 +29,7 @@ app.add_middleware(
 
 app.include_router(routes_auth.router)
 app.include_router(routes_keys.router)
+app.include_router(routes_domains.router)
 app.include_router(routes_sessions.router)
 app.include_router(routes_students.router)
 

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { api, MessageReply, Question } from "@/lib/api";
+import { useDomain } from "@/lib/domain";
 import MathText from "@/components/Math";
 
 interface Bubble {
@@ -48,6 +49,8 @@ export default function ChatPage() {
   // 会话管理（M4r7k：单删/批量删）
   const [manageMode, setManageMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  // 领域学习空间（M4r8）
+  const { active: activePack } = useDomain();
   // 开始页动态副标题（M4r7m）
   const [overview, setOverview] = useState<{ masteryPct: number | null; today: number; lastNode: string | null }>({
     masteryPct: null,
@@ -90,9 +93,10 @@ export default function ChatPage() {
     (async () => {
       try {
         const me = await api<{ user_id: number }>("/auth/me");
+        const qp = activePack ? `?pack_id=${activePack}` : "";
         const [m, t] = await Promise.all([
-          api<{ mastery: Record<string, number> }>(`/api/v1/students/${me.user_id}/mastery`).catch(() => null),
-          api<{ trend: { date: string; count: number }[] }>(`/api/v1/students/${me.user_id}/trend`).catch(() => null),
+          api<{ mastery: Record<string, number> }>(`/api/v1/students/${me.user_id}/mastery${qp}`).catch(() => null),
+          api<{ trend: { date: string; count: number }[] }>(`/api/v1/students/${me.user_id}/trend${qp}`).catch(() => null),
         ]);
         const entries = m?.mastery ? Object.entries(m.mastery) : [];
         const today = new Date().toISOString().slice(0, 10);
@@ -107,7 +111,7 @@ export default function ChatPage() {
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sessionId]);
+  }, [sessionId, activePack]);
 
   async function startSession(type: "diagnostic" | "tutor") {
     setShowConfig(true); // 先配置再开始（诊断/辅导共用面板，M4r7h）
@@ -122,6 +126,7 @@ export default function ChatPage() {
     setLoading(true);
     try {
       const body: any = { type };
+      if (activePack) body.pack_id = activePack; // M4r8：按当前领域创建会话
       if (type === "diagnostic" && config) {
         body.config = { qtypes: config.qtypes, qcount: config.qcount, difficulty: config.difficulty };
         localStorage.setItem("diag_config", JSON.stringify(config));

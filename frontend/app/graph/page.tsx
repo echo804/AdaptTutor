@@ -5,8 +5,9 @@ import Link from "next/link";
 import StarMap3D, { StarEdge, StarNode } from "@/components/StarMap3D";
 import { api, MasteryOut } from "@/lib/api";
 import { useThemeVar } from "@/lib/theme";
+import { useDomain } from "@/lib/domain";
 
-/** 知识图谱星辰图页（M4r2：星空 + 知识星点亮；点击星 → 详情卡 + 溯源发光路径） */
+/** 知识图谱星辰图页（M4r2：星空 + 知识星点亮；点击星 → 详情卡 + 溯源发光路径；M4r8 按领域） */
 export default function GraphPage() {
   const [graph, setGraph] = useState<{ nodes: StarNode[]; edges: StarEdge[] } | null>(null);
   const [mastery, setMastery] = useState<Record<string, number>>({});
@@ -14,16 +15,20 @@ export default function GraphPage() {
   const [err, setErr] = useState<string | null>(null);
   // 主题强调色（图例色随色板切换）
   const amber = useThemeVar("--amber", "#d4a574");
+  // 领域学习空间（M4r8）：图谱/掌握度随领域切换重载
+  const { active: activePack } = useDomain();
 
   useEffect(() => {
+    if (!activePack) return;
     (async () => {
       try {
         const [g, me] = await Promise.all([
-          api<{ nodes: StarNode[]; edges: StarEdge[] }>("/api/v1/graph"),
+          api<{ nodes: StarNode[]; edges: StarEdge[] }>(`/api/v1/graph?pack_id=${activePack}`),
           api<{ user_id: number }>("/auth/me"),
         ]);
         setGraph(g);
-        const m = await api<MasteryOut>(`/api/v1/students/${me.user_id}/mastery`).catch(
+        setSelected(null);
+        const m = await api<MasteryOut>(`/api/v1/students/${me.user_id}/mastery?pack_id=${activePack}`).catch(
           () => ({ mastery: {}, weakest: null } as MasteryOut),
         );
         setMastery(m.mastery);
@@ -31,7 +36,7 @@ export default function GraphPage() {
         setErr(e.message);
       }
     })();
-  }, []);
+  }, [activePack]);
 
   // 溯源祖先链：沿前置边反向 BFS（暖色路径 + 链首为根因）
   const trace = useMemo(() => {
