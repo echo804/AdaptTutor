@@ -19,7 +19,6 @@ export default function WelcomePage() {
   const [showTitle, setShowTitle] = useState(false);   // 哲思标题
   const [showCta, setShowCta] = useState(false);       // 开启思辨之旅按钮
   const [showLogin, setShowLogin] = useState(false);   // 登录链接
-  const [showFooter, setShowFooter] = useState(false); // 底部领域小字
 
   // 淡黄素描纸背景铺满整个页面（含 html/body，防止缩放/滚动露出米白底）
   useEffect(() => {
@@ -58,11 +57,7 @@ export default function WelcomePage() {
       const t = setTimeout(() => setShowLogin(true), 650);
       return () => clearTimeout(t);
     }
-    if (!showFooter) {
-      const t = setTimeout(() => setShowFooter(true), 550);
-      return () => clearTimeout(t);
-    }
-  }, [printed, showTitle, showCta, showLogin, showFooter]);
+  }, [printed, showTitle, showCta, showLogin]);
 
   return (
     <div className="welcome-paper relative flex min-h-screen items-center justify-center overflow-hidden">
@@ -115,12 +110,6 @@ export default function WelcomePage() {
           >
             已有账号？登录
           </Link>
-        )}
-
-        {showFooter && (
-          <p className="welcome-soft mt-10 text-[11px] tracking-widest" style={{ color: "rgba(44,62,80,0.4)" }}>
-            初中数学 · 大模型应用开发 · 更多领域持续加入
-          </p>
         )}
       </main>
     </div>
