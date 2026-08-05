@@ -70,7 +70,7 @@ def test_build_path_topological():
 # ---- 四态辅导闭环 ----
 
 def test_tutor_full_cycle():
-    """elicit → identify → hint → verify → done（答错暴露→提示→变式答对）。"""
+    """elicit → identify → hint（停留）→ 回应 → verify → done（提示→变式答对）。"""
     t = _tutor()
     r = t.tutor_start()
     assert r.state == State.ELICIT.value
@@ -79,9 +79,12 @@ def test_tutor_full_cycle():
     assert r.state == State.IDENTIFY.value
 
     r = t.tutor_step("我不确定第一步做什么。", correct=False)
-    assert r.state in (State.HINT.value, State.VERIFY.value)  # 提示给出即转验证
+    assert r.state == State.HINT.value  # M4r7f：提示停留，不瞬移
 
-    r = t.tutor_step("我再试试。", correct=True)
+    r = t.tutor_step("好，我按提示想想。", correct=None)
+    assert r.state == State.VERIFY.value  # 回应 → 变式验证
+
+    r = t.tutor_step(t.verify_question.answer, correct=True)
     assert r.state == State.DONE.value
 
 
@@ -92,7 +95,8 @@ def test_tutor_messages_never_leak():
     msgs = [r.message]
     msgs.append(t.tutor_step("我算出来是 7。", correct=False).message)
     msgs.append(t.tutor_step("我不确定第一步做什么。", correct=False).message)
-    msgs.append(t.tutor_step("我再试试。", correct=True).message)
+    msgs.append(t.tutor_step("好，我按提示想想。", correct=None).message)
+    msgs.append(t.tutor_step("答案是 x=6。", correct=True).message)
     for m in msgs:
         assert not t.sanitizer.check_leak(m)
 

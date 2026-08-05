@@ -203,12 +203,16 @@ class TutorOrchestrator:
         )
 
     def _hint_turn(self) -> TurnResult:
+        """给出最小提示并停留在 HINT 态（等待学生回应后由 HINT 分支触发 HINT_GIVEN → 变式验证）。
+
+        修复 M4r7f：原来此处提前触发 HINT_GIVEN 导致提示态瞬移 VERIFY，
+        学生下一条消息被误当作变式题作答判错。
+        """
         level = min(self.sm.context["hint_level"], len(_HINTS) - 1)
         raw = _HINTS[level]
         res = self.sanitizer.sanitize(raw)
-        self.sm.step(Event.HINT_GIVEN)
         return TurnResult(
-            state=self.sm.state.value,
+            state=self.sm.state.value,  # hint
             message=res.text,
             degraded=res.degraded,
             context=dict(self.sm.context),
@@ -248,6 +252,9 @@ class TutorOrchestrator:
             else None,
             "pool_ids": [q.id for q in self.pool],
             "diag_config": dict(self.diag_config),
+            "verify_question_id": self.verify_question.id
+            if self.verify_question
+            else None,
         }
 
     def restore_state(self, state: dict) -> None:
@@ -274,6 +281,12 @@ class TutorOrchestrator:
         # M4r5：恢复诊断配置（题型/题量/难度）
         if state.get("diag_config"):
             self.diag_config.update(state["diag_config"])
+        # M4r7f：恢复辅导变式题（AI 判题对象）
+        vqid = state.get("verify_question_id")
+        if vqid:
+            self.verify_question = next(
+                (q for q in self.pack.questions if q.id == vqid), None
+            )
 
     # ---------- 阶段 4：反馈 ----------
 

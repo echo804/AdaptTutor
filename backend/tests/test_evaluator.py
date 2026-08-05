@@ -45,6 +45,22 @@ def test_judge_choice_wrong_gives_answer():
     assert r.correct_answer == "B（1）"
 
 
+def test_judge_choice_accepts_option_content():
+    """M4r7f：choice 题输入选项内容（"1"）而非字母（"B"）也算对。"""
+    q = _q("c4", "choice", "1+1=?", "B", options=["0", "1", "2", "3"])
+    assert judge_choice("1", q).correct
+    assert judge_choice("$1$", q).correct  # LaTeX 包裹容差
+    assert not judge_choice("3", q).correct
+
+
+def test_judge_choice_indeterminate_on_non_answer():
+    """M4r7f：choice 题非答案输入（"好"）→ indeterminate。"""
+    q = _q("c5", "choice", "1+1=?", "B", options=["0", "1", "2", "3"])
+    r = judge_choice("好，我知道了", q)
+    assert r.indeterminate
+    assert r.correct_answer is None
+
+
 # ---- 规则兜底 ----
 
 def test_rule_numeric_tolerance():
@@ -88,3 +104,13 @@ def test_judge_open_mock_degraded_when_rule_negative():
     r = judge_open("答案是 5", q)
     assert not r.correct
     assert r.degraded
+
+
+def test_judge_open_indeterminate_on_non_answer():
+    """M4r7f：非答案输入（"好"等）→ indeterminate，不判错不给答案。"""
+    q = _q("i1", "blank", "x=?", "7")
+    r = judge_open("好，我知道了", q)
+    assert r.indeterminate
+    assert not r.degraded or r.degraded
+    assert r.correct_answer is None  # 不给正确答案
+    assert "请直接输入" in r.feedback

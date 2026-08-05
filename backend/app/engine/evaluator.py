@@ -20,6 +20,7 @@ _NUM = re.compile(r"-?\d+(?:\.\d+)?")
 # 规则兜底反馈模板
 _FEEDBACK_CORRECT = "思路正确，这一步掌握了。"
 _FEEDBACK_WRONG = "答案不太对，我们回到这一步再看一遍依据。"
+_FEEDBACK_INDETERMINATE = "请直接输入你的答案（数字或关键步骤），我来判断对不对。"
 
 
 @dataclass
@@ -30,15 +31,34 @@ class JudgeResult:
     degraded: bool = False
     correct_answer: str | None = None  # M4r5：判错时展示正确答案（用户需求 1d）
     explanation: str | None = None     # 简短解析（有则附）
+    indeterminate: bool = False        # M4r7f：无法判定（非答案输入）→ 温和提示重答，不推进状态机
 
 
 # ---------- 选择题 ----------
 
 def judge_choice(user_choice: str, question: Question) -> JudgeResult:
-    """选择题：比对选项字母（A/B/C/D，容错小写/空格）。"""
+    """选择题：比对选项字母（A/B/C/D，容错小写/空格/选项内容）。
+
+    M4r7f：兼容直接输入选项内容（如答案"10"而非字母"C"）。
+    """
     u = user_choice.strip().upper()
-    correct = u == question.answer.strip().upper()
     ans = question.answer.strip().upper()
+    correct = u == ans
+    if not correct:
+        # 按选项内容匹配（去空白/LaTeX 包裹）——兼容直接输入选项内容
+        norm = lambda s: s.replace(" ", "").strip("$").upper()  # noqa: E731
+        for i, o in enumerate(question.options):
+            if norm(o) == norm(u):
+                correct = chr(65 + i) == ans
+                break
+    if not correct and not re.search(r"[A-Z0-9]", u):
+        # M4r7f：非答案输入（"好"等）→ indeterminate，温和提示重答
+        return JudgeResult(
+            correct=False,
+            feedback=_FEEDBACK_INDETERMINATE,
+            method="choice",
+            indeterminate=True,
+        )
     idx = ord(ans) - 65 if len(ans) == 1 and ans.isalpha() else -1
     opt = question.options[idx] if 0 <= idx < len(question.options) else None
     return JudgeResult(
@@ -64,6 +84,8 @@ def judge_by_rule(user_text: str, question: Question) -> JudgeResult | None:
     ans_nums = _extract_numbers(ans)
     user_nums = _extract_numbers(user)
     if ans_nums:
+        if not user_nums:
+            return None  # M4r7f：学生输入不含数字 → 无法判定（非答案）
         # 答案所有数字都在学生回答中出现（浮点容差）
         matched = all(any(abs(a - u) < 0.01 for u in user_nums) for a in ans_nums)
         return JudgeResult(
@@ -126,26 +148,37 @@ def judge_open(
     )
     resp: GatewayResponse = gateway.generate("judge", prompt, ctx)
     if resp.mock or resp.level >= 2:
-        # 无 key 或降级 → 规则兜底结果
-        base = rule or JudgeResult(correct=False, feedback=_FEEDBACK_WRONG, method="rule")
+        # M4r7f：无 key/降级且规则无法判定 → indeterminate（非答案输入，温和提示重答）
+        if rule is None:
+            return JudgeResult(
+                correct=False,
+                feedback=_FEEDBACK_INDETERMINATE,
+                method="rule",
+                degraded=True,
+                indeterminate=True,
+            )
+        # 规则兜底结果
         return JudgeResult(
-            correct=base.correct,
-            feedback=base.feedback,
-            method=base.method,
+            correct=rule.correct,
+            feedback=rule.feedback,
+            method=rule.method,
             degraded=True,
-            correct_answer=base.correct_answer,
+            correct_answer=rule.correct_answer,
         )
 
     parsed = _parse_judge_json(resp.text)
     if parsed is None or "correct" not in parsed:
-        # LLM 输出不可解析 → 规则兜底
-        base = rule or JudgeResult(correct=False, feedback=_FEEDBACK_WRONG, method="rule")
+        # LLM 输出不可解析 → 规则兜底（含 indeterminate）
+        base = rule or JudgeResult(
+            correct=False, feedback=_FEEDBACK_INDETERMINATE, method="rule", indeterminate=True
+        )
         return JudgeResult(
             correct=base.correct,
             feedback=base.feedback,
             method=base.method,
             degraded=True,
             correct_answer=base.correct_answer,
+            indeterminate=base.indeterminate,
         )
 
     feedback = str(parsed.get("feedback") or (_FEEDBACK_CORRECT if parsed["correct"] else _FEEDBACK_WRONG))

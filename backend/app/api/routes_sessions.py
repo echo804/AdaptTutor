@@ -132,48 +132,95 @@ async def api_send_message(
         from app.engine.evaluator import judge
 
         result = judge(body.answer, q)
-        st = t.diagnose(result.correct)
-        nq = st.get("question")
-        # M4r5：判错 → 落库错题集（复盘抽卡数据源）
-        if not result.correct:
-            await repo.add_event(
-                db,
-                user.id,
-                "wrong_answer",
-                node_id=next(iter(q.step_node_map.values()), None),
-                session_id=sid,
-                payload={
-                    "qid": q.id,
-                    "question": q.content,
-                    "type": q.type,
-                    "options": q.options,
-                    "user_answer": body.answer,
-                    "correct_answer": result.correct_answer or q.answer,
-                },
+        # M4r7f：无法判定（非答案输入）→ 温和提示重答，不推进诊断
+        if result.indeterminate:
+            reply = MessageReply(
+                state="diagnose",
+                message=result.feedback,
+                degraded=True,
+                mock=True,
+                correct=False,
+                feedback=result.feedback,
+                judge_method="rule",
             )
-        reply_text = (
-            f"答对了！{result.feedback} 下一题：{nq.content if nq else '（诊断完成）'}"
-            if result.correct
-            else f"答错了。{result.feedback} 下一题：{nq.content if nq else '（诊断完成）'}"
-        )
-        reply = MessageReply(
-            state="diagnose",
-            message=reply_text,
-            question=_question_to_dict(nq),
-            terminated=bool(st.get("terminated", False)),
-            done=bool(st.get("done", False)),
-            correct=result.correct,
-            feedback=result.feedback,
-            judge_method=result.method,
-            correct_answer=None if result.correct else result.correct_answer,
-            qcount=st.get("qcount"),
-            answered=st.get("answered"),
-        )
+        else:
+            st = t.diagnose(result.correct)
+            nq = st.get("question")
+            # M4r5：判错 → 落库错题集（复盘抽卡数据源）
+            if not result.correct:
+                await repo.add_event(
+                    db,
+                    user.id,
+                    "wrong_answer",
+                    node_id=next(iter(q.step_node_map.values()), None),
+                    session_id=sid,
+                    payload={
+                        "qid": q.id,
+                        "question": q.content,
+                        "type": q.type,
+                        "options": q.options,
+                        "user_answer": body.answer,
+                        "correct_answer": result.correct_answer or q.answer,
+                    },
+                )
+            reply_text = (
+                f"答对了！{result.feedback} 下一题：{nq.content if nq else '（诊断完成）'}"
+                if result.correct
+                else f"答错了。{result.feedback} 下一题：{nq.content if nq else '（诊断完成）'}"
+            )
+            reply = MessageReply(
+                state="diagnose",
+                message=reply_text,
+                question=_question_to_dict(nq),
+                terminated=bool(st.get("terminated", False)),
+                done=bool(st.get("done", False)),
+                correct=result.correct,
+                feedback=result.feedback,
+                judge_method=result.method,
+                correct_answer=None if result.correct else result.correct_answer,
+                qcount=st.get("qcount"),
+                answered=st.get("answered"),
+            )
     else:
-        r = t.tutor_step(body.content or "", correct=body.correct)
-        reply = MessageReply(
-            state=r.state, message=r.message, degraded=r.degraded, mock=r.mock
-        )
+        # M4r7f：辅导会话作答自动判题——VERIFY 态（变式验证）用户消息视为作答
+        from app.engine.evaluator import judge as judge_answer
+        from app.engine.state_machine.states import State as SMState
+
+        if t.sm.state == SMState.VERIFY and t.verify_question and (body.content or "").strip():
+            j = judge_answer(body.content, t.verify_question)
+            # M4r7f：非答案输入（"好"等）→ 温和提示重答，不推进状态机
+            if j.indeterminate:
+                reply = MessageReply(
+                    state="verify",
+                    message=j.feedback,
+                    degraded=True,
+                    mock=True,
+                    correct=False,
+                    feedback=j.feedback,
+                    judge_method="rule",
+                )
+            else:
+                r = t.tutor_step(body.content, correct=j.correct)
+                judge_line = (
+                    f"✓ 答对了！{j.feedback}"
+                    if j.correct
+                    else f"✗ 答错了。{j.feedback} 正确答案：{j.correct_answer or t.verify_question.answer}"
+                )
+                reply = MessageReply(
+                    state=r.state,
+                    message=f"{judge_line}\n{r.message}",
+                    degraded=r.degraded,
+                    mock=r.mock,
+                    correct=j.correct,
+                    feedback=j.feedback,
+                    judge_method=j.method,
+                    correct_answer=None if j.correct else j.correct_answer,
+                )
+        else:
+            r = t.tutor_step(body.content or "", correct=body.correct)
+            reply = MessageReply(
+                state=r.state, message=r.message, degraded=r.degraded, mock=r.mock
+            )
 
     # 掌握度快照落库（mastery_states，供仪表盘真实数据）
     for node_id, p in t.mastery.items():
@@ -229,14 +276,17 @@ async def api_session_state(
     t = _new_orchestrator()
     t.restore_state(s.context or {})
     q = t.current_question
+    is_diag = s.type == "diagnostic"
     return {
         "session_id": sid,
         "type": s.type,
         "status": s.status,
         "state": t.sm.state.value if t.sm.state else "diagnose",
         "question": _question_to_dict(q),
-        "qcount": t.diag_config.get("qcount"),
-        "answered": sum(t.answered_counts.values()),
+        # M4r7f：诊断才返回题数进度；辅导返回变式题（VERIFY 判题对象）
+        "qcount": t.diag_config.get("qcount") if is_diag else None,
+        "answered": sum(t.answered_counts.values()) if is_diag else None,
+        "verify_question": _question_to_dict(t.verify_question) if not is_diag else None,
         "done": q is None,
     }
 

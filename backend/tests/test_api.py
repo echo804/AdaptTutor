@@ -305,3 +305,48 @@ async def test_diagnostic_config_qcount(client):
             assert r.json()["done"] is True  # 3 题后结束
         else:
             assert r.json()["done"] is False
+
+# ---- M4r7f：辅导会话 AI 判题 ----
+
+async def test_tutor_verify_auto_judge(client):
+    """辅导 VERIFY 态：用户消息自动判题，答对→通过，答错→重新定位+给答案。"""
+    from app.engine.tutor_orchestrator import TutorOrchestrator
+    from app.persistence import repositories as repo
+    from app.persistence.db import get_session_factory
+
+    token, uid = await _register(client)
+    h = {"Authorization": f"Bearer {token}"}
+    await client.put("/me/api-keys/deepseek", json={"provider": "deepseek", "api_key": "sk-secret-abcdefgh"}, headers=h)
+    r = await client.post("/api/v1/sessions", json={"type": "tutor"}, headers=h)
+    assert r.status_code == 200, r.text
+    sid = r.json()["session_id"]
+
+    # 推进到 VERIFY 态：ELICIT(答) → IDENTIFY(答) → HINT(任意) → VERIFY
+    await client.post(f"/api/v1/sessions/{sid}/messages", json={"kind": "message", "content": "我的思路是移项"}, headers=h)
+    await client.post(f"/api/v1/sessions/{sid}/messages", json={"kind": "message", "content": "第一步先合并同类项"}, headers=h)
+    r = await client.post(f"/api/v1/sessions/{sid}/messages", json={"kind": "message", "content": "好"}, headers=h)
+    assert r.status_code == 200
+    assert r.json()["state"] == "verify", r.text
+
+    # 读 verify_question 的标准答案
+    factory = get_session_factory()
+    async with factory() as db:
+        s = await repo.get_session(db, sid)
+        t = TutorOrchestrator()
+        t.restore_state(s.context or {})
+        vq = t.verify_question
+        assert vq is not None, "verify_question 应从快照恢复"
+        correct_ans = vq.answer
+
+    # 答对
+    r = await client.post(f"/api/v1/sessions/{sid}/messages", json={"kind": "message", "content": f"{correct_ans}"}, headers=h)
+    assert r.status_code == 200
+    body = r.json()
+    assert body["correct"] is True
+    assert body["state"] in ("done", "verify")
+
+    # 状态接口：辅导会话不返回 qcount（修复 0/10 bug），返回 verify_question
+    r = await client.get(f"/api/v1/sessions/{sid}/state", headers=h)
+    st = r.json()
+    assert st["qcount"] is None
+    assert st["type"] == "tutor"
