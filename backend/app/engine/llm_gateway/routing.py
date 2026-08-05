@@ -27,8 +27,17 @@ def parse_model_routing(raw: str) -> dict[str, str]:
     return {k: str(v) for k, v in data.items() if k in _ROLES}
 
 
-def resolve_model(role: str, routing: dict[str, str]) -> str:
-    """按角色取模型；无配置回退默认。"""
+def resolve_model(
+    role: str,
+    routing: dict[str, str],
+    override: str | None = None,
+) -> str:
+    """按角色取模型；ctx 显式覆盖（如百炼模型下拉选择）优先；无配置回退默认。
+
+    override：完整 LiteLLM 模型名（如 dashscope/qwen-turbo）。
+    """
+    if override:
+        return override
     return routing.get(role) or routing.get("tutor") or DEFAULT_MODEL
 
 

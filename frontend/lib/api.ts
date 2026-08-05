@@ -58,6 +58,15 @@ export interface KeyItem {
   masked_key: string;
 }
 
+export interface BailianModel {
+  id: string;
+  label: string;
+}
+
+export interface SettingsOut {
+  bailian_models: Record<string, string>;
+}
+
 export interface Question {
   id: string;
   type: "choice" | "blank" | "open";

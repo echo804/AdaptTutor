@@ -191,6 +191,40 @@ async def test_mastery_dashboard_data(client):
     assert r.json()["path"]
 
 
+# ---- 阿里云百炼（DashScope） ----
+
+async def test_bailian_models_and_prefs(client):
+    """百炼模型列表 + 模型偏好存取（04 v0.9：百炼免费额度模型）。"""
+    token, _ = await _register(client)
+    h = {"Authorization": f"Bearer {token}"}
+
+    # 模型列表
+    r = await client.get("/me/api-keys/bailian/models", headers=h)
+    assert r.status_code == 200
+    models = r.json()
+    ids = [m["id"] for m in models]
+    assert "dashscope/qwen-turbo" in ids
+    assert "dashscope/deepseek-v3" in ids  # 百炼托管 DeepSeek
+
+    # 配百炼 key
+    r = await client.put(
+        "/me/api-keys/bailian",
+        json={"provider": "bailian", "api_key": "sk-bailian-test-1234"},
+        headers=h,
+    )
+    assert r.status_code == 200
+    assert r.json()["masked_key"] == "sk-b****1234"  # 掩码
+
+    # 保存模型偏好
+    prefs = {"tutor": "dashscope/deepseek-v3", "generate": "dashscope/qwen-turbo"}
+    r = await client.put("/me/api-keys/settings", json={"bailian_models": prefs}, headers=h)
+    assert r.status_code == 200
+
+    # 回读
+    r = await client.get("/me/api-keys/settings", headers=h)
+    assert r.json()["bailian_models"]["tutor"] == "dashscope/deepseek-v3"
+
+
 async def test_healthz(client):
     r = await client.get("/healthz")
     assert r.status_code == 200

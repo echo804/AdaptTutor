@@ -47,7 +47,7 @@ class LLMGateway:
         if key is None:
             return self._mock(role)
 
-        model = resolve_model(role, self.routing)
+        model = resolve_model(role, self.routing, override=ctx.get("model"))
         try:
             import litellm
 

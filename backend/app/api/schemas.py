@@ -36,13 +36,22 @@ class MeResponse(BaseModel):
 # ---- keys ----
 
 class KeyPutRequest(BaseModel):
-    provider: str = Field(pattern="^(deepseek|qwen|glm)$")
+    provider: str = Field(pattern="^(deepseek|qwen|glm|bailian)$")
     api_key: str = Field(min_length=8)
 
 
 class KeyItem(BaseModel):
     provider: str
     masked_key: str
+
+
+class BailianModel(BaseModel):
+    id: str          # LiteLLM 模型名（dashscope/ 前缀）
+    label: str
+
+
+class SettingsPutRequest(BaseModel):
+    bailian_models: dict[str, str] | None = None  # {"tutor": "...", "generate": "..."}
 
 
 # ---- sessions / 消息 ----
