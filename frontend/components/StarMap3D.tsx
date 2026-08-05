@@ -141,36 +141,82 @@ function clusterLayout(nodes: StarNode[], edges: StarEdge[]) {
   return out;
 }
 
-/** 中央主节点：月牙（新月 Shape：外圆挖去偏移内圆） */
-function Crescent({ amberHex }: { amberHex: string }) {
-  const geometry = useMemo(() => {
-    const s = new THREE.Shape();
-    s.absarc(0, 0, 1.55, 0, Math.PI * 2);
-    const hole = new THREE.Path();
-    hole.absarc(-0.6, 0, 1.15, 0, Math.PI * 2);
-    s.holes.push(hole);
-    return new THREE.ShapeGeometry(s, 24);
+/** 中央主节点：旋涡星系（中心亮核 + 琥珀星点旋臂，与知识星同语言） */
+function GalaxyCore({ amberHex }: { amberHex: string }) {
+  const reduce = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const groupRef = useRef<THREE.Group>(null);
+  // 旋臂星点：两条对数螺旋臂（琥珀渐变透明度），共 26 星
+  const arms = useMemo(() => {
+    const pts: { x: number; z: number; s: number; o: number; a: number }[] = [];
+    const ARM = 2;
+    const N = 13;
+    for (let a = 0; a < ARM; a++) {
+      for (let i = 0; i < N; i++) {
+        const t = (i + 0.5) / N;
+        const r = 1.8 + t * 4.6;
+        const ang = t * Math.PI * 2.4 + a * Math.PI;
+        pts.push({
+          x: Math.cos(ang) * r,
+          z: Math.sin(ang) * r,
+          s: 0.16 + t * 0.2,             // 越外越小
+          o: 0.4 + (1 - t) * 0.5,        // 越外越淡
+          a: (i / N) * Math.PI * 2,      // 相位（闪动错开）
+        });
+      }
+    }
+    return pts;
   }, []);
+
+  useFrame(({ clock }) => {
+    if (groupRef.current && !reduce) {
+      groupRef.current.rotation.y = clock.getElapsedTime() * 0.12; // 慢速自转
+    }
+  });
 
   return (
     <group position={[0, 0, 0]}>
-      {/* 月牙平躺 xz 平面（绕 x 旋转 -90°），开口朝上 */}
-      <mesh geometry={geometry} rotation={[-Math.PI / 2, 0, 0]}>
-        <meshStandardMaterial
-          color={amberHex}
-          emissive={amberHex}
-          emissiveIntensity={0.85}
-          roughness={0.25}
-          metalness={0.1}
-          side={THREE.DoubleSide}
-        />
+      {/* 旋臂星点组（自转） */}
+      <group ref={groupRef}>
+        {arms.map((p, i) => (
+          <TwinklePoint key={i} x={p.x} z={p.z} size={p.s} opacity={p.o} phase={p.a} amberHex={amberHex} />
+        ))}
+      </group>
+      {/* 中心亮核：发光球体 + 光晕 */}
+      <mesh>
+        <sphereGeometry args={[0.85, 24, 24]} />
+        <meshStandardMaterial color={amberHex} emissive={amberHex} emissiveIntensity={1.5} roughness={0.2} />
       </mesh>
-      {/* 外层微光晕 */}
-      <mesh geometry={geometry} rotation={[-Math.PI / 2, 0, 0]} scale={1.18}>
-        <meshBasicMaterial color={amberHex} transparent opacity={0.12} side={THREE.DoubleSide} />
+      {/* 核外光晕（双层呼吸） */}
+      <mesh>
+        <sphereGeometry args={[1.5, 20, 20]} />
+        <meshBasicMaterial color={amberHex} transparent opacity={0.14} />
       </mesh>
-      <pointLight color={amberHex} intensity={1.8} distance={34} />
+      <mesh>
+        <sphereGeometry args={[2.2, 20, 20]} />
+        <meshBasicMaterial color={amberHex} transparent opacity={0.05} />
+      </mesh>
+      <pointLight color={amberHex} intensity={2.6} distance={40} />
     </group>
+  );
+}
+
+/** 旋臂上的闪烁星点（与知识星视觉语言一致） */
+function TwinklePoint({ x, z, size, opacity, phase, amberHex }: { x: number; z: number; size: number; opacity: number; phase: number; amberHex: string }) {
+  const ref = useRef<THREE.Mesh>(null);
+  const reduce = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  useFrame(({ clock }) => {
+    if (ref.current && !reduce) {
+      const t = clock.getElapsedTime();
+      const tw = 0.7 + 0.3 * Math.sin(t * 1.6 + phase);
+      ref.current.scale.setScalar(tw);
+      (ref.current.material as THREE.MeshBasicMaterial).opacity = opacity * tw;
+    }
+  });
+  return (
+    <mesh ref={ref} position={[x, 0, z]}>
+      <sphereGeometry args={[size, 12, 12]} />
+      <meshBasicMaterial color={amberHex} transparent opacity={opacity} />
+    </mesh>
   );
 }
 
@@ -371,8 +417,8 @@ export default function StarMap3D(props: StarMap3DProps) {
         <pointLight position={[0, 4, 0]} intensity={0.6} color="#e8e6e3" />
         <Stars radius={80} depth={40} count={2600} factor={3.2} saturation={0} fade speed={reduce ? 0 : 0.6} />
 
-        {/* 中央月牙主节点 */}
-        <Crescent amberHex={amberHex} />
+        {/* 中央旋涡星系主节点 */}
+        <GalaxyCore amberHex={amberHex} />
 
         <Galaxy
           nodes={nodes}
