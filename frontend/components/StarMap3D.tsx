@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Html, OrbitControls, Stars } from "@react-three/drei";
 import * as THREE from "three";
 import { hexToRgba, useThemeVar } from "@/lib/theme";
@@ -439,6 +439,27 @@ function Galaxy({ nodes, edges, mastery, selected, onSelect, litThreshold, trace
   );
 }
 
+/** 强制同步 canvas 尺寸 = 容器 offset 尺寸（R3F 初始测量偏差的兜底）。
+ * 用 offsetWidth/Height（不受 star-reveal 动画 scale transform 影响）。 */
+function ResizeSync() {
+  const setSize = useThree((s) => s.setSize);
+  const gl = useThree((s) => s.gl);
+  useEffect(() => {
+    const parent = gl.domElement.parentElement;
+    if (!parent) return;
+    const sync = () => setSize(parent.offsetWidth, parent.offsetHeight);
+    sync();
+    const ro = new ResizeObserver(sync);
+    ro.observe(parent);
+    window.addEventListener("resize", sync);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", sync);
+    };
+  }, [gl, setSize]);
+  return null;
+}
+
 export default function StarMap3D(props: StarMap3DProps) {
   const { nodes, edges, mastery, selected, onSelect, litThreshold = 0.5, traceChain = [], traceRoot } = props;
   const positions = useMemo(() => clusterLayout(nodes, edges), [nodes, edges]);
@@ -447,7 +468,12 @@ export default function StarMap3D(props: StarMap3DProps) {
 
   return (
     <div className="h-full w-full" style={{ background: "radial-gradient(ellipse at 30% 30%, #0f172a 0%, #0b1120 60%, #060a14 100%)" }}>
-      <Canvas camera={{ position: [0, 14, 16], fov: 50 }} dpr={[1, 1.5]}>
+      <Canvas
+        camera={{ position: [0, 14, 16], fov: 50 }}
+        dpr={[1, 1.5]}
+      >
+        {/* 强制同步 canvas 尺寸 = 容器 offset 尺寸（R3F 初始测量偏差的兜底） */}
+        <ResizeSync />
         <ambientLight intensity={0.4} />
         <pointLight position={[0, 4, 0]} intensity={0.6} color="#e8e6e3" />
         <Stars radius={80} depth={40} count={2600} factor={3.2} saturation={0} fade speed={reduce ? 0 : 0.6} />
