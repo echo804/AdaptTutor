@@ -163,11 +163,23 @@ async def api_send_message(
                         "correct_answer": result.correct_answer or q.answer,
                     },
                 )
-            reply_text = (
-                f"答对了！{result.feedback} 下一题：{nq.content if nq else '（诊断完成）'}"
-                if result.correct
-                else f"答错了。{result.feedback} 下一题：{nq.content if nq else '（诊断完成）'}"
-            )
+            if st.get("done"):
+                # M4r7j：诊断完成总结（引导下一步），不再只写"（诊断完成）"
+                if not t.weak_nodes:
+                    t.build_path()  # 诊断后生成薄弱路径（供总结与仪表盘）
+                weak = "、".join((t.weak_nodes or [])[:3]) or "—"
+                answered = st.get("answered") or 0
+                reply_text = (
+                    f"🎉 诊断完成！共诊断 {answered} 题。"
+                    f"薄弱知识点：{weak}。推荐学习路径已生成，"
+                    "可去仪表盘查看，或开始辅导练习巩固。"
+                )
+            else:
+                reply_text = (
+                    f"答对了！{result.feedback} 下一题：{nq.content}"
+                    if result.correct
+                    else f"答错了。{result.feedback} 下一题：{nq.content}"
+                )
             reply = MessageReply(
                 state="diagnose",
                 message=reply_text,
