@@ -124,20 +124,21 @@ export default function GraphPage() {
   // ---- 展开状态：星辰图 ----
   if (open) {
     return (
-      <div className="relative h-full p-4">
-        <div className="mb-3 flex items-center justify-between">
-          <h1 className="text-lg font-semibold" style={{ color: "var(--text)" }}>
+      <div className="fixed inset-0 z-40" style={{ background: "#060a14" }}>
+        {/* 顶部控制栏（浮在星空上） */}
+        <div className="absolute inset-x-0 top-0 z-20 flex items-center justify-between p-4">
+          <h1 className="text-lg font-semibold" style={{ color: "#e8e6e3" }}>
             知识图谱 · 星辰 ——《{open.subject}》
           </h1>
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-3 text-xs" style={{ color: "var(--muted)" }}>
+            <div className="flex items-center gap-3 text-xs" style={{ color: "rgba(232,230,225,0.7)" }}>
               <span className="flex items-center gap-1"><span className="inline-block h-2.5 w-2.5 rounded-full" style={{ background: amber, boxShadow: `0 0 6px ${amber}` }} /> 已点亮</span>
               <span className="flex items-center gap-1"><span className="inline-block h-2.5 w-2.5 rounded-full" style={{ background: "rgba(148,163,184,0.5)" }} /> 未完成</span>
               <span className="flex items-center gap-1"><span className="inline-block h-2.5 w-2.5 rounded-full border" style={{ background: "rgba(148,163,184,0.25)" }} /> 未测</span>
             </div>
             <button
               className="rounded-full px-4 py-1.5 text-sm font-medium transition-opacity hover:opacity-80"
-              style={{ background: "var(--accent-soft)", color: "var(--accent)" }}
+              style={{ background: "rgba(232,230,225,0.12)", color: "#e8e6e3", border: "1px solid rgba(232,230,225,0.25)" }}
               onClick={() => {
                 setOpen(null);
                 setGraph(null);
@@ -150,9 +151,11 @@ export default function GraphPage() {
           </div>
         </div>
 
-        {err && <div className="p-4 text-sm text-red-600">{err}</div>}
+        {err && <div className="p-4 pt-16 text-sm text-red-400">{err}</div>}
+
+        {/* 星空加载页（全屏） */}
         {!graph && !err && (
-          <div className="star-loading relative flex h-[calc(100%-3rem)] items-center justify-center rounded-xl border" style={{ borderColor: "var(--border)" }}>
+          <div className="star-loading absolute inset-0">
             {/* 闪烁星点 */}
             {Array.from({ length: 42 }, (_, i) => (
               <span
@@ -167,7 +170,7 @@ export default function GraphPage() {
               />
             ))}
             {/* 中央：书名 + 加载提示 */}
-            <div className="relative z-10 text-center">
+            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center text-center">
               <div className="text-lg font-semibold" style={{ color: "#e8e6e3" }}>
                 《{open.subject}》
               </div>
@@ -177,8 +180,10 @@ export default function GraphPage() {
             </div>
           </div>
         )}
+
+        {/* 星辰图（全屏沉浸） */}
         {graph && (
-          <div className="relative h-[calc(100%-3rem)] rounded-xl border" style={{ borderColor: "var(--border)", overflow: "hidden" }}>
+          <div className="absolute inset-0">
             {/* 星辰图内苏格拉底剪影（深蓝夜空上的琥珀线条，融入背景） */}
             <div
               className="pointer-events-none absolute inset-0 z-[5]"
@@ -206,28 +211,28 @@ export default function GraphPage() {
               traceRoot={trace.root || undefined}
             />
 
-            {/* 详情卡（选中星） */}
+            {/* 详情卡（选中星，浮于星空右上） */}
             {selectedNode && (
               <div
-                className="absolute right-4 top-4 w-60 rounded-xl border p-4 shadow-lg"
-                style={{ background: "var(--surface)", borderColor: "var(--border)" }}
+                className="absolute right-4 top-16 w-60 rounded-xl border p-4 shadow-lg"
+                style={{ background: "rgba(38,38,38,0.85)", borderColor: "rgba(232,230,225,0.2)", backdropFilter: "blur(8px)" }}
               >
                 <div className="mb-1 flex items-center justify-between">
-                  <span className="text-sm font-medium">{selectedNode.name}</span>
+                  <span className="text-sm font-medium" style={{ color: "#e8e6e3" }}>{selectedNode.name}</span>
                   <button
                     className="text-xs"
-                    style={{ color: "var(--muted)" }}
+                    style={{ color: "rgba(232,230,225,0.6)" }}
                     onClick={() => setSelected(null)}
                   >
                     ✕
                   </button>
                 </div>
-                <div className="space-y-1 text-xs" style={{ color: "var(--muted)" }}>
+                <div className="space-y-1 text-xs" style={{ color: "rgba(232,230,225,0.75)" }}>
                   <div>节点：{selectedNode.id}</div>
                   <div>
                     掌握度：
                     {selectedMastery !== undefined ? (
-                      <span style={{ color: selectedMastery >= 0.5 ? "var(--accent)" : "var(--warn)" }}>
+                      <span style={{ color: selectedMastery >= 0.5 ? amber : "#d9907a" }}>
                         {Math.round(selectedMastery * 100)}%（{selectedMastery >= 0.5 ? "已点亮" : "未完成"}）
                       </span>
                     ) : (
@@ -235,13 +240,13 @@ export default function GraphPage() {
                     )}
                   </div>
                   {trace.chain.length > 1 && (
-                    <div>溯源根因：<span style={{ color: "var(--accent)" }}>{trace.root}</span></div>
+                    <div>溯源根因：<span style={{ color: amber }}>{trace.root}</span></div>
                   )}
                 </div>
                 <Link
                   href="/chat"
-                  className="mt-3 block rounded px-3 py-1.5 text-center text-xs font-medium text-white"
-                  style={{ background: "var(--accent)" }}
+                  className="mt-3 block rounded px-3 py-1.5 text-center text-xs font-medium"
+                  style={{ background: amber, color: "#1a1a1a" }}
                 >
                   开始学习
                 </Link>
