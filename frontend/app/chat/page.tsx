@@ -192,11 +192,15 @@ export default function ChatPage() {
   // M4r7k：删除会话（单删/批量删）
   async function deleteSessions(ids: number[]) {
     if (!ids.length) return;
-    if (!confirm(`确认删除 ${ids.length} 个会话？删除后不可恢复。`)) return;
+    const deletingCurrent = !!sessionId && ids.includes(sessionId);
+    const tip = deletingCurrent
+      ? "（当前正在查看的会话将被删除并退出到开始页）"
+      : "（删除后不可恢复）";
+    if (!confirm(`确认删除 ${ids.length} 个会话？${tip}`)) return;
     try {
       await api<{ removed: number }>("/api/v1/sessions", { method: "DELETE", body: { ids } });
       // 若删除的是当前会话 → 退出
-      if (sessionId && ids.includes(sessionId)) {
+      if (deletingCurrent) {
         setSessionId(null);
         setActiveSessionId(null);
         setSessionType(null);
@@ -213,6 +217,15 @@ export default function ChatPage() {
     }
   }
 
+  // M4r7l：全选/取消全选
+  function toggleSelectAll() {
+    if (selectedIds.length === sessions.length) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(sessions.map((s) => s.id));
+    }
+  }
+
   const typeLabel = (t: string | null) => (t === "diagnostic" ? "诊断" : t === "tutor" ? "辅导" : t ?? "");
 
   return (
@@ -225,6 +238,9 @@ export default function ChatPage() {
             <div className="flex items-center gap-1">
               {manageMode ? (
                 <>
+                  <button className="text-xs" style={{ color: "var(--accent)" }} onClick={toggleSelectAll}>
+                    {selectedIds.length === sessions.length ? "全不选" : "全选"}
+                  </button>
                   <button className="text-xs" style={{ color: "var(--accent)" }} onClick={() => { setManageMode(false); setSelectedIds([]); }}>完成</button>
                   <button className="text-xs" style={{ color: selectedIds.length ? "#b3543c" : "var(--muted)" }} disabled={!selectedIds.length} onClick={() => deleteSessions(selectedIds)}>
                     删除({selectedIds.length})
