@@ -71,10 +71,12 @@ async def api_create_session(
         r = t.tutor_start()
         first = r.message
     elif body.type == "diagnostic":
-        st = t.start_diagnosis()
+        st = t.start_diagnosis(body.config)
         q = st.get("question")
         question = _question_to_dict(q)
         first = f"开始诊断。第一题：{q.content}" if q else "开始诊断。"
+        if st.get("done"):
+            raise HTTPException(status_code=400, detail="当前配置下无可用题目（题型/难度筛选后为空）")
     # 诊断首次选题后即可用
     s = await session_service.create_session_with_state(
         db, user.id, body.type, t.save_state()
@@ -85,6 +87,8 @@ async def api_create_session(
         status=s.status,
         first_message=first,
         question=question,
+        qcount=st.get("qcount") if body.type == "diagnostic" else None,
+        answered=st.get("answered") if body.type == "diagnostic" else None,
     )
 
 
@@ -130,8 +134,25 @@ async def api_send_message(
         result = judge(body.answer, q)
         st = t.diagnose(result.correct)
         nq = st.get("question")
+        # M4r5：判错 → 落库错题集（复盘抽卡数据源）
+        if not result.correct:
+            await repo.add_event(
+                db,
+                user.id,
+                "wrong_answer",
+                node_id=next(iter(q.step_node_map.values()), None),
+                session_id=sid,
+                payload={
+                    "qid": q.id,
+                    "question": q.content,
+                    "type": q.type,
+                    "options": q.options,
+                    "user_answer": body.answer,
+                    "correct_answer": result.correct_answer or q.answer,
+                },
+            )
         reply_text = (
-            f"答对了！{result.feedback} 下一题：{nq.content}"
+            f"答对了！{result.feedback} 下一题：{nq.content if nq else '（诊断完成）'}"
             if result.correct
             else f"答错了。{result.feedback} 下一题：{nq.content if nq else '（诊断完成）'}"
         )
@@ -144,6 +165,9 @@ async def api_send_message(
             correct=result.correct,
             feedback=result.feedback,
             judge_method=result.method,
+            correct_answer=None if result.correct else result.correct_answer,
+            qcount=st.get("qcount"),
+            answered=st.get("answered"),
         )
     else:
         r = t.tutor_step(body.content or "", correct=body.correct)
@@ -192,6 +216,29 @@ async def api_session_detail(
         state=state.get("sm", {}).get("state"),
         context=state,
     )
+
+
+@router.get("/sessions/{sid}/state")
+async def api_session_state(
+    sid: int,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """会话当前状态（M4r5b 前端"继续会话"）：恢复快照返回当前题/进度/阶段。"""
+    s = await _own_session(db, sid, user.id)
+    t = _new_orchestrator()
+    t.restore_state(s.context or {})
+    q = t.current_question
+    return {
+        "session_id": sid,
+        "type": s.type,
+        "status": s.status,
+        "state": t.sm.state.value if t.sm.state else "diagnose",
+        "question": _question_to_dict(q),
+        "qcount": t.diag_config.get("qcount"),
+        "answered": sum(t.answered_counts.values()),
+        "done": q is None,
+    }
 
 
 @router.get("/sessions/{sid}/messages", response_model=list[MessageOut])

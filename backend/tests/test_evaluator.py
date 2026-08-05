@@ -10,13 +10,13 @@ from app.engine.evaluator import (
 )
 
 
-def _q(qid: str, qtype: str, content: str, answer: str) -> Question:
+def _q(qid: str, qtype: str, content: str, answer: str, options: list[str] | None = None) -> Question:
     return Question(
         id=qid,
         type=qtype,
         content=content,
         difficulty=0.5,
-        options=["A", "B", "C", "D"] if qtype == "choice" else [],
+        options=options if options is not None else (["A", "B", "C", "D"] if qtype == "choice" else []),
         answer=answer,
         step_node_map={"step1": "a01"},
     )
@@ -35,6 +35,14 @@ def test_judge_choice_case_insensitive():
     q = _q("c2", "choice", "1+1=?", "B")
     assert judge_choice("b", q).correct
     assert not judge_choice("A", q).correct
+
+
+def test_judge_choice_wrong_gives_answer():
+    """判错给正确答案（需求 1d）：选项字母 + 选项文本。"""
+    q = _q("c3", "choice", "1+1=?", "B", options=["0", "1", "2", "3"])
+    r = judge_choice("A", q)
+    assert not r.correct
+    assert r.correct_answer == "B（1）"
 
 
 # ---- 规则兜底 ----

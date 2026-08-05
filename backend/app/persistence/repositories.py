@@ -206,6 +206,59 @@ async def get_trend(
     return [{"date": row.d.isoformat(), "count": row.n} for row in res.all()]
 
 
+async def list_wrong_questions(
+    db: AsyncSession, student_id: int, limit: int = 100
+) -> list[dict]:
+    """错题集（M4r5 复盘抽卡）：取每道错题最近一次判错记录，最新在前。"""
+    res = await db.execute(
+        select(LearningEvent)
+        .where(
+            LearningEvent.student_id == student_id,
+            LearningEvent.event_type == "wrong_answer",
+            LearningEvent.payload.isnot(None),
+        )
+        .order_by(LearningEvent.ts.desc())
+    )
+    seen: set[str] = set()
+    out: list[dict] = []
+    for ev in res.scalars().all():
+        p = ev.payload or {}
+        qid = p.get("qid")
+        if not qid or qid in seen:
+            continue
+        seen.add(qid)
+        out.append(
+            {
+                "qid": qid,
+                "ts": ev.ts.isoformat(),
+                "question": p.get("question", ""),
+                "type": p.get("type", "blank"),
+                "options": p.get("options", []),
+                "user_answer": p.get("user_answer", ""),
+                "correct_answer": p.get("correct_answer", ""),
+                "node_id": ev.node_id,
+            }
+        )
+        if len(out) >= limit:
+            break
+    return out
+
+
+async def remove_wrong_question(
+    db: AsyncSession, student_id: int, qid: str
+) -> bool:
+    """移出错题集（"已掌握"）：删除该题全部 wrong_answer 事件。"""
+    res = await db.execute(
+        LearningEvent.__table__.delete().where(
+            LearningEvent.student_id == student_id,
+            LearningEvent.event_type == "wrong_answer",
+            LearningEvent.payload["qid"].astext == qid,
+        )
+    )
+    await db.commit()
+    return res.rowcount > 0
+
+
 # ---------- evaluations ----------
 
 async def add_evaluation(

@@ -33,6 +33,28 @@ def test_diagnose_terminates_on_confidence():
     assert terminated or st.get("done")
 
 
+def test_diagnose_qcount_limits_questions():
+    """M4r5：用户自选题量上限（qcount）生效。"""
+    t = _tutor()
+    st = t.start_diagnosis({"qcount": 3, "qtypes": ["choice"]})
+    assert st.get("qcount") == 3 and st.get("answered") == 0
+    for i in range(1, 4):
+        st = t.diagnose(True)
+        if i < 3:
+            assert st.get("done") is False, f"第 {i} 轮不应提前结束"
+            assert st.get("answered") == i
+        else:
+            assert st.get("done") is True, "第 3 轮后应结束（qcount=3）"
+
+
+def test_diagnose_config_filters_types():
+    """M4r5：题型过滤——只出指定题型。"""
+    t = _tutor()
+    st = t.start_diagnosis({"qtypes": ["open"]})
+    q = st.get("question")
+    assert q is not None and q.type == "open"
+
+
 # ---- 路径 ----
 
 def test_build_path_topological():

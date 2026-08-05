@@ -82,3 +82,29 @@ async def api_trend(
     _check_self(user.id, sid)
     rows = await repo.get_trend(db, user.id, days)
     return {"trend": rows}
+
+
+@router.get("/{sid}/wrong-questions")
+async def api_wrong_questions(
+    sid: int,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """错题集（M4r5 复盘抽卡）：按题去重，最新判错在前。"""
+    _check_self(user.id, sid)
+    return {"items": await repo.list_wrong_questions(db, user.id)}
+
+
+@router.delete("/{sid}/wrong-questions/{qid}")
+async def api_remove_wrong_question(
+    sid: int,
+    qid: str,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """移出错题集（"已掌握"）。"""
+    _check_self(user.id, sid)
+    ok = await repo.remove_wrong_question(db, user.id, qid)
+    if not ok:
+        raise HTTPException(status_code=404, detail="该错题不存在或已移除")
+    return {"removed": qid}

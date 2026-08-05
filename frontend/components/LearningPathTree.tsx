@@ -1,10 +1,13 @@
 "use client";
 
-/** 学习路径树（M4r3，05 §5.3）：SVG 横向链——根因 → … → 目标，
- * 节点圆按掌握度着色（冷灰 #94A3B8 → 暖绿 #7EC8A0），链首根因暖色描边。 */
+/** 缩略版星系路径（M4r7 需求 4，呼应 3D 宇宙）：
+ * - 背景微星空点 + 每个行星的轨道椭圆环
+ * - 行星节点：径向渐变（受光面亮/背光暗）+ 光晕；掌握度冷灰→暖绿着色
+ * - 根因：暖色 + 呼吸脉冲环；路径链虚线暖色流动
+ */
 
 interface LearningPathTreeProps {
-  path: string[];               // 推荐路径节点 id（拓扑序，链首=根因）
+  path: string[];
   mastery: Record<string, number>;
   names?: Record<string, string>;
   height?: number;
@@ -20,22 +23,58 @@ function color(p?: number) {
   return `rgb(${ch(0)},${ch(1)},${ch(2)})`;
 }
 
-export default function LearningPathTree({ path, mastery, names, height = 120 }: LearningPathTreeProps) {
+export default function LearningPathTree({ path, mastery, names, height = 150 }: LearningPathTreeProps) {
   const n = path.length;
   if (n === 0) return null;
-  const padX = 34;
-  const nodeR = 16;
+  const padX = 40;
+  const nodeR = 17;
   const step = n > 1 ? (100 - padX * 2) / (n - 1) : 0;
   const cy = height / 2;
 
   const nodes = path.map((id, i) => {
     const x = padX + (n > 1 ? i * step : 0);
-    return { id, x, cx: (x / 100) * 1000, i };
+    return { id, cx: (x / 100) * 1000, i };
   });
 
+  // 背景星点（伪随机但稳定）
+  const stars = Array.from({ length: 26 }, (_, k) => ({
+    x: ((k * 37) % 97) + 1.5,
+    y: ((k * 53) % 92) + 4,
+    r: 0.5 + ((k * 7) % 10) / 9,
+    o: 0.25 + ((k * 13) % 30) / 60,
+  }));
+
   return (
-    <svg viewBox={`0 0 1000 ${height}`} className="w-full" role="img" aria-label="学习路径树">
-      {/* 连线 */}
+    <svg viewBox={`0 0 1000 ${height}`} className="w-full" role="img" aria-label="学习路径星系图">
+      <defs>
+        <radialGradient id="planetGrad" cx="35%" cy="30%" r="75%">
+          <stop offset="0%" stopColor="#ffffff" stopOpacity={0.55} />
+          <stop offset="45%" stopColor="#ffffff" stopOpacity={0.08} />
+          <stop offset="100%" stopColor="#000000" stopOpacity={0.35} />
+        </radialGradient>
+      </defs>
+
+      {/* 背景星点 */}
+      {stars.map((s, k) => (
+        <circle key={k} cx={s.x * 10} cy={s.y * 10} r={s.r} fill="#cbd5e1" opacity={s.o} />
+      ))}
+
+      {/* 轨道椭圆（每颗行星） */}
+      {nodes.map((nd) => (
+        <ellipse
+          key={`orbit-${nd.id}`}
+          cx={nd.cx}
+          cy={cy}
+          rx={nodeR + 9}
+          ry={nodeR + 4.5}
+          fill="none"
+          stroke="rgba(148,163,184,0.22)"
+          strokeWidth={1}
+          transform={`rotate(-8 ${nd.cx} ${cy})`}
+        />
+      ))}
+
+      {/* 路径链（虚线流动感） */}
       {nodes.slice(1).map((nd, i) => {
         const prev = nodes[i];
         return (
@@ -45,32 +84,33 @@ export default function LearningPathTree({ path, mastery, names, height = 120 }:
             y1={cy}
             x2={nd.cx - nodeR}
             y2={cy}
-            stroke="rgba(148,163,184,0.4)"
+            stroke="rgba(212,165,116,0.55)"
             strokeWidth={2}
-            strokeDasharray="4 3"
+            strokeDasharray="5 4"
           />
         );
       })}
-      {/* 节点 */}
+
+      {/* 行星节点 */}
       {nodes.map((nd) => {
         const p = mastery[nd.id];
         const isRoot = nd.i === 0;
+        const base = color(p);
         return (
           <g key={nd.id}>
-            <circle
-              cx={nd.cx}
-              cy={cy}
-              r={nodeR}
-              fill={color(p)}
-              stroke={isRoot ? "#d4a574" : "rgba(148,163,184,0.5)"}
-              strokeWidth={isRoot ? 2 : 1}
-            />
-            {/* 根因脉冲环 */}
-            {isRoot && <circle cx={nd.cx} cy={cy} r={nodeR + 4} fill="none" stroke="#d4a574" strokeWidth={1} opacity={0.5} />}
-            <text x={nd.cx} y={cy + 4} textAnchor="middle" fontSize={11} fill="#0f172a" fontWeight={600}>
+            {/* 光晕 */}
+            <circle cx={nd.cx} cy={cy} r={nodeR + 5} fill={base} opacity={0.18} />
+            {/* 行星体 */}
+            <circle cx={nd.cx} cy={cy} r={nodeR} fill={base} stroke={isRoot ? "#d4a574" : "rgba(148,163,184,0.6)"} strokeWidth={isRoot ? 2 : 1} />
+            {/* 光照层（受光面亮） */}
+            <circle cx={nd.cx} cy={cy} r={nodeR} fill="url(#planetGrad)" />
+            {/* 根因呼吸脉冲环 */}
+            {isRoot && <circle cx={nd.cx} cy={cy} r={nodeR + 4.5} fill="none" stroke="#d4a574" strokeWidth={1.2} opacity={0.6} />}
+            {/* 编号 */}
+            <text x={nd.cx} y={cy + 4} textAnchor="middle" fontSize={11} fill="#0f172a" fontWeight={700}>
               {nd.id.replace(/[a-z]/g, "")}
             </text>
-            <text x={nd.cx} y={cy + 26} textAnchor="middle" fontSize={9} fill="rgba(148,163,184,0.9)">
+            <text x={nd.cx} y={cy + 30} textAnchor="middle" fontSize={9} fill="rgba(148,163,184,0.9)">
               {names?.[nd.id] || nd.id}
             </text>
           </g>

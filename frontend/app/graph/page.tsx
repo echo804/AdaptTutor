@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import StarMap, { StarEdge, StarNode } from "@/components/StarMap";
+import StarMap3D, { StarEdge, StarNode } from "@/components/StarMap3D";
 import { api, MasteryOut } from "@/lib/api";
 
 /** 知识图谱星辰图页（M4r2：星空 + 知识星点亮；点击星 → 详情卡 + 溯源发光路径） */
@@ -74,7 +74,7 @@ export default function GraphPage() {
       </div>
 
       <div className="h-[calc(100%-3rem)] rounded-xl border" style={{ borderColor: "var(--border)", overflow: "hidden" }}>
-        <StarMap
+        <StarMap3D
           nodes={graph.nodes}
           edges={graph.edges}
           mastery={mastery}

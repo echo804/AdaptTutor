@@ -28,6 +28,8 @@ class JudgeResult:
     feedback: str
     method: str = "rule"  # choice | rule | llm | mock
     degraded: bool = False
+    correct_answer: str | None = None  # M4r5：判错时展示正确答案（用户需求 1d）
+    explanation: str | None = None     # 简短解析（有则附）
 
 
 # ---------- 选择题 ----------
@@ -36,10 +38,14 @@ def judge_choice(user_choice: str, question: Question) -> JudgeResult:
     """选择题：比对选项字母（A/B/C/D，容错小写/空格）。"""
     u = user_choice.strip().upper()
     correct = u == question.answer.strip().upper()
+    ans = question.answer.strip().upper()
+    idx = ord(ans) - 65 if len(ans) == 1 and ans.isalpha() else -1
+    opt = question.options[idx] if 0 <= idx < len(question.options) else None
     return JudgeResult(
         correct=correct,
         feedback=_FEEDBACK_CORRECT if correct else _FEEDBACK_WRONG,
         method="choice",
+        correct_answer=None if correct else f"{ans}（{opt}）" if opt else ans,
     )
 
 
@@ -64,6 +70,7 @@ def judge_by_rule(user_text: str, question: Question) -> JudgeResult | None:
             correct=matched,
             feedback=_FEEDBACK_CORRECT if matched else _FEEDBACK_WRONG,
             method="rule",
+            correct_answer=None if matched else ans,
         )
 
     # 2. 关键词匹配（答案文本出现在学生回答中，忽略空白）
@@ -71,20 +78,22 @@ def judge_by_rule(user_text: str, question: Question) -> JudgeResult | None:
         norm = lambda s: re.sub(r"\s+", "", s)  # noqa: E731
         if norm(ans) in norm(user):
             return JudgeResult(correct=True, feedback=_FEEDBACK_CORRECT, method="rule")
-        return JudgeResult(correct=False, feedback=_FEEDBACK_WRONG, method="rule")
+        return JudgeResult(
+            correct=False, feedback=_FEEDBACK_WRONG, method="rule", correct_answer=ans
+        )
 
     return None  # 无法判定（交给 LLM）
 
 
 # ---------- LLM 判题（填空/解答） ----------
 
-_JUDGE_PROMPT = """你是数学辅导判题器。根据题目、标准答案与学生答案，判断学生答案是否正确，并给一句不超过 30 字的引导式反馈（不直接给完整答案）。
+_JUDGE_PROMPT = """你是数学辅导判题器。根据题目、标准答案与学生答案，判断学生答案是否正确，给一句不超过 30 字的引导式反馈；若学生答错，在 correct_answer 中给出标准答案（简洁，含选项字母或数值/结论）。
 
 题目：{content}
 标准答案：{answer}
 学生答案：{student}
 
-只输出 JSON：{{"correct": true/false, "feedback": "一句话反馈"}}
+只输出 JSON：{{"correct": true/false, "feedback": "一句话反馈", "correct_answer": "标准答案（仅答错时）"}}
 """
 
 
@@ -120,7 +129,11 @@ def judge_open(
         # 无 key 或降级 → 规则兜底结果
         base = rule or JudgeResult(correct=False, feedback=_FEEDBACK_WRONG, method="rule")
         return JudgeResult(
-            correct=base.correct, feedback=base.feedback, method=base.method, degraded=True
+            correct=base.correct,
+            feedback=base.feedback,
+            method=base.method,
+            degraded=True,
+            correct_answer=base.correct_answer,
         )
 
     parsed = _parse_judge_json(resp.text)
@@ -128,7 +141,11 @@ def judge_open(
         # LLM 输出不可解析 → 规则兜底
         base = rule or JudgeResult(correct=False, feedback=_FEEDBACK_WRONG, method="rule")
         return JudgeResult(
-            correct=base.correct, feedback=base.feedback, method=base.method, degraded=True
+            correct=base.correct,
+            feedback=base.feedback,
+            method=base.method,
+            degraded=True,
+            correct_answer=base.correct_answer,
         )
 
     feedback = str(parsed.get("feedback") or (_FEEDBACK_CORRECT if parsed["correct"] else _FEEDBACK_WRONG))
@@ -136,6 +153,7 @@ def judge_open(
         correct=bool(parsed["correct"]),
         feedback=feedback,
         method="llm",
+        correct_answer=str(parsed["correct_answer"]) if parsed.get("correct_answer") else None,
     )
 
 

@@ -8,6 +8,7 @@ import { clearToken, getToken, api } from "@/lib/api";
 const NAV = [
   { href: "/chat", label: "对话学习" },
   { href: "/graph", label: "知识图谱" },
+  { href: "/review", label: "错题复盘" },
   { href: "/dashboard", label: "仪表盘" },
   { href: "/settings", label: "设置" },
 ];

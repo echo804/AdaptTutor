@@ -61,11 +61,24 @@ class TutorOrchestrator:
         self.weak_nodes: list[str] = []
         self.verify_question = None
         self.history: list[str] = []
+        # M4r5：诊断配置（题型/题量/难度，前端自主选择）
+        self.diag_config: dict = {"qtypes": ["choice", "blank", "open"], "qcount": 10, "difficulty": "auto"}
 
     # ---------- 阶段 1：诊断 ----------
 
-    def start_diagnosis(self) -> dict:
-        """初始化诊断：选第一题（不消耗作答），供创建会话时返回首题。"""
+    def start_diagnosis(self, config: dict | None = None) -> dict:
+        """初始化诊断：按配置过滤题型/难度/题量，选第一题（不消耗作答）。"""
+        if config:
+            merged = dict(self.diag_config)
+            merged.update({k: v for k, v in config.items() if v is not None})
+            self.diag_config = merged
+        qtypes = self.diag_config.get("qtypes") or ["choice", "blank", "open"]
+        diff = self.diag_config.get("difficulty", "auto")
+        pool = [q for q in self.pack.questions if q.type in qtypes]
+        if diff != "auto":
+            lo, hi = {"easy": (0, 0.34), "medium": (0.34, 0.66), "hard": (0.66, 1.01)}[diff]
+            pool = [q for q in pool if lo <= q.difficulty < hi]
+        self.pool = pool
         self.current_question = select_next_question(
             self.mastery, self.pool, self.rules
         )
@@ -86,8 +99,16 @@ class TutorOrchestrator:
         return self._diag_state()
 
     def _diag_state(self) -> dict:
-        if self.current_question is None:
-            return {"stage": "diagnose", "done": True}
+        # M4r5：用户自选题量上限（qcount）优先于置信度终止
+        answered = sum(self.answered_counts.values())
+        max_q = int(self.diag_config.get("qcount", 10))
+        if self.current_question is None or answered >= max_q:
+            return {
+                "stage": "diagnose",
+                "done": True,
+                "qcount": max_q,
+                "answered": answered,
+            }
         weak = min(self.mastery, key=self.mastery.get)
         confident = (1 - self.mastery[weak]) >= self.rules.termination.confidence_threshold
         return {
@@ -97,6 +118,8 @@ class TutorOrchestrator:
             "weakest": weak,
             "confidence": round(1 - self.mastery[weak], 3),
             "terminated": confident,
+            "qcount": max_q,
+            "answered": answered,
         }
 
     # ---------- 阶段 2：路径 ----------
@@ -224,6 +247,7 @@ class TutorOrchestrator:
             if self.current_question
             else None,
             "pool_ids": [q.id for q in self.pool],
+            "diag_config": dict(self.diag_config),
         }
 
     def restore_state(self, state: dict) -> None:
@@ -247,6 +271,9 @@ class TutorOrchestrator:
         if pool_ids is not None:
             by_id = {q.id: q for q in self.pack.questions}
             self.pool = [by_id[i] for i in pool_ids if i in by_id]
+        # M4r5：恢复诊断配置（题型/题量/难度）
+        if state.get("diag_config"):
+            self.diag_config.update(state["diag_config"])
 
     # ---------- 阶段 4：反馈 ----------
 

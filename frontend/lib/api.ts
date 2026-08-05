@@ -86,6 +86,9 @@ export interface MessageReply {
   correct: boolean | null;
   feedback: string | null;
   judge_method: string | null;
+  correct_answer: string | null;
+  qcount: number | null;
+  answered: number | null;
 }
 
 export interface SessionCreated {

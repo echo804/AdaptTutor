@@ -231,3 +231,77 @@ async def test_healthz(client):
     assert r.status_code == 200
     assert r.json()["ok"] is True
     assert r.json()["db"] == "up"
+
+# ---- M4r5：错题集生命周期 ----
+
+async def test_wrong_questions_lifecycle(client):
+    """判错落库 → 查询去重 → 移除（已掌握）。"""
+    from app.persistence import repositories as repo
+
+    token, uid = await _register(client)
+    h = {"Authorization": f"Bearer {token}"}
+    await client.put("/me/api-keys/deepseek", json={"provider": "deepseek", "api_key": "sk-secret-abcdefgh"}, headers=h)
+    r = await client.post("/api/v1/sessions", json={"type": "diagnostic"}, headers=h)
+    sid = r.json()["session_id"]
+
+    # 直接构造两条 wrong_answer 事件（同一题 q001，另一题 q002）
+    factory = get_session_factory()
+    async with factory() as db:
+        await repo.add_event(
+            db, uid, "wrong_answer", node_id="a01", session_id=sid,
+            payload={"qid": "q001", "question": "测试题一", "type": "blank", "options": [],
+                     "user_answer": "x", "correct_answer": "3"},
+        )
+        await repo.add_event(
+            db, uid, "wrong_answer", node_id="a01", session_id=sid,
+            payload={"qid": "q001", "question": "测试题一", "type": "blank", "options": [],
+                     "user_answer": "y", "correct_answer": "3"},
+        )
+        await repo.add_event(
+            db, uid, "wrong_answer", node_id="b02", session_id=sid,
+            payload={"qid": "q002", "question": "测试题二", "type": "choice", "options": ["1", "2"],
+                     "user_answer": "A", "correct_answer": "B"},
+        )
+
+    # 查询：q001/q002 各一条（去重）
+    r = await client.get(f"/api/v1/students/{uid}/wrong-questions", headers=h)
+    assert r.status_code == 200
+    items = r.json()["items"]
+    qids = {i["qid"] for i in items}
+    assert qids == {"q001", "q002"}
+    q1 = next(i for i in items if i["qid"] == "q001")
+    assert q1["user_answer"] == "y"  # 最新判错优先
+
+    # 移除 q001（已掌握）
+    r = await client.delete(f"/api/v1/students/{uid}/wrong-questions/q001", headers=h)
+    assert r.status_code == 200
+    r = await client.get(f"/api/v1/students/{uid}/wrong-questions", headers=h)
+    assert {i["qid"] for i in r.json()["items"]} == {"q002"}
+
+    # 越权：另一用户不能查
+    token_b, uid_b = await _register(client)
+    r = await client.get(f"/api/v1/students/{uid_b}/wrong-questions", headers={"Authorization": f"Bearer {token_b}"})
+    assert r.status_code == 200
+    assert r.json()["items"] == []
+
+
+async def test_diagnostic_config_qcount(client):
+    """诊断配置：qcount 上限 → 3 轮后诊断完成。"""
+    token, uid = await _register(client)
+    h = {"Authorization": f"Bearer {token}"}
+    await client.put("/me/api-keys/deepseek", json={"provider": "deepseek", "api_key": "sk-secret-abcdefgh"}, headers=h)
+    r = await client.post(
+        "/api/v1/sessions",
+        json={"type": "diagnostic", "config": {"qtypes": ["choice"], "qcount": 3, "difficulty": "auto"}},
+        headers=h,
+    )
+    assert r.status_code == 200, r.text
+    assert r.json()["qcount"] == 3
+    sid = r.json()["session_id"]
+    for i in range(3):
+        r = await client.post(f"/api/v1/sessions/{sid}/messages", json={"kind": "answer", "answer": "A"}, headers=h)
+        assert r.status_code == 200
+        if i == 2:
+            assert r.json()["done"] is True  # 3 题后结束
+        else:
+            assert r.json()["done"] is False

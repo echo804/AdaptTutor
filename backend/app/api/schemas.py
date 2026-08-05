@@ -58,6 +58,8 @@ class SettingsPutRequest(BaseModel):
 
 class SessionCreateRequest(BaseModel):
     type: str = Field(pattern="^(diagnostic|tutor|review)$")
+    # M4r5：诊断配置（用户自主选择题型/题量/难度）
+    config: dict | None = None
 
 
 class SessionCreated(BaseModel):
@@ -65,7 +67,9 @@ class SessionCreated(BaseModel):
     type: str
     status: str
     first_message: str | None = None
-    question: dict | None = None  # 诊断首题（M4 前端作答按钮用）
+    question: dict | None = None
+    qcount: int | None = None    # M4r5：诊断总题数（前端进度显示）
+    answered: int | None = None  # M4r5：当前已答数  # 诊断首题（M4 前端作答按钮用）
 
 
 class MessageSendRequest(BaseModel):
@@ -86,6 +90,9 @@ class MessageReply(BaseModel):
     correct: bool | None = None       # AI 判题结果（M4r1）
     feedback: str | None = None       # 判题反馈
     judge_method: str | None = None   # choice|rule|llm
+    correct_answer: str | None = None # 判错时标准答案（M4r5 需求 1d）
+    qcount: int | None = None         # M4r5：诊断总题数
+    answered: int | None = None       # M4r5：当前已答数
 
 
 class SessionDetail(BaseModel):
