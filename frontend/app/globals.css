@@ -492,3 +492,33 @@ body:has(.note-page) {
 @media (prefers-reduced-motion: reduce) {
   .star-loading .twinkle { animation: none; opacity: 0.6; }
 }
+
+/* ---- M4r12 苏格拉底水印：主框架各功能页背景（mask 蒙版 + 主题对比色） ----
+ * 用透明 PNG 线稿作 alpha 蒙版，背景色 = --amber（与 --accent 主色对比，
+ * 随色板/明暗联动：浅色琥珀 / 暗色亮琥珀）。极低透明，不干扰内容阅读。
+ */
+.socrates-watermark {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background: var(--amber);
+  -webkit-mask-image: url("/socrates-full.webp");
+  mask-image: url("/socrates-full.webp");
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center bottom;
+  mask-position: center bottom;
+  opacity: 0.1;
+}
+/* 暗色模式下稍微提亮，保证线条在深灰背景上仍可见 */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-mode="light"]) .socrates-watermark {
+    opacity: 0.14;
+  }
+}
+:root[data-mode="dark"] .socrates-watermark {
+  opacity: 0.14;
+}

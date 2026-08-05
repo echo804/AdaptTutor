@@ -212,8 +212,12 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           ))}
         </nav>
 
-        {/* 内容区 */}
-        <main className="flex-1 overflow-auto">{children}</main>
+        {/* 内容区：底层苏格拉底水印 + 上层页面内容 */}
+        <main className="relative flex-1 overflow-auto">
+          {/* 苏格拉底水印（M4r12：mask 蒙版，线条色 = --amber 与主题主色对比） */}
+          <div className="socrates-watermark" aria-hidden />
+          <div className="relative z-10">{children}</div>
+        </main>
       </div>
     </div>
   );
