@@ -67,6 +67,7 @@ class TutorOrchestrator:
         self.tutor_pool: list = list(self.pack.questions)
         self.max_rounds: int = 1
         self.practice_rounds: int = 0
+        self.current_node: str | None = None  # M4r7i：当前辅导知识点（变式题匹配依据）
 
     # ---------- 阶段 1：诊断 ----------
 
@@ -162,14 +163,29 @@ class TutorOrchestrator:
             self.build_path()
         return self._tutor_start_round()
 
+    def _pick_node_question(self):
+        """从路径中顺延选择首个有可用题的节点；路径无匹配则放宽到全图（M4r7i）。"""
+        path = self.path or []
+        candidates = list(path) + [n for n in self.graph.node_ids if n not in path]
+        for n in candidates:
+            q = next((q for q in self.tutor_pool if n in q.step_node_map.values()), None)
+            if q:
+                return n, q
+        return None, None
+
     def _tutor_start_round(self) -> TurnResult:
-        """启动一轮辅导（当前路径首个知识点）。"""
+        """启动一轮辅导：从路径中顺延选择首个有可用题的节点（M4r7i）。"""
         self.sm.reset()
-        node = self.path[0] if self.path else self.graph.node_ids[0]
-        self.verify_question = next(
-            (q for q in self.tutor_pool if node in q.step_node_map.values()), None
-        )
-        msg = f"我们来看这个知识点：{node}。先试试这题：{self.verify_question.content if self.verify_question else '—'}"
+        node, q = self._pick_node_question()
+        self.current_node = node
+        self.verify_question = q
+        if self.verify_question is None:
+            return TurnResult(
+                state=self.sm.state.value,
+                message="当前配置（题型/难度）下暂无可用题目，请调整配置后再试。",
+                context=dict(self.sm.context),
+            )
+        msg = f"我们来看这个知识点：{node}。先试试这题：{self.verify_question.content}"
         return TurnResult(state=self.sm.state.value, message=msg, context=dict(self.sm.context))
 
     def tutor_step(self, user_msg: str, correct: bool | None = None) -> TurnResult:
@@ -219,20 +235,37 @@ class TutorOrchestrator:
             if correct is True:
                 self.sm.step(Event.VERIFY_PASS)
                 if self.sm.state == State.DONE and self.practice_rounds + 1 < self.max_rounds and len(self.path) > 1:
-                    # M4r7h：练习轮数未满且路径有后续 → 进入下一知识点
+                    # M4r7h：练习轮数未满且路径有后续 → 进入下一知识点（顺延选有题的节点）
                     self.practice_rounds += 1
                     self.path = self.path[1:]
                     self.sm.reset()
-                    node = self.path[0]
-                    self.verify_question = next(
-                        (q for q in self.tutor_pool if node in q.step_node_map.values()), None
-                    )
+                    node, q = self._pick_node_question()
+                    self.current_node = node
+                    self.verify_question = q
+                    if self.verify_question is None:
+                        return TurnResult(
+                            state=self.sm.state.value,
+                            message="当前配置下剩余知识点暂无可用题目，本轮练习到此结束。",
+                            context=dict(self.sm.context),
+                        )
                     return TurnResult(
                         state=self.sm.state.value,
-                        message=f"很好，这一步掌握了！进入下一个知识点：{node}。先试试这题：{self.verify_question.content if self.verify_question else '—'}",
+                        message=f"很好，这一步掌握了！进入下一个知识点：{node}。先试试这题：{self.verify_question.content}",
                         context=dict(self.sm.context),
                     )
                 self.practice_rounds += 1
+                if self.practice_rounds >= self.max_rounds or len(self.path) <= 1:
+                    # M4r7i：练习完成总结（轮数满/路径耗尽）——不再显示误导性"进入下一题"
+                    weak = "、".join((self.weak_nodes or ["—"])[:3])
+                    return TurnResult(
+                        state=self.sm.state.value,
+                        message=(
+                            f"🎉 本轮练习完成！巩固了 {self.practice_rounds} 个知识点。"
+                            f"当前薄弱点是：{weak}。"
+                            "可以去仪表盘查看路径，或开始新的会话继续巩固。"
+                        ),
+                        context=dict(self.sm.context),
+                    )
                 return TurnResult(
                     state=self.sm.state.value,
                     message="很好，这一步掌握了！我们进入下一题。",
@@ -275,7 +308,7 @@ class TutorOrchestrator:
         )
 
     def _pick_verify(self):
-        node = self.path[0] if self.path else None
+        node = self.current_node or (self.path[0] if self.path else None)
         cands = [q for q in self.tutor_pool if node in q.step_node_map.values()]
         return cands[-1] if cands else None
 
@@ -300,6 +333,7 @@ class TutorOrchestrator:
             else None,
             "practice_rounds": self.practice_rounds,
             "max_rounds": self.max_rounds,
+            "current_node": self.current_node,
         }
 
     def restore_state(self, state: dict) -> None:
@@ -335,6 +369,7 @@ class TutorOrchestrator:
         # M4r7h：恢复辅导题库与练习轮数
         self.max_rounds = int(state.get("max_rounds", self.max_rounds))
         self.practice_rounds = int(state.get("practice_rounds", 0))
+        self.current_node = state.get("current_node")
         qtypes = self.diag_config.get("qtypes") or ["choice", "blank", "open"]
         diff = self.diag_config.get("difficulty", "auto")
         pool = [q for q in self.pack.questions if q.type in qtypes]
