@@ -1,17 +1,15 @@
 "use client";
 
-import { useThemeVar } from "@/lib/theme";
+import { transformHex, useThemeVar } from "@/lib/theme";
 import type { BookInfo } from "@/lib/bookshelf";
 
-/** 魔法书（M4r11）：复古魔法书 SVG——深色皮质封面 + 烫金书名 + 书脊 + 金属角饰。
- * 封面角标：星群表示掌握进度（5 星，按 percent 点亮琥珀/暗灰）。
- * M4r11b：未点亮（mastered=0）→ 封面蒙尘 + 角落蜘蛛网；已点亮 → 琥珀高亮慢闪。
+/** 魔法书（M4r11e）：封面皮质从主题主色（--accent）派生，随色板/明暗联动。
+ * 点亮书：主色压暗成深皮（色相跟随主题）；蒙尘书：主色降饱和 + 提亮成旧皮灰。
+ * 烫金书名/星群/角饰仍用琥珀系（--amber）。
  */
 
 const GOLD = "#d4a574"; // 烫金
 const GOLD_DIM = "rgba(212,165,116,0.35)";
-const LEATHER_LIT = ["#4a3523", "#3a2a1c", "#2c2016"]; // 点亮书：更暖的皮质
-const LEATHER_DIM = ["#5a5248", "#4a433b", "#38322c"]; // 蒙尘书：灰棕旧皮质
 const STAR_COUNT = 5;
 
 interface MagicBookProps {
@@ -22,10 +20,14 @@ interface MagicBookProps {
 
 export default function MagicBook({ book, active, onOpen }: MagicBookProps) {
   const amber = useThemeVar("--amber", GOLD);
+  const accent = useThemeVar("--accent", "#2c3e50");
   const litStars = Math.round(book.percent * STAR_COUNT);
   const lit = book.mastered > 0; // 已点亮：mastered > 0 → 高亮慢闪；否则蒙尘
   const title = book.subject.length > 6 ? `${book.subject.slice(0, 6)}…` : book.subject;
-  const leather = lit ? LEATHER_LIT : LEATHER_DIM;
+  // 皮质渐变（主色派生）：点亮=深皮三阶；蒙尘=降饱和提亮的旧皮三阶
+  const leather = lit
+    ? [transformHex(accent, { lightness: 0.24 }), transformHex(accent, { lightness: 0.18 }), transformHex(accent, { lightness: 0.12 })]
+    : [transformHex(accent, { saturation: 0.25, lightness: 0.40 }), transformHex(accent, { saturation: 0.22, lightness: 0.32 }), transformHex(accent, { saturation: 0.20, lightness: 0.26 })];
 
   return (
     <button

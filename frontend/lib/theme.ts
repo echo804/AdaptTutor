@@ -78,3 +78,49 @@ export function hexToRgba(hex: string, alpha: number): string {
   if (Number.isNaN(n) || h.length !== 6) return `rgba(212,165,116,${alpha})`; // 解析失败回退琥珀
   return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${alpha})`;
 }
+
+/** 变换一个 #hex 颜色的饱和度/明度（HSL 空间，保持色相），用于从主题主色派生封面皮质等。
+ * 例：transformHex("#2c3e50", { saturation: 0.8, lightness: 0.22 }) → 墨蓝加深皮色
+ */
+export function transformHex(
+  hex: string,
+  opts: { saturation?: number; lightness?: number } = {},
+): string {
+  let h = hex.trim().replace("#", "");
+  if (h.length === 3) h = h.split("").map((c) => c + c).join("");
+  if (h.length !== 6) return hex; // 非 hex（如 rgb()/var()）原样返回
+  const n = parseInt(h, 16);
+  const r = (n >> 16) & 255;
+  const g = (n >> 8) & 255;
+  const b = n & 255;
+
+  // RGB → HSL
+  const rn = r / 255, gn = g / 255, bn = b / 255;
+  const max = Math.max(rn, gn, bn), min = Math.min(rn, gn, bn);
+  let hue = 0, sat = 0;
+  const light = (max + min) / 2;
+  const d = max - min;
+  if (d !== 0) {
+    sat = light > 0.5 ? d / (2 - max - min) : d / (max + min);
+    if (max === rn) hue = ((gn - bn) / d + (gn < bn ? 6 : 0)) / 6;
+    else if (max === gn) hue = ((bn - rn) / d + 2) / 6;
+    else hue = ((rn - gn) / d + 4) / 6;
+  }
+  const ns = opts.saturation !== undefined ? opts.saturation : sat;
+  const nl = opts.lightness !== undefined ? opts.lightness : light;
+
+  // HSL → RGB
+  const q = nl < 0.5 ? nl * (1 + ns) : nl + ns - nl * ns;
+  const p = 2 * nl - q;
+  const conv = (t: number) => {
+    let tt = t;
+    if (tt < 0) tt += 1;
+    if (tt > 1) tt -= 1;
+    if (tt < 1 / 6) return p + (q - p) * 6 * tt;
+    if (tt < 1 / 2) return q;
+    if (tt < 2 / 3) return p + (q - p) * (2 / 3 - tt) * 6;
+    return p;
+  };
+  const to8 = (x: number) => Math.round(x * 255);
+  return `rgb(${to8(conv(hue + 1 / 3))},${to8(conv(hue))},${to8(conv(hue - 1 / 3))})`;
+}
