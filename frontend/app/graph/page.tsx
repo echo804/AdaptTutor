@@ -179,6 +179,23 @@ export default function GraphPage() {
         )}
         {graph && (
           <div className="relative h-[calc(100%-3rem)] rounded-xl border" style={{ borderColor: "var(--border)", overflow: "hidden" }}>
+            {/* 星辰图内苏格拉底剪影（深蓝夜空上的琥珀线条，融入背景） */}
+            <div
+              className="pointer-events-none absolute inset-0 z-[5]"
+              style={{
+                background: "rgba(212,165,116,0.5)",
+                WebkitMaskImage: "url(/socrates-full.webp)",
+                maskImage: "url(/socrates-full.webp)",
+                WebkitMaskSize: "contain",
+                maskSize: "contain",
+                WebkitMaskRepeat: "no-repeat",
+                maskRepeat: "no-repeat",
+                WebkitMaskPosition: "center bottom",
+                maskPosition: "center bottom",
+                opacity: 0.12,
+              }}
+              aria-hidden
+            />
             <StarMap3D
               nodes={graph.nodes}
               edges={graph.edges}

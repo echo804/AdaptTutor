@@ -216,7 +216,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         <main className="relative flex-1 overflow-auto">
           {/* 苏格拉底水印（M4r12：mask 蒙版，线条色 = --amber 与主题主色对比） */}
           <div className="socrates-watermark" aria-hidden />
-          <div className="relative z-10">{children}</div>
+          <div className="relative z-10 h-full">{children}</div>
         </main>
       </div>
     </div>
