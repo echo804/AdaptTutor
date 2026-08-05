@@ -5,29 +5,36 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getToken } from "@/lib/api";
 
-/** 欢迎页（M4r9d）：淡黄素描纸 + 左侧深灰苏格拉底雕像头像水印（无五官侧脸）+ 右侧哲思文案。
+/** 欢迎页（M4r9f）：淡黄素描纸 + 正中苏格拉底正面雕像剪影（卷发环绕头像）+ 文字浮于剪影上。
  * 已登录 → 直接进入 /chat；未登录 → 展示欢迎页 + 登录/注册 CTA。
  */
 
 const BRAND = "AdaptTutor";
 const TITLE = "不是给予答案，而是唤醒思考";
 
-/** 苏格拉底头像剪影：古希腊雕像头部（卷发 + 无五官侧脸轮廓），深灰水印 */
+/** 苏格拉底正面头像剪影：古希腊雕像正面（蛋形脸轮廓 + 卷发帽环绕 + 两侧垂发），深灰水印 */
 function SocratesWatermark({ className = "" }: { className?: string }) {
   return (
     <svg
-      viewBox="150 10 205 335"
+      viewBox="0 0 420 480"
       className={className}
       aria-hidden
       preserveAspectRatio="xMidYMid meet"
     >
-      <g fill="#3f3f46" opacity="0.38">
-        {/* 头：无五官侧脸轮廓（额 → 鼻 → 唇 → 下巴 → 后脑） */}
-        <path d="M168 132 C168 78 200 44 248 40 C296 36 332 66 336 106 C340 118 340 130 336 140 C332 150 326 156 320 160 L300 170 C296 176 294 182 294 188 C294 196 296 202 300 208 L282 212 C280 220 280 226 282 232 C286 236 290 240 292 244 C288 250 282 256 278 262 C274 270 272 278 272 286 C272 296 276 304 282 312 C278 320 272 326 264 330 C256 334 248 334 242 330 C232 324 226 316 222 306 C218 296 216 284 216 272 C216 258 218 244 222 232 C212 226 204 218 200 206 C196 192 196 176 200 162 C190 156 180 148 174 136 C168 124 168 116 168 132 Z" />
-        {/* 卷发（覆盖头顶与后脑） */}
-        <path d="M168 128 C168 74 200 40 248 36 C296 32 332 62 336 102 C340 92 338 74 328 58 C318 42 296 30 272 26 C246 22 216 24 194 34 C170 46 156 72 168 128 Z" />
-        {/* 额前卷发缕 */}
-        <path d="M332 96 C340 88 344 74 340 60 C336 46 324 38 312 36" fill="none" stroke="#3f3f46" strokeWidth="7" strokeLinecap="round" opacity="0.8" />
+      <g fill="#3f3f46" opacity="0.34">
+        {/* 脸：正面蛋形轮廓（无五官） */}
+        <path d="M210 70 C270 70 310 125 310 200 C310 275 275 330 210 340 C145 330 110 275 110 200 C110 125 150 70 210 70 Z" />
+        {/* 头顶卷发帽（覆盖头顶，两端垂到耳侧） */}
+        <path d="M120 172 C98 118 140 58 210 54 C280 58 322 118 300 172 C322 128 312 86 282 64 C252 42 168 42 138 64 C108 86 98 128 120 172 Z" />
+        {/* 左侧垂发（脸颊旁卷发绺） */}
+        <path d="M118 176 C100 202 96 242 104 284 C96 262 88 232 90 202 C92 172 104 162 118 176 Z" />
+        {/* 右侧垂发 */}
+        <path d="M302 176 C320 202 324 242 316 284 C324 262 332 232 330 202 C328 172 316 162 302 176 Z" />
+        {/* 额前卷发（帽缘波浪，中缝一缕） */}
+        <path d="M178 66 C168 92 170 120 182 144" fill="none" stroke="#3f3f46" strokeWidth="7" strokeLinecap="round" opacity="0.85" />
+        <path d="M222 62 C232 88 230 116 218 140" fill="none" stroke="#3f3f46" strokeWidth="6" strokeLinecap="round" opacity="0.85" />
+        <path d="M140 132 C124 150 116 172 114 196" fill="none" stroke="#3f3f46" strokeWidth="6" strokeLinecap="round" opacity="0.8" />
+        <path d="M280 132 C296 150 304 172 306 196" fill="none" stroke="#3f3f46" strokeWidth="6" strokeLinecap="round" opacity="0.8" />
       </g>
     </svg>
   );
@@ -61,17 +68,12 @@ export default function WelcomePage() {
   }, [printed, showTitle, showCta]);
 
   return (
-    <div className="welcome-paper min-h-screen">
-      {/* 左半屏：深灰雕像头像水印 */}
-      <SocratesWatermark className="pointer-events-none absolute left-0 top-0 hidden h-full w-[46vw] sm:block" />
+    <div className="welcome-paper relative flex min-h-screen items-center justify-center overflow-hidden">
+      {/* 中屏正面剪影（水印层，z-0） */}
+      <SocratesWatermark className="pointer-events-none absolute z-0 w-[68vw] max-w-[700px]" />
 
-      {/* 右半屏：品牌 + 标题 + CTA（垂直居中） */}
-      <main className="relative z-10 flex min-h-screen flex-col items-center justify-center px-8 py-16 sm:ml-[46vw] sm:items-start sm:pl-4 sm:pr-16">
-        {/* 移动端小水印 */}
-        <div className="mb-8 flex justify-center sm:hidden">
-          <SocratesWatermark className="h-44 w-auto" />
-        </div>
-
+      {/* 文字浮于剪影上（z-10） */}
+      <main className="relative z-10 flex flex-col items-center px-6 py-16 text-center">
         <h1
           className="font-mono text-4xl font-bold tracking-[0.14em] sm:text-5xl"
           style={{ color: "#2c3e50" }}
@@ -90,7 +92,7 @@ export default function WelcomePage() {
         )}
 
         {showCta && (
-          <div className="welcome-fade mt-10 flex flex-col items-center gap-4 sm:items-start">
+          <div className="welcome-fade mt-10 flex flex-col items-center gap-4">
             <Link
               href="/register"
               className="rounded-full px-10 py-3.5 text-sm font-medium transition-transform hover:scale-105 hover:opacity-90"
@@ -109,7 +111,7 @@ export default function WelcomePage() {
         )}
 
         {showCta && (
-          <p className="welcome-fade mt-12 text-[11px] tracking-widest" style={{ color: "rgba(44,62,80,0.4)" }}>
+          <p className="welcome-fade mt-10 text-[11px] tracking-widest" style={{ color: "rgba(44,62,80,0.4)" }}>
             初中数学 · 大模型应用开发 · 更多领域持续加入
           </p>
         )}
