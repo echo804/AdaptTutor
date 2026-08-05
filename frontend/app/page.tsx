@@ -16,8 +16,10 @@ const TITLE = "不是给予答案，而是唤醒思考";
 export default function WelcomePage() {
   const router = useRouter();
   const [printed, setPrinted] = useState(0); // 已打印字符数
-  const [showTitle, setShowTitle] = useState(false);
-  const [showCta, setShowCta] = useState(false);
+  const [showTitle, setShowTitle] = useState(false);   // 哲思标题
+  const [showCta, setShowCta] = useState(false);       // 开启思辨之旅按钮
+  const [showLogin, setShowLogin] = useState(false);   // 登录链接
+  const [showFooter, setShowFooter] = useState(false); // 底部领域小字
 
   // 淡黄素描纸背景铺满整个页面（含 html/body，防止缩放/滚动露出米白底）
   useEffect(() => {
@@ -38,21 +40,29 @@ export default function WelcomePage() {
     if (getToken()) router.replace("/chat");
   }, [router]);
 
-  // 品牌名逐字打印 → 标题 → CTA
+  // 品牌名逐字打印 → 标题 → 按钮 → 登录 → 底部小字（各段独立浮现，节奏从容）
   useEffect(() => {
     if (printed < BRAND.length) {
       const t = setTimeout(() => setPrinted((p) => p + 1), 110);
       return () => clearTimeout(t);
     }
     if (!showTitle) {
-      const t = setTimeout(() => setShowTitle(true), 300);
+      const t = setTimeout(() => setShowTitle(true), 500);
       return () => clearTimeout(t);
     }
     if (!showCta) {
-      const t = setTimeout(() => setShowCta(true), 500);
+      const t = setTimeout(() => setShowCta(true), 750);
       return () => clearTimeout(t);
     }
-  }, [printed, showTitle, showCta]);
+    if (!showLogin) {
+      const t = setTimeout(() => setShowLogin(true), 650);
+      return () => clearTimeout(t);
+    }
+    if (!showFooter) {
+      const t = setTimeout(() => setShowFooter(true), 550);
+      return () => clearTimeout(t);
+    }
+  }, [printed, showTitle, showCta, showLogin, showFooter]);
 
   return (
     <div className="welcome-paper relative flex min-h-screen items-center justify-center overflow-hidden">
@@ -86,26 +96,29 @@ export default function WelcomePage() {
         )}
 
         {showCta && (
-          <div className="welcome-fade mt-10 flex flex-col items-center gap-4">
+          <div className="welcome-rise mt-10">
             <Link
               href="/register"
-              className="rounded-full px-10 py-3.5 text-sm font-medium transition-transform hover:scale-105 hover:opacity-90"
+              className="inline-block rounded-full px-10 py-3.5 text-sm font-medium transition-transform hover:scale-105 hover:opacity-90"
               style={{ background: "var(--amber)", color: "#1a1a1a", boxShadow: "0 4px 20px rgba(212,165,116,0.45)" }}
             >
               开启思辨之旅
             </Link>
-            <Link
-              href="/login"
-              className="text-sm transition-opacity hover:opacity-70"
-              style={{ color: "rgba(44,62,80,0.6)" }}
-            >
-              已有账号？登录
-            </Link>
           </div>
         )}
 
-        {showCta && (
-          <p className="welcome-fade mt-10 text-[11px] tracking-widest" style={{ color: "rgba(44,62,80,0.4)" }}>
+        {showLogin && (
+          <Link
+            href="/login"
+            className="welcome-soft mt-5 text-sm transition-opacity hover:opacity-70"
+            style={{ color: "rgba(44,62,80,0.6)" }}
+          >
+            已有账号？登录
+          </Link>
+        )}
+
+        {showFooter && (
+          <p className="welcome-soft mt-10 text-[11px] tracking-widest" style={{ color: "rgba(44,62,80,0.4)" }}>
             初中数学 · 大模型应用开发 · 更多领域持续加入
           </p>
         )}

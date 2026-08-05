@@ -241,3 +241,21 @@ body:has(.welcome-paper) {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: none; }
 }
+/* 欢迎页按钮浮现：位移更大、节奏更缓（主 CTA 更郑重） */
+.welcome-rise {
+  opacity: 0;
+  animation: welcome-rise-in 1.1s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+}
+@keyframes welcome-rise-in {
+  from { opacity: 0; transform: translateY(22px); }
+  to { opacity: 1; transform: none; }
+}
+/* 欢迎页次要文字浮现：位移更小、更轻（登录/底部小字） */
+.welcome-soft {
+  opacity: 0;
+  animation: welcome-soft-in 1.2s ease forwards;
+}
+@keyframes welcome-soft-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
