@@ -48,6 +48,12 @@ export default function ChatPage() {
   // 会话管理（M4r7k：单删/批量删）
   const [manageMode, setManageMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  // 开始页动态副标题（M4r7m）
+  const [overview, setOverview] = useState<{ masteryPct: number | null; today: number; lastNode: string | null }>({
+    masteryPct: null,
+    today: 0,
+    lastNode: null,
+  });
   // 诊断配置面板（M4r5b）
   const [showConfig, setShowConfig] = useState(false);
   const [configType, setConfigType] = useState<"diagnostic" | "tutor">("diagnostic");
@@ -77,6 +83,31 @@ export default function ChatPage() {
   useEffect(() => {
     loadSessions();
   }, [loadSessions, sessionId]);
+
+  // 开始页动态副标题：掌握度 / 今日题数 / 上次学习
+  useEffect(() => {
+    if (sessionId) return;
+    (async () => {
+      try {
+        const me = await api<{ user_id: number }>("/auth/me");
+        const [m, t] = await Promise.all([
+          api<{ mastery: Record<string, number> }>(`/api/v1/students/${me.user_id}/mastery`).catch(() => null),
+          api<{ trend: { date: string; count: number }[] }>(`/api/v1/students/${me.user_id}/trend`).catch(() => null),
+        ]);
+        const entries = m?.mastery ? Object.entries(m.mastery) : [];
+        const today = new Date().toISOString().slice(0, 10);
+        const todayCount = t?.trend?.filter((x) => x.date === today).reduce((s, x) => s + x.count, 0) ?? 0;
+        setOverview({
+          masteryPct: entries.length ? Math.round((entries.reduce((s, [, p]) => s + p, 0) / entries.length) * 100) : null,
+          today: todayCount,
+          lastNode: null,
+        });
+      } catch {
+        /* 未登录等静默 */
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sessionId]);
 
   async function startSession(type: "diagnostic" | "tutor") {
     setShowConfig(true); // 先配置再开始（诊断/辅导共用面板，M4r7h）
@@ -307,30 +338,144 @@ export default function ChatPage() {
 
       <div className="flex flex-1 flex-col">
         {!sessionId ? (
-          <div className="flex flex-1 items-center justify-center">
-            <div className="w-full max-w-md space-y-3 p-6">
-              <h1 className="text-lg font-semibold">开始一次学习</h1>
-              <p className="text-sm" style={{ color: "var(--muted)" }}>AI 将按 诊断 → 路径 → 讲解 → 练习 引导你</p>
-              <button className="w-full rounded-xl border p-4 text-left transition-colors hover:opacity-80" style={{ background: "var(--surface)", borderColor: "var(--border)" }} onClick={() => startSession("diagnostic")} disabled={loading}>
-                <div className="text-sm font-medium">诊断测试</div>
-                <div className="text-xs" style={{ color: "var(--muted)" }}>选择题型/题量/难度，定位薄弱知识点，生成学习路径</div>
-              </button>
-              <button className="w-full rounded-xl border p-4 text-left transition-colors hover:opacity-80" style={{ background: "var(--surface)", borderColor: "var(--border)" }} onClick={() => startSession("tutor")} disabled={loading}>
-                <div className="text-sm font-medium">辅导练习</div>
-                <div className="text-xs" style={{ color: "var(--muted)" }}>苏格拉底式引导：只给提示，不给答案</div>
-              </button>
-              {sessions.length > 0 && (
-                <div className="pt-2">
-                  <div className="mb-1 text-xs font-medium" style={{ color: "var(--muted)" }}>继续之前的对话</div>
-                  <ul className="space-y-1">
-                    {sessions.slice(0, 5).map((s) => (
-                      <li key={s.id}>
-                        <button className="w-full rounded-lg border px-3 py-1.5 text-left text-xs" style={{ borderColor: "var(--border)" }} onClick={() => resumeSession(s.id)} disabled={loading}>
-                          {typeLabel(s.type)} #{s.id} · {new Date(s.created_at).toLocaleString("zh-CN", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" })}
-                        </button>
-                      </li>
+          <div className="relative flex flex-1 items-center justify-center overflow-auto p-6">
+            {/* 背景星点装饰（M4r7m） */}
+            <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
+              {Array.from({ length: 18 }, (_, k) => (
+                <span
+                  key={k}
+                  className="absolute rounded-full"
+                  style={{
+                    left: `${(k * 37) % 100}%`,
+                    top: `${(k * 53) % 100}%`,
+                    width: 2 + (k % 3),
+                    height: 2 + (k % 3),
+                    background: "var(--muted)",
+                    opacity: 0.18 + ((k * 13) % 30) / 100,
+                  }}
+                />
+              ))}
+              <div
+                className="absolute -top-24 left-1/2 h-64 w-[36rem] -translate-x-1/2 rounded-full blur-3xl"
+                style={{ background: "radial-gradient(circle, var(--accent-soft), transparent 70%)", opacity: 0.7 }}
+              />
+            </div>
+
+            <div className="relative w-full max-w-2xl animate-fade">
+              {/* 品牌标题区 */}
+              <div className="mb-8 text-center">
+                <h1 className="text-2xl font-semibold tracking-tight" style={{ color: "var(--text)" }}>
+                  今天想学点什么？
+                </h1>
+                <p className="mt-2 text-sm" style={{ color: "var(--muted)" }}>
+                  {overview.masteryPct !== null ? (
+                    <>
+                      掌握度 <span style={{ color: "var(--accent)" }}>{overview.masteryPct}%</span>
+                      {overview.today > 0 && <> · 今日已练 <span style={{ color: "var(--accent)" }}>{overview.today}</span> 题</>}
+                      {sessions.length > 0 && <> · 上次学到 {typeLabel(sessions[0].type)} #{sessions[0].id}</>}
+                    </>
+                  ) : (
+                    "AI 将按 诊断 → 路径 → 讲解 → 练习 引导你"
+                  )}
+                </p>
+              </div>
+
+              {/* 双入口大卡（M4r7m） */}
+              <div className="grid gap-4 md:grid-cols-2">
+                <button
+                  className="group rounded-2xl border p-5 text-left transition-all duration-200 hover:-translate-y-0.5"
+                  style={{ background: "var(--surface)", borderColor: "var(--border)" }}
+                  onClick={() => startSession("diagnostic")}
+                  disabled={loading}
+                >
+                  <span
+                    className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl text-lg"
+                    style={{ background: "var(--accent-soft)", color: "var(--accent)" }}
+                  >
+                    🎯
+                  </span>
+                  <div className="text-base font-medium" style={{ color: "var(--text)" }}>诊断测试</div>
+                  <div className="mt-1 text-xs leading-relaxed" style={{ color: "var(--muted)" }}>
+                    选择题型/题量/难度，定位薄弱知识点，生成学习路径
+                  </div>
+                  <span
+                    className="mt-3 inline-flex items-center gap-1 text-xs font-medium transition-transform duration-200 group-hover:translate-x-0.5"
+                    style={{ color: "var(--accent)" }}
+                  >
+                    开始 <span aria-hidden>→</span>
+                  </span>
+                </button>
+
+                <button
+                  className="group rounded-2xl border p-5 text-left transition-all duration-200 hover:-translate-y-0.5"
+                  style={{ background: "var(--surface)", borderColor: "var(--border)" }}
+                  onClick={() => startSession("tutor")}
+                  disabled={loading}
+                >
+                  <span
+                    className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl text-lg"
+                    style={{ background: "rgba(212,165,116,0.16)", color: "#b08a54" }}
+                  >
+                    💬
+                  </span>
+                  <div className="text-base font-medium" style={{ color: "var(--text)" }}>辅导练习</div>
+                  <div className="mt-1 text-xs leading-relaxed" style={{ color: "var(--muted)" }}>
+                    苏格拉底式引导：只给提示，不给答案
+                  </div>
+                  <span
+                    className="mt-3 inline-flex items-center gap-1 text-xs font-medium transition-transform duration-200 group-hover:translate-x-0.5"
+                    style={{ color: "#b08a54" }}
+                  >
+                    开始 <span aria-hidden>→</span>
+                  </span>
+                </button>
+              </div>
+
+              {/* 继续之前的对话（M4r7m：小卡列表） */}
+              {sessions.length > 0 ? (
+                <div className="mt-8">
+                  <div className="mb-2 flex items-center justify-between">
+                    <span className="text-xs font-medium" style={{ color: "var(--muted)" }}>最近会话</span>
+                  </div>
+                  <div className="space-y-2">
+                    {sessions.slice(0, 4).map((s) => (
+                      <button
+                        key={s.id}
+                        className="flex w-full items-center gap-3 rounded-xl border px-4 py-2.5 text-left transition-all duration-200 hover:border-[color:var(--accent)]"
+                        style={{ background: "var(--surface)", borderColor: "var(--border)" }}
+                        onClick={() => resumeSession(s.id)}
+                        disabled={loading}
+                      >
+                        <span
+                          className="shrink-0 rounded px-2 py-0.5 text-[11px] font-medium"
+                          style={{
+                            background: s.type === "tutor" ? "rgba(212,165,116,0.16)" : "var(--accent-soft)",
+                            color: s.type === "tutor" ? "#b08a54" : "var(--accent)",
+                          }}
+                        >
+                          {typeLabel(s.type)}
+                        </span>
+                        <span className="flex-1 truncate text-xs" style={{ color: "var(--text)" }}>
+                          会话 #{s.id}
+                        </span>
+                        <span className="flex items-center gap-1.5 text-[11px]" style={{ color: "var(--muted)" }}>
+                          <span
+                            className="inline-block h-1.5 w-1.5 rounded-full"
+                            style={{ background: s.status === "completed" ? "var(--success)" : "var(--accent)" }}
+                          />
+                          {s.status === "active" ? "进行中" : "已完成"}
+                          <span className="ml-1">
+                            {new Date(s.created_at).toLocaleString("zh-CN", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" })}
+                          </span>
+                        </span>
+                        <span aria-hidden className="text-xs" style={{ color: "var(--muted)" }}>›</span>
+                      </button>
                     ))}
-                  </ul>
+                  </div>
+                </div>
+              ) : (
+                <div className="mt-8 rounded-xl border border-dashed px-4 py-6 text-center" style={{ borderColor: "var(--border)" }}>
+                  <p className="text-xs" style={{ color: "var(--muted)" }}>还没有学习记录，从上方选择一种方式开始吧 ✨</p>
                 </div>
               )}
             </div>
