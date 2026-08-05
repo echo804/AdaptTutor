@@ -181,6 +181,13 @@ code, pre, .katex {
 }
 
 /* ---- M4r9 欢迎页：淡黄素描纸 + 苏格拉底剪影（与 05 规范主风格统一） ---- */
+/* 背景铺满整个页面：html/body 也设淡黄底，防止视口缩放/内容溢出时露出全局米白 */
+html:has(.welcome-paper) {
+  background-color: #f6ecdc;
+}
+body:has(.welcome-paper) {
+  background-color: #f6ecdc;
+}
 .welcome-paper {
   position: relative;
   min-height: 100vh;

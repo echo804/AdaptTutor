@@ -19,6 +19,20 @@ export default function WelcomePage() {
   const [showTitle, setShowTitle] = useState(false);
   const [showCta, setShowCta] = useState(false);
 
+  // 淡黄素描纸背景铺满整个页面（含 html/body，防止缩放/滚动露出米白底）
+  useEffect(() => {
+    const html = document.documentElement;
+    const body = document.body;
+    const prevHtml = html.style.backgroundColor;
+    const prevBody = body.style.backgroundColor;
+    html.style.backgroundColor = "#f6ecdc";
+    body.style.backgroundColor = "#f6ecdc";
+    return () => {
+      html.style.backgroundColor = prevHtml;
+      body.style.backgroundColor = prevBody;
+    };
+  }, []);
+
   // 已登录直接进应用（不等动画，避免闪烁）
   useEffect(() => {
     if (getToken()) router.replace("/chat");
