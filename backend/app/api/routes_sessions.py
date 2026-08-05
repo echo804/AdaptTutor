@@ -9,6 +9,7 @@ from __future__ import annotations
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user, get_db, require_ai_access
@@ -100,6 +101,33 @@ async def api_list_sessions(
     """会话列表（M4r3 仪表盘"最近会话"数据源）。"""
     rows = await session_service.list_sessions(db, user.id)
     return SessionList(sessions=rows)
+
+
+class SessionDeleteRequest(BaseModel):
+    ids: list[int] = Field(min_length=1)
+
+
+@router.delete("/sessions/{sid}")
+async def api_delete_session(
+    sid: int,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """删除单个会话（M4r7k）。"""
+    await _own_session(db, sid, user.id)
+    n = await repo.delete_sessions(db, user.id, [sid])
+    return {"removed": n}
+
+
+@router.delete("/sessions")
+async def api_delete_sessions_batch(
+    body: SessionDeleteRequest,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """批量删除会话（M4r7k）。"""
+    n = await repo.delete_sessions(db, user.id, body.ids)
+    return {"removed": n}
 
 
 @router.post("/sessions/{sid}/messages", response_model=MessageReply)
@@ -243,6 +271,13 @@ async def api_send_message(
     # 掌握度快照落库（mastery_states，供仪表盘真实数据）
     for node_id, p in t.mastery.items():
         await repo.upsert_mastery(db, user.id, node_id, p, 1 - min(t.mastery.values()))
+
+    # M4r7k：诊断完成 / 辅导完成 → 会话状态自动置 completed
+    is_finished = (s.type == "diagnostic" and reply.done) or (
+        s.type == "tutor" and reply.state == "done"
+    )
+    if is_finished:
+        await repo.update_session_status(db, sid, "completed")
 
     await session_service.persist_session_state(db, sid, t.save_state())
     await repo.add_message(db, sid, trace_id, "assistant", reply.message, None)

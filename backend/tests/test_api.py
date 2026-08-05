@@ -364,3 +364,48 @@ async def test_tutor_verify_auto_judge(client):
     st = r.json()
     assert st["qcount"] is None
     assert st["type"] == "tutor"
+
+# ---- M4r7k：会话删除 + 完成状态 ----
+
+async def test_session_delete_single_and_batch(client):
+    """单删/批量删会话：级联消息、保留错题。"""
+    token, uid = await _register(client)
+    h = {"Authorization": f"Bearer {token}"}
+    await client.put("/me/api-keys/deepseek", json={"provider": "deepseek", "api_key": "sk-secret-abcdefgh"}, headers=h)
+
+    sids = []
+    for _ in range(3):
+        r = await client.post("/api/v1/sessions", json={"type": "tutor"}, headers=h)
+        sids.append(r.json()["session_id"])
+
+    # 单删
+    r = await client.delete(f"/api/v1/sessions/{sids[0]}", headers=h)
+    assert r.status_code == 200 and r.json()["removed"] == 1
+    r = await client.get("/api/v1/sessions", headers=h)
+    assert {s["id"] for s in r.json()["sessions"]} == set(sids[1:])
+
+    # 批量删（含越权 id 不影响）
+    r = await client.request("DELETE", "/api/v1/sessions", json={"ids": sids[1:] + [99999]}, headers=h)
+    assert r.status_code == 200
+    assert r.json()["removed"] == 2
+    r = await client.get("/api/v1/sessions", headers=h)
+    assert r.json()["sessions"] == []
+
+
+async def test_session_status_completed_after_diagnostic(client):
+    """诊断完成后会话状态自动置 completed（M4r7k）。"""
+    token, uid = await _register(client)
+    h = {"Authorization": f"Bearer {token}"}
+    await client.put("/me/api-keys/deepseek", json={"provider": "deepseek", "api_key": "sk-secret-abcdefgh"}, headers=h)
+    r = await client.post("/api/v1/sessions", json={"type": "diagnostic", "config": {"qtypes": ["choice"], "qcount": 2, "difficulty": "auto"}}, headers=h)
+    sid = r.json()["session_id"]
+
+    r = await client.get(f"/api/v1/sessions/{sid}", headers=h)
+    assert r.json()["status"] == "active"
+
+    for _ in range(2):
+        r = await client.post(f"/api/v1/sessions/{sid}/messages", json={"kind": "answer", "answer": "A"}, headers=h)
+        assert r.status_code == 200
+
+    r = await client.get(f"/api/v1/sessions/{sid}", headers=h)
+    assert r.json()["status"] == "completed"

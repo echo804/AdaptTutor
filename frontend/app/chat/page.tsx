@@ -45,6 +45,9 @@ export default function ChatPage() {
   // 会话历史（M4r5b）
   const [sessions, setSessions] = useState<SessionItem[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<number | null>(null);
+  // 会话管理（M4r7k：单删/批量删）
+  const [manageMode, setManageMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
   // 诊断配置面板（M4r5b）
   const [showConfig, setShowConfig] = useState(false);
   const [configType, setConfigType] = useState<"diagnostic" | "tutor">("diagnostic");
@@ -186,31 +189,95 @@ export default function ChatPage() {
     loadSessions();
   }
 
+  // M4r7k：删除会话（单删/批量删）
+  async function deleteSessions(ids: number[]) {
+    if (!ids.length) return;
+    if (!confirm(`确认删除 ${ids.length} 个会话？删除后不可恢复。`)) return;
+    try {
+      await api<{ removed: number }>("/api/v1/sessions", { method: "DELETE", body: { ids } });
+      // 若删除的是当前会话 → 退出
+      if (sessionId && ids.includes(sessionId)) {
+        setSessionId(null);
+        setActiveSessionId(null);
+        setSessionType(null);
+        setBubbles([]);
+        setCurrentQuestion(null);
+        setJudgeResult(null);
+        setDiagProgress({});
+      }
+      setSelectedIds([]);
+      setManageMode(false);
+      await loadSessions();
+    } catch (e: any) {
+      setErr(e.message || "删除失败");
+    }
+  }
+
   const typeLabel = (t: string | null) => (t === "diagnostic" ? "诊断" : t === "tutor" ? "辅导" : t ?? "");
 
   return (
     <div className="flex h-full">
-      {/* 会话历史侧栏（M4r5b） */}
+      {/* 会话历史侧栏（M4r5b）+ 管理（M4r7k） */}
       {sessionId && (
         <aside className="w-56 shrink-0 border-r p-3" style={{ borderColor: "var(--border)" }}>
           <div className="mb-2 flex items-center justify-between">
             <span className="text-xs font-medium" style={{ color: "var(--muted)" }}>历史会话</span>
-            <button className="text-xs" style={{ color: "var(--accent)" }} onClick={loadSessions}>↻</button>
+            <div className="flex items-center gap-1">
+              {manageMode ? (
+                <>
+                  <button className="text-xs" style={{ color: "var(--accent)" }} onClick={() => { setManageMode(false); setSelectedIds([]); }}>完成</button>
+                  <button className="text-xs" style={{ color: selectedIds.length ? "#b3543c" : "var(--muted)" }} disabled={!selectedIds.length} onClick={() => deleteSessions(selectedIds)}>
+                    删除({selectedIds.length})
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button className="text-xs" style={{ color: "var(--accent)" }} onClick={() => { setManageMode(true); setSelectedIds([]); }}>管理</button>
+                  <button className="text-xs" style={{ color: "var(--accent)" }} onClick={loadSessions}>↻</button>
+                </>
+              )}
+            </div>
           </div>
           <ul className="space-y-1">
             {sessions.map((s) => (
-              <li key={s.id}>
+              <li key={s.id} className="group flex items-center gap-1">
+                {manageMode ? (
+                  <input
+                    type="checkbox"
+                    className="shrink-0"
+                    checked={selectedIds.includes(s.id)}
+                    onChange={(e) =>
+                      setSelectedIds((sel) =>
+                        e.target.checked ? [...sel, s.id] : sel.filter((x) => x !== s.id),
+                      )
+                    }
+                  />
+                ) : (
+                  <button
+                    className="shrink-0 rounded p-0.5 text-[10px] opacity-0 transition-opacity group-hover:opacity-100"
+                    style={{ color: "#b3543c" }}
+                    title="删除此会话"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      deleteSessions([s.id]);
+                    }}
+                  >
+                    ✕
+                  </button>
+                )}
                 <button
                   className="w-full rounded px-2 py-1.5 text-left text-xs transition-colors"
                   style={{
                     background: s.id === activeSessionId ? "var(--accent-soft)" : "transparent",
                     color: "var(--text)",
                   }}
-                  onClick={() => (s.id === sessionId ? undefined : resumeSession(s.id))}
+                  onClick={() => (manageMode ? undefined : s.id === sessionId ? undefined : resumeSession(s.id))}
                 >
                   <div className="flex justify-between">
                     <span>{typeLabel(s.type)} #{s.id}</span>
-                    <span style={{ color: "var(--muted)" }}>{s.status === "active" ? "进行中" : s.status}</span>
+                    <span style={{ color: s.status === "completed" ? "var(--success)" : "var(--muted)" }}>
+                      {s.status === "active" ? "进行中" : s.status === "completed" ? "已完成" : s.status}
+                    </span>
                   </div>
                   <div className="text-[10px]" style={{ color: "var(--muted)" }}>
                     {new Date(s.created_at).toLocaleString("zh-CN", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" })}

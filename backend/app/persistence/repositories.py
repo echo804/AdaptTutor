@@ -290,3 +290,49 @@ async def get_evaluations_by_session(
         .order_by(Evaluation.ts)
     )
     return list(res.scalars().all())
+
+
+async def delete_sessions(
+    db: AsyncSession, student_id: int, ids: list[int]
+) -> int:
+    """删除会话（单删/批量，M4r7k）：级联删 messages/evaluations，
+    learning_events 的 session_id 置空（保留错题集数据）。"""
+    if not ids:
+        return 0
+    from sqlalchemy import delete, update
+
+    # 校验归属并级联删除
+    await db.execute(
+        delete(Message).where(
+            Message.session_id.in_(ids),
+            Message.session_id.in_(
+                select(Session.id).where(Session.student_id == student_id)
+            ),
+        )
+    )
+    await db.execute(
+        delete(Evaluation).where(
+            Evaluation.session_id.in_(ids),
+            Evaluation.session_id.in_(
+                select(Session.id).where(Session.student_id == student_id)
+            ),
+        )
+    )
+    await db.execute(
+        update(LearningEvent)
+        .where(
+            LearningEvent.session_id.in_(ids),
+            LearningEvent.session_id.in_(
+                select(Session.id).where(Session.student_id == student_id)
+            ),
+        )
+        .values(session_id=None)
+    )
+    res = await db.execute(
+        delete(Session).where(
+            Session.student_id == student_id,
+            Session.id.in_(ids),
+        )
+    )
+    await db.commit()
+    return res.rowcount or 0
