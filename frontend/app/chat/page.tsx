@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { api, MessageReply, Question } from "@/lib/api";
 import { useDomain } from "@/lib/domain";
 import MathText from "@/components/Math";
+import ConfirmDialog from "@/components/ConfirmDialog";
 
 interface Bubble {
   role: "user" | "assistant";
@@ -49,6 +50,8 @@ export default function ChatPage() {
   // 会话管理（M4r7k：单删/批量删）
   const [manageMode, setManageMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  // 删除确认弹窗（M4r15：替代原生 confirm——暗色主题下原生 confirm 黑底割裂）
+  const [pendingDelete, setPendingDelete] = useState<{ ids: number[]; tip: string } | null>(null);
   // 领域学习空间（M4r8）
   const { active: activePack } = useDomain();
   // 开始页动态副标题（M4r7m）
@@ -225,14 +228,22 @@ export default function ChatPage() {
     loadSessions();
   }
 
-  // M4r7k：删除会话（单删/批量删）
+  // M4r7k：删除会话（单删/批量删）——先弹站内确认，确认后执行
   async function deleteSessions(ids: number[]) {
     if (!ids.length) return;
     const deletingCurrent = !!sessionId && ids.includes(sessionId);
     const tip = deletingCurrent
       ? "（当前正在查看的会话将被删除并退出到开始页）"
       : "（删除后不可恢复）";
-    if (!confirm(`确认删除 ${ids.length} 个会话？${tip}`)) return;
+    // 站内弹窗确认（替代原生 confirm，M4r15）
+    setPendingDelete({ ids, tip });
+  }
+
+  async function confirmDelete() {
+    if (!pendingDelete) return;
+    const ids = pendingDelete.ids;
+    const deletingCurrent = !!sessionId && ids.includes(sessionId);
+    setPendingDelete(null);
     try {
       await api<{ removed: number }>("/api/v1/sessions", { method: "DELETE", body: { ids } });
       // 若删除的是当前会话 → 退出
@@ -747,6 +758,19 @@ export default function ChatPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* 删除确认弹窗（M4r15：替代原生 confirm） */}
+      {pendingDelete && (
+        <ConfirmDialog
+          title="删除会话"
+          message={`确认删除 ${pendingDelete.ids.length} 个会话？${pendingDelete.tip}`}
+          confirmText="确认删除"
+          cancelText="取消"
+          danger
+          onConfirm={confirmDelete}
+          onCancel={() => setPendingDelete(null)}
+        />
       )}
     </div>
   );
