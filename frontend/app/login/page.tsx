@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { api, setToken, AuthResponse } from "@/lib/api";
-import { QuillInk, PaperClip, Pencil, Magnifier, InkDots } from "@/components/NoteDecor";
+import { QuillInk, Glasses, MapleLeaf, Feather, InkDots } from "@/components/NoteDecor";
 
 /** 登录页（M4r10）：复古笔记风，与欢迎页素描纸同系列（白纸 + 横线格 + 红边线 + 胶带） */
 export default function LoginPage() {
@@ -35,11 +35,12 @@ export default function LoginPage() {
 
   return (
     <div className="note-page relative flex min-h-screen items-center justify-center p-4">
-      {/* 背景文具装饰（手绘淡墨线，低透明） */}
+      {/* 背景文具装饰（手绘淡墨线，复古文艺风，低透明） */}
       <QuillInk className="pointer-events-none absolute left-[6%] top-[12%] hidden w-28 -rotate-6 sm:block lg:w-32" />
-      <PaperClip className="pointer-events-none absolute right-[9%] top-[14%] hidden w-16 rotate-12 sm:block" />
-      <Pencil className="pointer-events-none absolute bottom-[11%] left-[9%] hidden w-24 rotate-[14deg] sm:block lg:w-28" />
-      <Magnifier className="pointer-events-none absolute bottom-[15%] right-[8%] hidden w-24 -rotate-[10deg] sm:block lg:w-28" />
+      <Glasses className="pointer-events-none absolute right-[9%] top-[13%] hidden w-24 rotate-6 sm:block lg:w-28" />
+      <MapleLeaf className="pointer-events-none absolute bottom-[13%] left-[8%] hidden w-20 -rotate-[18deg] sm:block lg:w-24" />
+      <MapleLeaf className="pointer-events-none absolute bottom-[24%] left-[16%] hidden w-12 rotate-[24deg] opacity-60 sm:block lg:w-14" />
+      <Feather className="pointer-events-none absolute bottom-[12%] right-[9%] hidden w-28 rotate-[10deg] sm:block lg:w-32" />
       <InkDots className="pointer-events-none absolute left-[4%] top-[45%] hidden w-40 opacity-70 sm:block" />
       <InkDots className="pointer-events-none absolute bottom-[6%] right-[3%] hidden w-48 -scale-x-100 opacity-60 sm:block" />
 

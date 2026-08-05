@@ -1,13 +1,13 @@
 "use client";
 
-/** 复古笔记风装饰物（M4r10）：手绘线条 SVG，淡墨色 + 琥珀点缀，低透明不抢焦点。
- * 全部用 <path>/<line> 勾线，无填色，与欢迎页素描纸语言一致。
+/** 复古笔记风装饰物（M4r10c）：手绘线条 SVG，淡墨色 + 琥珀点缀，低透明不抢焦点。
+ * 全部用 <path>/<line>/<circle> 勾线，无填色，复古文艺风：羽毛笔/眼镜/枫叶/羽毛。
  */
 
 const INK = "rgba(44,62,80,0.18)"; // 淡墨线
 const AMBER = "rgba(212,165,116,0.55)"; // 琥珀点缀
 
-/** 羽毛笔 + 墨水瓶（左上） */
+/** 羽毛笔 + 墨水瓶 */
 export function QuillInk({ className = "" }: { className?: string }) {
   return (
     <svg viewBox="0 0 120 120" className={className} aria-hidden>
@@ -34,48 +34,69 @@ export function QuillInk({ className = "" }: { className?: string }) {
   );
 }
 
-/** 回形针（右上） */
-export function PaperClip({ className = "" }: { className?: string }) {
+/** 圆框眼镜（复古文艺） */
+export function Glasses({ className = "" }: { className?: string }) {
   return (
     <svg viewBox="0 0 120 120" className={className} aria-hidden>
+      {/* 左镜片 */}
+      <circle cx="42" cy="58" r="22" fill="none" stroke={INK} strokeWidth="2.2" />
+      {/* 右镜片 */}
+      <circle cx="84" cy="58" r="22" fill="none" stroke={INK} strokeWidth="2.2" />
+      {/* 鼻梁桥 */}
+      <path d="M64 58 q-2 -6 2 -6" fill="none" stroke={INK} strokeWidth="2" />
+      {/* 左镜腿 */}
+      <path d="M20 58 q-6 2 -10 14" fill="none" stroke={INK} strokeWidth="2" strokeLinecap="round" />
+      {/* 右镜腿 */}
+      <path d="M106 58 q6 2 10 14" fill="none" stroke={INK} strokeWidth="2" strokeLinecap="round" />
+      {/* 镜片琥珀微光 */}
+      <path d="M34 50 a14 14 0 0 1 10 -8" fill="none" stroke={AMBER} strokeWidth="2" strokeLinecap="round" opacity="0.6" />
+      <path d="M76 50 a14 14 0 0 1 10 -8" fill="none" stroke={AMBER} strokeWidth="2" strokeLinecap="round" opacity="0.6" />
+    </svg>
+  );
+}
+
+/** 枫叶（复古文艺） */
+export function MapleLeaf({ className = "" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 120 120" className={className} aria-hidden>
+      {/* 枫叶轮廓：五裂掌状 */}
       <path
-        d="M62 22 c22 0 30 8 30 26 v34 c0 16 -8 24 -22 24 c-18 0 -26 -10 -26 -26 v-38 c0 -12 6 -18 16 -18 c12 0 18 8 18 20 v32"
+        d="M60 14 q6 14 2 26 l16 -12 q-4 16 -14 22 l20 2 q-8 14 -22 10 l10 20 q-14 -2 -18 -16 l-10 18 q-10 -12 -4 -26 l-18 10 q2 -16 14 -20 l-16 -8 q10 -12 22 -8 l-4 -18 q12 4 14 16 z"
         fill="none"
         stroke={INK}
-        strokeWidth="3"
-        strokeLinecap="round"
+        strokeWidth="1.6"
+        strokeLinejoin="round"
       />
+      {/* 主叶脉 */}
+      <path d="M60 14 q2 26 0 44 l-2 40" fill="none" stroke={INK} strokeWidth="1.2" />
+      {/* 侧叶脉 */}
+      <path d="M60 32 q-10 2 -16 10" fill="none" stroke={INK} strokeWidth="1" />
+      <path d="M60 32 q10 2 16 10" fill="none" stroke={INK} strokeWidth="1" />
+      <path d="M60 44 q-8 4 -12 12" fill="none" stroke={INK} strokeWidth="1" />
+      <path d="M60 44 q8 4 12 12" fill="none" stroke={INK} strokeWidth="1" />
+      {/* 琥珀色叶尖点缀 */}
+      <path d="M60 14 l1 4" stroke={AMBER} strokeWidth="1.6" strokeLinecap="round" opacity="0.6" />
     </svg>
   );
 }
 
-/** 铅笔（左下） */
-export function Pencil({ className = "" }: { className?: string }) {
+/** 单片羽毛（复古文艺） */
+export function Feather({ className = "" }: { className?: string }) {
   return (
     <svg viewBox="0 0 120 120" className={className} aria-hidden>
-      {/* 笔身 */}
-      <path d="M22 34 h68 l4 6 -68 64 -10 -6 z" fill="none" stroke={INK} strokeWidth="1.6" strokeLinejoin="round" />
-      <path d="M30 42 h56" stroke={INK} strokeWidth="1.2" />
-      <path d="M26 52 h52" stroke={INK} strokeWidth="1.2" />
-      <path d="M22 62 h48" stroke={INK} strokeWidth="1.2" />
-      {/* 笔尖 */}
-      <path d="M88 40 l16 -10 -4 14 z" fill={AMBER} opacity="0.6" />
-      {/* 橡皮 */}
-      <path d="M16 34 a8 8 0 0 1 8 -6 h4 l4 6 -8 8 -8 -8 z" fill="none" stroke={INK} strokeWidth="1.6" />
-      <path d="M28 28 l4 6 -8 8 -8 -8 8 -6" stroke={INK} strokeWidth="1.2" />
-    </svg>
-  );
-}
-
-/** 放大镜（右下） */
-export function Magnifier({ className = "" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 120 120" className={className} aria-hidden>
-      <circle cx="48" cy="48" r="26" fill="none" stroke={INK} strokeWidth="3" />
-      {/* 镜内高光 */}
-      <path d="M38 40 a12 12 0 0 1 8 -6" fill="none" stroke={AMBER} strokeWidth="2.4" strokeLinecap="round" />
-      {/* 镜柄 */}
-      <path d="M68 68 l24 24" stroke={INK} strokeWidth="3" strokeLinecap="round" />
+      {/* 羽轴 */}
+      <path d="M18 102 q40 -36 78 -76" fill="none" stroke={INK} strokeWidth="1.8" strokeLinecap="round" />
+      {/* 左羽片 */}
+      <path d="M40 82 q26 -6 22 -34" fill="none" stroke={INK} strokeWidth="1.3" />
+      <path d="M52 72 q20 -8 16 -30" fill="none" stroke={INK} strokeWidth="1.1" />
+      <path d="M62 64 q16 -8 12 -26" fill="none" stroke={INK} strokeWidth="1.1" />
+      {/* 右羽片 */}
+      <path d="M50 84 q30 -14 26 -42" fill="none" stroke={INK} strokeWidth="1.3" />
+      <path d="M58 76 q24 -12 18 -34" fill="none" stroke={INK} strokeWidth="1.1" />
+      {/* 羽根（管状末端） */}
+      <path d="M18 102 q4 6 10 8" fill="none" stroke={INK} strokeWidth="1.4" strokeLinecap="round" />
+      {/* 琥珀羽尖 */}
+      <path d="M96 26 l3 -3" stroke={AMBER} strokeWidth="1.8" strokeLinecap="round" opacity="0.6" />
     </svg>
   );
 }
