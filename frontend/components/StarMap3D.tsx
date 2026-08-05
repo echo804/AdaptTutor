@@ -43,15 +43,51 @@ function lerpColor(c1: THREE.Color, c2: THREE.Color, t: number) {
   return c1.clone().lerp(c2, Math.max(0, Math.min(1, t)));
 }
 
-// 星系螺旋布局：阿基米德螺旋 + z 波动
+// 星系布局：按主题前缀分组扇形（M4r8b 分散优化）
+// 每个主题（l/r/a/t/o…）占一个角度扇区，组内节点沿扇区半径递增 + 角度铺开，
+// y 方向分层错开——多领域大节点集（如 llm_app_dev 98 节点）不再挤成一条螺旋。
 function spiralPositions(nodes: StarNode[]) {
   const pos: Record<string, [number, number, number]> = {};
-  nodes.forEach((n, i) => {
-    const theta = 0.8 + i * 0.55;
-    const r = 5.5 + theta * 0.45;
-    pos[n.id] = [r * Math.cos(theta), (i % 5) * 0.9 - 1.8, r * Math.sin(theta) * 0.55];
+  if (nodes.length === 0) return pos;
+
+  // 按 id 前缀分组（保留主题分组语义）
+  const groups: Record<string, StarNode[]> = {};
+  nodes.forEach((n) => {
+    const p = n.id.replace(/[0-9]/g, "") || "x";
+    (groups[p] = groups[p] || []).push(n);
+  });
+  const keys = Object.keys(groups);
+  const SECTOR = (Math.PI * 2) / keys.length;
+  const SECTOR_PAD = 0.6; // 扇区两侧留空隙，避免相邻组粘连
+  const R0 = 4.2;
+  const DR = 0.72; // 组内半径递增步长
+
+  keys.forEach((key, gi) => {
+    const g = groups[key];
+    const start = gi * SECTOR + SECTOR_PAD;
+    const span = SECTOR - SECTOR_PAD * 2;
+    g.forEach((n, i) => {
+      const t = g.length > 1 ? i / (g.length - 1) : 0;
+      const theta = start + t * span;
+      const r = R0 + i * DR;
+      // y 按 5 层错开（-3.0 … +3.0），z 收缩放宽，垂直投影显著拉开
+      pos[n.id] = [r * Math.cos(theta), (i % 5) * 1.5 - 3.0, r * Math.sin(theta) * 0.78];
+    });
   });
   return pos;
+}
+
+// 主题分组色（M4r8b）：按节点 id 前缀着色标签边框，视觉分群（不覆盖掌握度主色）
+const GROUP_COLORS: Record<string, string> = {
+  l: "#6c5ce7", // LLM 原理
+  r: "#1e6091", // RAG
+  a: "#2e6b4f", // Agent
+  t: "#c05b2e", // 工具链
+  o: "#8a7a5c", // 入门概览
+};
+
+function groupColorOf(id: string): string {
+  return GROUP_COLORS[id.replace(/[0-9]/g, "")] || "#d4a574";
 }
 
 function Planet({
@@ -65,6 +101,7 @@ function Planet({
   onSelect,
   amberHex,
   amberColor,
+  groupColor,
 }: {
   id: string;
   name: string;
@@ -76,6 +113,7 @@ function Planet({
   onSelect: (id: string | null) => void;
   amberHex: string;
   amberColor: THREE.Color;
+  groupColor: string;
 }) {
   const meshRef = useRef<THREE.Mesh>(null);
   const lightRef = useRef<THREE.PointLight>(null);
@@ -117,7 +155,7 @@ function Planet({
           document.body.style.cursor = "default";
         }}
       >
-        <sphereGeometry args={[lit ? 0.55 : 0.42, 24, 24]} />
+        <sphereGeometry args={[lit ? 0.68 : 0.5, 24, 24]} />
         <meshStandardMaterial
           color={color}
           emissive={emissive}
@@ -141,7 +179,8 @@ function Planet({
           style={{
             background: lit ? hexToRgba(amberHex, 0.15) : "rgba(15,23,42,0.6)",
             color: lit ? "#e8e6e3" : "rgba(148,163,184,0.85)",
-            border: selected ? `1px solid ${amberHex}` : "1px solid transparent",
+            // 选中 → 主强调色边框；未选中 → 主题分组色细边框（M4r8b 视觉分群）
+            border: selected ? `1.5px solid ${amberHex}` : `1px solid ${hexToRgba(groupColor, 0.55)}`,
             backdropFilter: "blur(2px)",
             userSelect: "none",
           }}
@@ -232,6 +271,7 @@ function Galaxy({ nodes, edges, mastery, selected, onSelect, litThreshold, trace
               onSelect={(id) => onSelect?.(id)}
               amberHex={amberHex}
               amberColor={amberColor}
+              groupColor={groupColorOf(n.id)}
             />
           </group>
         );
@@ -258,7 +298,7 @@ export default function StarMap3D(props: StarMap3DProps) {
 
   return (
     <div className="h-full w-full" style={{ background: "radial-gradient(ellipse at 30% 30%, #0f172a 0%, #0b1120 60%, #060a14 100%)" }}>
-      <Canvas camera={{ position: [14, 6, 14], fov: 50 }} dpr={[1, 1.5]}>
+      <Canvas camera={{ position: [19, 9, 19], fov: 50 }} dpr={[1, 1.5]}>
         <ambientLight intensity={0.35} />
         <pointLight position={[0, 0, 0]} intensity={0.8} color={amberHex} />
         <Stars radius={80} depth={40} count={2600} factor={3.2} saturation={0} fade speed={reduce ? 0 : 0.6} />
@@ -291,7 +331,7 @@ export default function StarMap3D(props: StarMap3DProps) {
           minDistance={6}
           maxDistance={40}
           rotateSpeed={0.7}
-          autoRotate={!reduce}
+          autoRotate={false}
           autoRotateSpeed={0.5}
         />
       </Canvas>
