@@ -63,6 +63,10 @@ class TutorOrchestrator:
         self.history: list[str] = []
         # M4r5：诊断配置（题型/题量/难度，前端自主选择）
         self.diag_config: dict = {"qtypes": ["choice", "blank", "open"], "qcount": 10, "difficulty": "auto"}
+        # M4r7h：辅导题库（按配置过滤）+ 练习轮数
+        self.tutor_pool: list = list(self.pack.questions)
+        self.max_rounds: int = 1
+        self.practice_rounds: int = 0
 
     # ---------- 阶段 1：诊断 ----------
 
@@ -132,14 +136,38 @@ class TutorOrchestrator:
 
     # ---------- 阶段 3：四态辅导 ----------
 
-    def tutor_start(self) -> TurnResult:
-        """进入辅导：给出第一个引导（当前薄弱节点相关题目）。"""
+    def tutor_start(self, config: dict | None = None) -> TurnResult:
+        """进入辅导：按配置（题型/难度/练习轮数）过滤题库，给出第一个引导。
+
+        M4r7h：辅导也支持题量（练习轮数）/题型/难度配置（对齐诊断）。
+        """
+        if config:
+            merged = dict(self.diag_config)
+            merged.update({k: v for k, v in config.items() if v is not None})
+            self.diag_config = merged
+        # 辅导题库过滤（变式题来源）
+        qtypes = self.diag_config.get("qtypes") or ["choice", "blank", "open"]
+        diff = self.diag_config.get("difficulty", "auto")
+        pool = [q for q in self.pack.questions if q.type in qtypes]
+        if diff != "auto":
+            lo, hi = {"easy": (0, 0.34), "medium": (0.34, 0.66), "hard": (0.66, 1.01)}[diff]
+            pool = [q for q in pool if lo <= q.difficulty < hi]
+        self.tutor_pool = pool
+        # 练习轮数：仅在 config 显式提供 qcount 时生效（诊断默认 10 不串扰辅导）
+        qc = config.get("qcount") if config else None
+        self.max_rounds = max(1, int(qc)) if qc is not None else 1
+        self.practice_rounds = 0
         self.sm.reset()
         if not self.path:
             self.build_path()
+        return self._tutor_start_round()
+
+    def _tutor_start_round(self) -> TurnResult:
+        """启动一轮辅导（当前路径首个知识点）。"""
+        self.sm.reset()
         node = self.path[0] if self.path else self.graph.node_ids[0]
         self.verify_question = next(
-            (q for q in self.pack.questions if node in q.step_node_map.values()), None
+            (q for q in self.tutor_pool if node in q.step_node_map.values()), None
         )
         msg = f"我们来看这个知识点：{node}。先试试这题：{self.verify_question.content if self.verify_question else '—'}"
         return TurnResult(state=self.sm.state.value, message=msg, context=dict(self.sm.context))
@@ -190,6 +218,21 @@ class TutorOrchestrator:
         if state == State.VERIFY:
             if correct is True:
                 self.sm.step(Event.VERIFY_PASS)
+                if self.sm.state == State.DONE and self.practice_rounds + 1 < self.max_rounds and len(self.path) > 1:
+                    # M4r7h：练习轮数未满且路径有后续 → 进入下一知识点
+                    self.practice_rounds += 1
+                    self.path = self.path[1:]
+                    self.sm.reset()
+                    node = self.path[0]
+                    self.verify_question = next(
+                        (q for q in self.tutor_pool if node in q.step_node_map.values()), None
+                    )
+                    return TurnResult(
+                        state=self.sm.state.value,
+                        message=f"很好，这一步掌握了！进入下一个知识点：{node}。先试试这题：{self.verify_question.content if self.verify_question else '—'}",
+                        context=dict(self.sm.context),
+                    )
+                self.practice_rounds += 1
                 return TurnResult(
                     state=self.sm.state.value,
                     message="很好，这一步掌握了！我们进入下一题。",
@@ -233,7 +276,7 @@ class TutorOrchestrator:
 
     def _pick_verify(self):
         node = self.path[0] if self.path else None
-        cands = [q for q in self.pack.questions if node in q.step_node_map.values()]
+        cands = [q for q in self.tutor_pool if node in q.step_node_map.values()]
         return cands[-1] if cands else None
 
     # ---------- 状态快照（M3 会话恢复） ----------
@@ -255,6 +298,8 @@ class TutorOrchestrator:
             "verify_question_id": self.verify_question.id
             if self.verify_question
             else None,
+            "practice_rounds": self.practice_rounds,
+            "max_rounds": self.max_rounds,
         }
 
     def restore_state(self, state: dict) -> None:
@@ -287,6 +332,16 @@ class TutorOrchestrator:
             self.verify_question = next(
                 (q for q in self.pack.questions if q.id == vqid), None
             )
+        # M4r7h：恢复辅导题库与练习轮数
+        self.max_rounds = int(state.get("max_rounds", self.max_rounds))
+        self.practice_rounds = int(state.get("practice_rounds", 0))
+        qtypes = self.diag_config.get("qtypes") or ["choice", "blank", "open"]
+        diff = self.diag_config.get("difficulty", "auto")
+        pool = [q for q in self.pack.questions if q.type in qtypes]
+        if diff != "auto":
+            lo, hi = {"easy": (0, 0.34), "medium": (0.34, 0.66), "hard": (0.66, 1.01)}[diff]
+            pool = [q for q in pool if lo <= q.difficulty < hi]
+        self.tutor_pool = pool
 
     # ---------- 阶段 4：反馈 ----------
 

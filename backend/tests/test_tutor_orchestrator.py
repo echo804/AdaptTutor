@@ -88,6 +88,26 @@ def test_tutor_full_cycle():
     assert r.state == State.DONE.value
 
 
+def test_tutor_config_rounds_advances_path():
+    """M4r7h：辅导配置 qcount=3（练习轮数）→ 答对后进入下一知识点，满 3 轮才完成。"""
+    t = _tutor()
+    r = t.tutor_start({"qcount": 3, "qtypes": ["choice"], "difficulty": "auto"})
+    assert r.state == State.ELICIT.value
+    rounds_done = 0
+    for _ in range(40):  # 安全上限
+        if t.verify_question is None:
+            break
+        # 直接答对变式题（每轮：ELICIT 答对 → VERIFY 答对）
+        ans = t.verify_question.answer
+        r1 = t.tutor_step(ans, correct=True)  # ELICIT 答对 → 变式
+        r2 = t.tutor_step(ans, correct=True)  # VERIFY 答对 → 下一轮/完成
+        if r2.state == State.DONE.value:
+            rounds_done = t.practice_rounds
+            break
+    assert rounds_done == 3  # 3 轮练习完成
+    assert t.max_rounds == 3
+
+
 def test_tutor_messages_never_leak():
     """辅导过程中所有消息过自检：不泄露答案/步骤。"""
     t = _tutor()

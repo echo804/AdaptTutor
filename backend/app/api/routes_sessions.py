@@ -68,7 +68,7 @@ async def api_create_session(
     first: str | None = None
     question: dict | None = None
     if body.type == "tutor":
-        r = t.tutor_start()
+        r = t.tutor_start(body.config)
         first = r.message
     elif body.type == "diagnostic":
         st = t.start_diagnosis(body.config)

@@ -47,6 +47,7 @@ export default function ChatPage() {
   const [activeSessionId, setActiveSessionId] = useState<number | null>(null);
   // 诊断配置面板（M4r5b）
   const [showConfig, setShowConfig] = useState(false);
+  const [configType, setConfigType] = useState<"diagnostic" | "tutor">("diagnostic");
   const [diagConfig, setDiagConfig] = useState<DiagConfig>(() => {
     try {
       const saved = localStorage.getItem("diag_config");
@@ -75,12 +76,11 @@ export default function ChatPage() {
   }, [loadSessions, sessionId]);
 
   async function startSession(type: "diagnostic" | "tutor") {
-    if (type === "diagnostic") {
-      setShowConfig(true); // 先配置再开始
-      return;
+    setShowConfig(true); // 先配置再开始（诊断/辅导共用面板，M4r7h）
+    setConfigType(type);
+    if (type === "tutor" && ![1, 3, 5].includes(diagConfig.qcount)) {
+      setDiagConfig((c) => ({ ...c, qcount: 1 })); // 辅导轮数默认 1
     }
-    setShowConfig(false);
-    await createSession(type);
   }
 
   async function createSession(type: "diagnostic" | "tutor", config?: DiagConfig) {
@@ -415,11 +415,11 @@ export default function ChatPage() {
         )}
       </div>
 
-      {/* 诊断配置面板（M4r5b 需求 1c） */}
+      {/* 配置面板（诊断/辅导共用，M4r7h） */}
       {showConfig && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => setShowConfig(false)}>
           <div className="w-full max-w-sm rounded-xl border p-5" style={{ background: "var(--surface)", borderColor: "var(--border)" }} onClick={(e) => e.stopPropagation()}>
-            <h2 className="mb-4 text-base font-semibold">诊断配置</h2>
+            <h2 className="mb-4 text-base font-semibold">{configType === "tutor" ? "辅导配置" : "诊断配置"}</h2>
 
             <div className="mb-4">
               <div className="mb-1.5 text-xs font-medium" style={{ color: "var(--muted)" }}>题型（可多选）</div>
@@ -443,16 +443,18 @@ export default function ChatPage() {
             </div>
 
             <div className="mb-4">
-              <div className="mb-1.5 text-xs font-medium" style={{ color: "var(--muted)" }}>题量</div>
+              <div className="mb-1.5 text-xs font-medium" style={{ color: "var(--muted)" }}>
+                {configType === "tutor" ? "练习轮数" : "题量"}
+              </div>
               <div className="grid grid-cols-3 gap-2">
-                {[5, 10, 15].map((n) => (
+                {(configType === "tutor" ? [1, 3, 5] : [5, 10, 15]).map((n) => (
                   <button
                     key={n}
                     className="rounded-lg border py-1.5 text-sm"
                     style={{ borderColor: diagConfig.qcount === n ? "var(--accent)" : "var(--border)", background: diagConfig.qcount === n ? "var(--accent-soft)" : "transparent" }}
                     onClick={() => setDiagConfig((c) => ({ ...c, qcount: n }))}
                   >
-                    {n} 题
+                    {n} {configType === "tutor" ? "轮" : "题"}
                   </button>
                 ))}
               </div>
@@ -481,10 +483,16 @@ export default function ChatPage() {
                 disabled={loading || diagConfig.qtypes.length === 0}
                 onClick={() => {
                   setShowConfig(false);
-                  createSession("diagnostic", diagConfig);
+                  if (configType === "tutor") {
+                    // 辅导：练习轮数默认 1（诊断默认 10 不串扰）
+                    const cfg = { ...diagConfig, qcount: diagConfig.qcount };
+                    createSession("tutor", cfg);
+                  } else {
+                    createSession("diagnostic", diagConfig);
+                  }
                 }}
               >
-                开始诊断
+                {configType === "tutor" ? "开始辅导" : "开始诊断"}
               </button>
               <button className="rounded-lg border px-4 py-2 text-sm" style={{ borderColor: "var(--border)" }} onClick={() => setShowConfig(false)}>
                 取消
