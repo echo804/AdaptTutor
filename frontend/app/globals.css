@@ -379,3 +379,19 @@ body:has(.note-page) {
   font-size: 0.85rem;
   padding-bottom: 2px;
 }
+
+/* ---- M4r11b 魔法书：点亮书琥珀高亮慢闪 ---- */
+.magic-book-lit svg {
+  filter: drop-shadow(0 0 10px rgba(212, 165, 116, 0.35));
+  animation: magic-book-glow 3.2s ease-in-out infinite;
+}
+@keyframes magic-book-glow {
+  0%, 100% { filter: drop-shadow(0 0 6px rgba(212, 165, 116, 0.25)); }
+  50%      { filter: drop-shadow(0 0 16px rgba(212, 165, 116, 0.55)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .magic-book-lit svg {
+    animation: none;
+    filter: drop-shadow(0 0 8px rgba(212, 165, 116, 0.4));
+  }
+}

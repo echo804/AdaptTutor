@@ -192,21 +192,31 @@ export default function GraphPage() {
 
   return (
     <div className="relative h-full overflow-auto">
-      {/* 暖木色书架背景 */}
+      {/* 古朴淡雅书架背景：淡黄素描纸 + 柔光晕（与欢迎页同系列） */}
       <div
         className="absolute inset-0"
         style={{
           background:
-            "linear-gradient(180deg, #2a1c10 0%, #3a2716 40%, #2f2012 100%)",
+            "linear-gradient(180deg, #f6ecdc 0%, #f3e6cf 45%, #eee0c4 100%)",
         }}
         aria-hidden
       />
-      {/* 木质横板纹理 */}
+      {/* 素描纸噪点纹理 */}
       <div
-        className="pointer-events-none absolute inset-0 opacity-25"
+        className="pointer-events-none absolute inset-0 opacity-50"
         style={{
           backgroundImage:
-            "repeating-linear-gradient(0deg, rgba(212,165,116,0.06) 0 2px, transparent 2px 18px), repeating-linear-gradient(90deg, rgba(212,165,116,0.04) 0 60px, transparent 60px 120px)",
+            "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E\")",
+        }}
+        aria-hidden
+      />
+      {/* 木质书架层板（浅木色，含蓄） */}
+      <div
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-14"
+        style={{
+          background:
+            "linear-gradient(180deg, rgba(212,165,116,0.18), rgba(212,165,116,0.05))",
+          borderTop: "1px solid rgba(212,165,116,0.35)",
         }}
         aria-hidden
       />
@@ -214,24 +224,24 @@ export default function GraphPage() {
       <div className="relative z-10 mx-auto max-w-5xl p-6">
         <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h1 className="text-xl font-semibold" style={{ color: "#f2e6d5" }}>
+            <h1 className="text-xl font-semibold" style={{ color: "#2c3e50" }}>
               知识书库
             </h1>
-            <p className="mt-1 text-sm" style={{ color: "rgba(242,230,213,0.6)" }}>
+            <p className="mt-1 text-sm" style={{ color: "rgba(44,62,80,0.6)" }}>
               每一本都是一片星空——翻开书，点亮你的知识星辰
             </p>
           </div>
-          <div className="flex items-center gap-4 text-xs" style={{ color: "rgba(242,230,213,0.65)" }}>
+          <div className="flex items-center gap-4 text-xs" style={{ color: "rgba(44,62,80,0.65)" }}>
             <span className="flex items-center gap-1"><span className="text-sm" style={{ color: amber }}>★</span> 已点亮</span>
-            <span className="flex items-center gap-1"><span className="text-sm" style={{ color: "rgba(148,163,184,0.6)" }}>★</span> 未完成</span>
-            <span className="flex items-center gap-1"><span className="text-sm" style={{ color: "rgba(148,163,184,0.3)" }}>☆</span> 未测</span>
+            <span className="flex items-center gap-1"><span className="text-sm" style={{ color: "rgba(148,163,184,0.7)" }}>★</span> 未完成</span>
+            <span className="flex items-center gap-1"><span className="text-sm" style={{ color: "rgba(148,163,184,0.4)" }}>☆</span> 未测</span>
           </div>
         </div>
 
         {books.length === 0 ? (
           <div
             className="mt-16 rounded-xl border border-dashed p-10 text-center text-sm"
-            style={{ borderColor: "rgba(212,165,116,0.4)", color: "rgba(242,230,213,0.7)" }}
+            style={{ borderColor: "rgba(212,165,116,0.6)", color: "rgba(44,62,80,0.6)" }}
           >
             书架上还没有魔法书。去「领域市场」或「我的领域」获取第一本，开始点亮星空 ✨
           </div>
