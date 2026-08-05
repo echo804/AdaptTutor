@@ -30,3 +30,6 @@ backups/
 
 # Python 构建产物
 *.egg-info/
+
+# 一键启停脚本日志/pid
+logs/
