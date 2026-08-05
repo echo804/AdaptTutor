@@ -6,6 +6,8 @@
 
 from __future__ import annotations
 
+import os
+
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,
@@ -24,11 +26,13 @@ def get_engine() -> AsyncEngine:
     global _engine
     if _engine is None:
         settings = get_settings()
-        _engine = create_async_engine(
-            settings.database_url,
-            echo=False,
-            pool_pre_ping=True,
-        )
+        kwargs: dict = {"echo": False, "pool_pre_ping": True}
+        if os.environ.get("ADAPT_TEST_NULLPOOL") == "1":
+            # 测试模式：NullPool 避免连接池跨 event loop 复用冲突
+            from sqlalchemy.pool import NullPool
+
+            kwargs["poolclass"] = NullPool
+        _engine = create_async_engine(settings.database_url, **kwargs)
     return _engine
 
 

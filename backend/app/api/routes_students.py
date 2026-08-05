@@ -1,0 +1,71 @@
+"""学生数据路由：掌握度快照 / 推荐路径 / 错题溯源（对齐 03 5.2）。
+
+数据源：mastery_states 表（API 层每轮作答后 upsert，供仪表盘真实数据）。
+越权：{id} 必须等于当前登录用户（用户即学习者），否则 403。
+"""
+
+from __future__ import annotations
+
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.api.deps import get_current_user, get_db
+from app.api.schemas import MasteryOut, PathOut, TraceOut
+from app.api.routes_sessions import PACK_ID, _new_orchestrator
+from app.engine.graph_engine import KnowledgeGraph, plan_path, trace_root_evidenced
+from app.engine.tutor_orchestrator import TutorOrchestrator
+from app.persistence import repositories as repo
+from app.persistence.models import User
+
+router = APIRouter(prefix="/api/v1/students", tags=["students"])
+
+
+def _check_self(user_id: int, path_id: int) -> None:
+    if user_id != path_id:
+        raise HTTPException(status_code=403, detail="无权访问他人数据")
+
+
+@router.get("/{sid}/mastery", response_model=MasteryOut)
+async def api_mastery(
+    sid: int,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> MasteryOut:
+    _check_self(user.id, sid)
+    mastery = await repo.get_mastery_all(db, user.id)
+    weakest = min(mastery, key=mastery.get) if mastery else None
+    return MasteryOut(mastery=mastery, weakest=weakest)
+
+
+@router.get("/{sid}/path", response_model=PathOut)
+async def api_path(
+    sid: int,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> PathOut:
+    _check_self(user.id, sid)
+    t: TutorOrchestrator = _new_orchestrator()
+    mastery = await repo.get_mastery_all(db, user.id)
+    if not mastery:
+        return PathOut(path=[])
+    t.mastery.update(mastery)
+    return PathOut(path=t.build_path())
+
+
+@router.get("/{sid}/trace/{node_id}", response_model=TraceOut)
+async def api_trace(
+    sid: int,
+    node_id: str,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> TraceOut:
+    _check_self(user.id, sid)
+    mastery = await repo.get_mastery_all(db, user.id)
+    if node_id not in mastery:
+        raise HTTPException(status_code=404, detail="未知节点或尚未诊断该节点")
+    t = _new_orchestrator()
+    t.mastery.update(mastery)
+    graph = KnowledgeGraph(t.pack.graph)
+    chain = sorted(graph.ancestors(node_id))
+    root = trace_root_evidenced(graph, node_id, mastery, answered=set(mastery))
+    return TraceOut(wrong_node=node_id, root=root, chain=chain)

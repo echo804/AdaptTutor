@@ -49,6 +49,10 @@ def test_save_restore_roundtrip():
     assert t2.path == t1.path
     assert t2.weak_nodes == t1.weak_nodes
     assert t2.answered_counts == t1.answered_counts
+    # M4 修复：恢复诊断进度（当前题 + 剩余题库）
+    assert t2.current_question is not None
+    assert t2.current_question.id == t1.current_question.id
+    assert [q.id for q in t2.pool] == [q.id for q in t1.pool]
 
 
 def test_restore_continues_flow():

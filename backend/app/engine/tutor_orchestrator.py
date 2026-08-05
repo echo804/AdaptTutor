@@ -64,6 +64,13 @@ class TutorOrchestrator:
 
     # ---------- 阶段 1：诊断 ----------
 
+    def start_diagnosis(self) -> dict:
+        """初始化诊断：选第一题（不消耗作答），供创建会话时返回首题。"""
+        self.current_question = select_next_question(
+            self.mastery, self.pool, self.rules
+        )
+        return self._diag_state()
+
     def diagnose(self, correct: bool) -> dict:
         """提交一题作答，推进 BKT 与选题；返回当前收敛状态。"""
         if self.current_question is None:
@@ -213,6 +220,10 @@ class TutorOrchestrator:
             "weak_nodes": list(self.weak_nodes),
             "answered_counts": dict(self.answered_counts),
             "pack_id": self.pack.manifest.id,
+            "current_question_id": self.current_question.id
+            if self.current_question
+            else None,
+            "pool_ids": [q.id for q in self.pool],
         }
 
     def restore_state(self, state: dict) -> None:
@@ -226,6 +237,16 @@ class TutorOrchestrator:
         self.path = list(state.get("path", []))
         self.weak_nodes = list(state.get("weak_nodes", []))
         self.answered_counts = dict(state.get("answered_counts", {}))
+        # 恢复诊断进度：当前题与剩余题库（缺省回退全量）
+        cqid = state.get("current_question_id")
+        if cqid:
+            self.current_question = next(
+                (q for q in self.pack.questions if q.id == cqid), None
+            )
+        pool_ids = state.get("pool_ids")
+        if pool_ids is not None:
+            by_id = {q.id: q for q in self.pack.questions}
+            self.pool = [by_id[i] for i in pool_ids if i in by_id]
 
     # ---------- 阶段 4：反馈 ----------
 

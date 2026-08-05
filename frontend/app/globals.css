@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ---- 05 规范：明暗双主题（跟随系统）---- */
+:root {
+  --bg: #f7f8fc;
+  --surface: #ffffff;
+  --text: #1f2430;
+  --muted: #6b7280;
+  --border: #e5e7eb;
+  --accent: #3b5bdb; /* 浅色：墨蓝 */
+  --accent-soft: #e7ebfb;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #14161c;
+    --surface: #1d212b;
+    --text: #e8e6e1;
+    --muted: #9aa0ab;
+    --border: #2c313c;
+    --accent: #d9a441; /* 暗色：琥珀 */
+    --accent-soft: #2b2620;
+  }
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* KaTeX 数学公式字体 */
+.katex {
+  font-size: 1.05em;
+}

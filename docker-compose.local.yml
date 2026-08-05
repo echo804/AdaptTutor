@@ -29,22 +29,25 @@ services:
       # 容器内网直连 postgres 服务名；宿主侧访问用 5433（见 .env.example）
       DATABASE_URL: postgresql+asyncpg://adapt:adapt_dev_pw@postgres:5432/adapttutor
     ports:
-      - "8000:8000"
+      # 8000 被上级项目占用 → 本栈固定 8010
+      - "8010:8010"
     depends_on:
       postgres:
         condition: service_healthy
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8010
 
-  # web（前端 M4 启用）：前端骨架就绪后取消注释
-  # web:
-  #   image: node:20-alpine
-  #   container_name: adapttutor-web
-  #   working_dir: /app
-  #   volumes:
-  #     - ./frontend:/app
-  #   ports:
-  #     - "3000:3000"
-  #   command: sh -c "npm install && npm run dev"
+  web:
+    image: node:20-alpine
+    container_name: adapttutor-web
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+    ports:
+      - "3000:3000"
+    environment:
+      # 浏览器侧直连宿主机 8010（8000 被上级项目占用）
+      NEXT_PUBLIC_API_BASE: "http://localhost:8010"
+    command: sh -c "npm install && npm run dev -- -H 0.0.0.0"
 
 volumes:
   pgdata:
