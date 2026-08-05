@@ -45,6 +45,14 @@ export default function RegisterPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
+      {/* 返回欢迎页（M4r9） */}
+      <Link
+        href="/"
+        className="absolute left-4 top-4 flex items-center gap-1 text-sm transition-opacity hover:opacity-70"
+        style={{ color: "var(--muted)" }}
+      >
+        <span aria-hidden>←</span> 返回欢迎页
+      </Link>
       <form onSubmit={submit} className="w-full max-w-sm rounded-xl border p-8 shadow-sm" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
         <h1 className="mb-1 text-xl font-semibold" style={{ color: "var(--accent)" }}>
           注册账号

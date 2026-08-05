@@ -27,7 +27,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const [accent, setAccent] = useState<ThemeAccent>("ink");
   const { packs, active, ready, setActive } = useDomain();
 
-  const isAuthPage = pathname === "/login" || pathname === "/register";
+  // 免登录页：欢迎页 / 登录 / 注册（M4r9 欢迎页加入）
+  const isAuthPage = pathname === "/" || pathname === "/login" || pathname === "/register";
 
   useEffect(() => {
     if (isAuthPage) return;
