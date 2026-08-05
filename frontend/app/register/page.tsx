@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { api, setToken, AuthResponse } from "@/lib/api";
+import { QuillInk, PaperClip, Pencil, Magnifier, InkDots } from "@/components/NoteDecor";
 
 /** 注册页（M4r10）：复古笔记风，与欢迎页素描纸同系列 */
 export default function RegisterPage() {
@@ -46,6 +47,14 @@ export default function RegisterPage() {
 
   return (
     <div className="note-page relative flex min-h-screen items-center justify-center p-4">
+      {/* 背景文具装饰（与登录页镜像分布，避免雷同） */}
+      <PaperClip className="pointer-events-none absolute left-[8%] top-[13%] hidden w-16 -rotate-12 sm:block" />
+      <QuillInk className="pointer-events-none absolute right-[5%] top-[11%] hidden w-28 rotate-6 sm:block lg:w-32" />
+      <Magnifier className="pointer-events-none absolute bottom-[13%] left-[7%] hidden w-24 rotate-[10deg] sm:block lg:w-28" />
+      <Pencil className="pointer-events-none absolute bottom-[10%] right-[8%] hidden w-24 -rotate-[14deg] sm:block lg:w-28" />
+      <InkDots className="pointer-events-none absolute right-[5%] top-[45%] hidden w-40 opacity-70 sm:block" />
+      <InkDots className="pointer-events-none absolute bottom-[6%] left-[3%] hidden w-48 -scale-x-100 opacity-60 sm:block" />
+
       {/* 返回欢迎页 */}
       <Link
         href="/"
