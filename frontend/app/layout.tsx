@@ -10,7 +10,15 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="zh-CN">
+    <html lang="zh-CN" suppressHydrationWarning>
+      <head>
+        {/* 主题防闪烁：首帧前应用持久化的 data-mode / data-accent（与 lib/theme.ts 键一致） */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{var m=localStorage.getItem('at_mode'),a=localStorage.getItem('at_accent'),d=document.documentElement;if(m&&m!=='auto')d.dataset.mode=m;if(a&&a!=='ink')d.dataset.accent=a;}catch(e){}`,
+          }}
+        />
+      </head>
       <body>
         <AppShell>{children}</AppShell>
       </body>

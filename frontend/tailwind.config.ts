@@ -14,17 +14,17 @@ const config: Config = {
         mono: ["ui-monospace", "SFMono-Regular", "Consolas", '"Courier New"', "monospace"],
       },
       colors: {
-        // 浅色主题：墨蓝主强调色（05 §2）
+        // 主强调色：CSS 变量动态驱动（05 §2 色板，data-accent 可切换）
         primary: {
-          DEFAULT: "#2c3e50", // 墨蓝（克制、安静）
-          dark: "#1f2d3a",
-          light: "#eef1f4",
+          DEFAULT: "var(--accent)",
+          dark: "var(--accent)",
+          light: "var(--accent-soft)",
         },
-        // 暗色主题：琥珀主强调色（05 §2）
+        // 副强调色（琥珀系）
         amber_accent: {
-          DEFAULT: "#d4a574", // 一束温暖的光
-          dark: "#c08a54",
-          light: "#f5e6c8",
+          DEFAULT: "var(--amber)",
+          dark: "var(--amber)",
+          light: "var(--amber-soft)",
         },
       },
     },

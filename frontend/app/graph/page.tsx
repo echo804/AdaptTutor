@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import StarMap3D, { StarEdge, StarNode } from "@/components/StarMap3D";
 import { api, MasteryOut } from "@/lib/api";
+import { useThemeVar } from "@/lib/theme";
 
 /** 知识图谱星辰图页（M4r2：星空 + 知识星点亮；点击星 → 详情卡 + 溯源发光路径） */
 export default function GraphPage() {
@@ -11,6 +12,8 @@ export default function GraphPage() {
   const [mastery, setMastery] = useState<Record<string, number>>({});
   const [selected, setSelected] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
+  // 主题强调色（图例色随色板切换）
+  const amber = useThemeVar("--amber", "#d4a574");
 
   useEffect(() => {
     (async () => {
@@ -67,7 +70,7 @@ export default function GraphPage() {
       <div className="mb-3 flex items-center justify-between">
         <h1 className="text-lg font-semibold">知识图谱 · 星辰</h1>
         <div className="flex items-center gap-3 text-xs" style={{ color: "var(--muted)" }}>
-          <span className="flex items-center gap-1"><span className="inline-block h-2.5 w-2.5 rounded-full" style={{ background: "#d4a574", boxShadow: "0 0 6px #d4a574" }} /> 已点亮</span>
+          <span className="flex items-center gap-1"><span className="inline-block h-2.5 w-2.5 rounded-full" style={{ background: amber, boxShadow: `0 0 6px ${amber}` }} /> 已点亮</span>
           <span className="flex items-center gap-1"><span className="inline-block h-2.5 w-2.5 rounded-full" style={{ background: "rgba(148,163,184,0.5)" }} /> 未完成</span>
           <span className="flex items-center gap-1"><span className="inline-block h-2.5 w-2.5 rounded-full border" style={{ background: "rgba(148,163,184,0.25)" }} /> 未测</span>
         </div>

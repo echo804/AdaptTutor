@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { hexToRgba, useThemeVar } from "@/lib/theme";
 
 /** 星辰图（M4r2，对齐 05 §7"像一颗星星被点亮"）。
  *
@@ -36,7 +37,6 @@ interface StarMapProps {
 const NIGHT = ["#0b1120", "#0f172a", "#1e293b"];
 const COLD_GRAY = "#94a3b8";
 const WARM_GREEN = "#7ec8a0";
-const AMBER = "#d4a574";
 const EDGE = "rgba(148,163,184,0.22)";
 
 function lerpColor(c1: [number, number, number], c2: [number, number, number], t: number) {
@@ -48,6 +48,9 @@ export default function StarMap({ nodes, edges, mastery, selected, onSelect, lit
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
   const [hover, setHover] = useState<string | null>(null);
+  // 主题强调色（随色板/明暗切换自动刷新并重绘）
+  const amber = useThemeVar("--amber", "#d4a574");
+  const amberRgba = useCallback((a: number) => hexToRgba(amber, a), [amber]);
 
   // 布局：按 id 前缀分模块列，列内垂直分布
   const layout = useMemo(() => {
@@ -141,7 +144,7 @@ export default function StarMap({ nodes, edges, mastery, selected, onSelect, lit
         const traced = chainSet.has(e.from) && chainSet.has(e.to);
         if (traced) {
           // 溯源路径：暖色 + 虚线流动（05 §6 路径绘制，reduced-motion 时实线）
-          ctx.strokeStyle = "rgba(212,165,116,0.75)";
+          ctx.strokeStyle = amberRgba(0.75);
           ctx.lineWidth = 1.8;
           if (reduceMotion) {
             ctx.setLineDash([]);
@@ -165,8 +168,8 @@ export default function StarMap({ nodes, edges, mastery, selected, onSelect, lit
         const ry = rp.y * H;
         const breathe = reduceMotion ? 1 : 1 + 0.25 * Math.sin(t / 600);
         const ring = ctx.createRadialGradient(rx, ry, 6, rx, ry, 26 * breathe);
-        ring.addColorStop(0, "rgba(212,165,116,0.8)");
-        ring.addColorStop(1, "rgba(212,165,116,0)");
+        ring.addColorStop(0, amberRgba(0.8));
+        ring.addColorStop(1, amberRgba(0));
         ctx.beginPath();
         ctx.arc(rx, ry, 26 * breathe, 0, Math.PI * 2);
         ctx.fillStyle = ring;
@@ -189,8 +192,8 @@ export default function StarMap({ nodes, edges, mastery, selected, onSelect, lit
           // 点亮：琥珀光晕 + 脉冲
           const halo = 22 * pulse;
           const grad = ctx.createRadialGradient(cx, cy, 4, cx, cy, halo);
-          grad.addColorStop(0, "rgba(212,165,116,0.55)");
-          grad.addColorStop(1, "rgba(212,165,116,0)");
+          grad.addColorStop(0, amberRgba(0.55));
+          grad.addColorStop(1, amberRgba(0));
           ctx.beginPath();
           ctx.arc(cx, cy, halo, 0, Math.PI * 2);
           ctx.fillStyle = grad;
@@ -212,7 +215,7 @@ export default function StarMap({ nodes, edges, mastery, selected, onSelect, lit
         if (isSelected || isHover) {
           ctx.beginPath();
           ctx.arc(cx, cy, 16, 0, Math.PI * 2);
-          ctx.strokeStyle = "rgba(212,165,116,0.8)";
+          ctx.strokeStyle = amberRgba(0.8);
           ctx.lineWidth = 1.5;
           ctx.stroke();
         }
@@ -275,7 +278,7 @@ export default function StarMap({ nodes, edges, mastery, selected, onSelect, lit
       cv.removeEventListener("mousemove", onMove);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [nodes, edges, mastery, selected, hover, litThreshold, traceChain, traceRoot]);
+  }, [nodes, edges, mastery, selected, hover, litThreshold, traceChain, traceRoot, amber, amberRgba]);
 
   return (
     <div ref={wrapRef} className="relative h-full w-full overflow-hidden rounded-xl">

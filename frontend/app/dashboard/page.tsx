@@ -16,6 +16,7 @@ import {
 } from "recharts";
 import LearningPathTree from "@/components/LearningPathTree";
 import { api, MasteryOut, PathOut } from "@/lib/api";
+import { useThemeVar } from "@/lib/theme";
 
 /** 仪表盘（M4r3，05 §5.4）：今日推荐 → 掌握度总览 → 最近会话 → 学习趋势 */
 export default function DashboardPage() {
@@ -24,6 +25,8 @@ export default function DashboardPage() {
   const [trend, setTrend] = useState<{ date: string; count: number }[]>([]);
   const [sessions, setSessions] = useState<{ id: number; type: string; created_at: string }[]>([]);
   const [err, setErr] = useState<string | null>(null);
+  // 主题强调色（图表色随色板切换）
+  const amber = useThemeVar("--amber", "#d4a574");
 
   useEffect(() => {
     (async () => {
@@ -107,7 +110,7 @@ export default function DashboardPage() {
                 <Tooltip contentStyle={{ fontSize: 12, background: "var(--surface)", border: "1px solid var(--border)" }} />
                 <Bar dataKey="n" name="节点数" radius={[4, 4, 0, 0]}>
                   {dist.map((d, i) => (
-                    <Cell key={i} fill={i >= 4 ? "#7ec8a0" : i >= 3 ? "#d4a574" : "#94a3b8"} />
+                    <Cell key={i} fill={i >= 4 ? "#7ec8a0" : i >= 3 ? amber : "#94a3b8"} />
                   ))}
                 </Bar>
               </BarChart>
@@ -126,7 +129,7 @@ export default function DashboardPage() {
                 <AreaChart data={gaugeData} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
                   <defs>
                     <linearGradient id="avgGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#d4a574" />
+                      <stop offset="0%" stopColor={amber} />
                       <stop offset="100%" stopColor="#94a3b8" />
                     </linearGradient>
                   </defs>

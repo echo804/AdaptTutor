@@ -4,6 +4,7 @@ import { useMemo, useRef, useState } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Html, OrbitControls, Stars } from "@react-three/drei";
 import * as THREE from "three";
+import { hexToRgba, useThemeVar } from "@/lib/theme";
 
 /** 3D 宇宙星辰图（M4r6 需求 3）：
  * - 星系螺旋布局 + 中央恒星 + 星云粒子背景
@@ -34,8 +35,7 @@ interface StarMap3DProps {
   traceRoot?: string;
 }
 
-// 05 配色
-const AMBER = new THREE.Color("#d4a574");
+// 05 配色（语义色不随色板；强调色 AMBER 由主题变量动态传入）
 const COLD = new THREE.Color("#94a3b8");
 const WARM_GREEN = new THREE.Color("#7ec8a0");
 
@@ -63,6 +63,8 @@ function Planet({
   hovered,
   onHover,
   onSelect,
+  amberHex,
+  amberColor,
 }: {
   id: string;
   name: string;
@@ -72,6 +74,8 @@ function Planet({
   hovered: boolean;
   onHover: (id: string | null) => void;
   onSelect: (id: string | null) => void;
+  amberHex: string;
+  amberColor: THREE.Color;
 }) {
   const meshRef = useRef<THREE.Mesh>(null);
   const lightRef = useRef<THREE.PointLight>(null);
@@ -91,9 +95,9 @@ function Planet({
 
   // 掌握度色：点亮 → 琥珀→暖绿（按掌握度）；未点亮 → 冷灰暗沉
   const color = lit
-    ? lerpColor(AMBER, WARM_GREEN, Math.max(0, Math.min(1, ((mastery ?? 0) - 0.5) / 0.4)))
+    ? lerpColor(amberColor, WARM_GREEN, Math.max(0, Math.min(1, ((mastery ?? 0) - 0.5) / 0.4)))
     : COLD.clone().multiplyScalar(0.6);
-  const emissive = lit ? new THREE.Color("#d4a574") : new THREE.Color("#000000");
+  const emissive = lit ? new THREE.Color(amberHex) : new THREE.Color("#000000");
 
   return (
     <group>
@@ -122,12 +126,12 @@ function Planet({
         />
       </mesh>
       {/* 点亮光晕 */}
-      {lit && <pointLight ref={lightRef} color="#d4a574" distance={6} intensity={1.2} />}
+      {lit && <pointLight ref={lightRef} color={amberHex} distance={6} intensity={1.2} />}
       {/* 选中/悬停外环 */}
       {(selected || hovered) && (
         <mesh>
           <sphereGeometry args={[0.85, 16, 16]} />
-          <meshBasicMaterial color="#d4a574" wireframe transparent opacity={0.55} />
+          <meshBasicMaterial color={amberHex} wireframe transparent opacity={0.55} />
         </mesh>
       )}
       {/* 名称标签 */}
@@ -135,9 +139,9 @@ function Planet({
         <div
           className="whitespace-nowrap rounded px-1.5 py-0.5 text-[11px]"
           style={{
-            background: lit ? "rgba(212,165,116,0.15)" : "rgba(15,23,42,0.6)",
+            background: lit ? hexToRgba(amberHex, 0.15) : "rgba(15,23,42,0.6)",
             color: lit ? "#e8e6e3" : "rgba(148,163,184,0.85)",
-            border: selected ? "1px solid #d4a574" : "1px solid transparent",
+            border: selected ? `1px solid ${amberHex}` : "1px solid transparent",
             backdropFilter: "blur(2px)",
             userSelect: "none",
           }}
@@ -149,7 +153,7 @@ function Planet({
   );
 }
 
-function Galaxy({ nodes, edges, mastery, selected, onSelect, litThreshold, traceChain, traceRoot, positions }: {
+function Galaxy({ nodes, edges, mastery, selected, onSelect, litThreshold, traceChain, traceRoot, positions, amberHex, amberColor }: {
   nodes: StarNode[];
   edges: StarEdge[];
   mastery: Record<string, number>;
@@ -159,6 +163,8 @@ function Galaxy({ nodes, edges, mastery, selected, onSelect, litThreshold, trace
   traceChain: string[];
   traceRoot?: string;
   positions: Record<string, [number, number, number]>;
+  amberHex: string;
+  amberColor: THREE.Color;
 }) {
   const [hovered, setHovered] = useState<string | null>(null);
   const rootRef = useRef<THREE.Mesh>(null);
@@ -202,7 +208,7 @@ function Galaxy({ nodes, edges, mastery, selected, onSelect, litThreshold, trace
             />
           </bufferGeometry>
           <lineBasicMaterial
-            color={l.traced ? "#d4a574" : "#475569"}
+            color={l.traced ? amberHex : "#475569"}
             transparent
             opacity={l.traced ? 0.85 : 0.35}
           />
@@ -224,6 +230,8 @@ function Galaxy({ nodes, edges, mastery, selected, onSelect, litThreshold, trace
               hovered={hovered === n.id}
               onHover={setHovered}
               onSelect={(id) => onSelect?.(id)}
+              amberHex={amberHex}
+              amberColor={amberColor}
             />
           </group>
         );
@@ -233,7 +241,7 @@ function Galaxy({ nodes, edges, mastery, selected, onSelect, litThreshold, trace
       {traceRoot && positions[traceRoot] && (
         <mesh ref={rootRef} position={positions[traceRoot]}>
           <sphereGeometry args={[1.1, 20, 20]} />
-          <meshBasicMaterial color="#d4a574" wireframe transparent opacity={0.45} />
+          <meshBasicMaterial color={amberHex} wireframe transparent opacity={0.45} />
         </mesh>
       )}
     </group>
@@ -244,20 +252,23 @@ export default function StarMap3D(props: StarMap3DProps) {
   const { nodes, edges, mastery, selected, onSelect, litThreshold = 0.5, traceChain = [], traceRoot } = props;
   const positions = useMemo(() => spiralPositions(nodes), [nodes]);
   const reduce = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  // 主题强调色（随色板/明暗切换自动刷新）
+  const amberHex = useThemeVar("--amber", "#d4a574");
+  const amberColor = useMemo(() => new THREE.Color(amberHex), [amberHex]);
 
   return (
     <div className="h-full w-full" style={{ background: "radial-gradient(ellipse at 30% 30%, #0f172a 0%, #0b1120 60%, #060a14 100%)" }}>
       <Canvas camera={{ position: [14, 6, 14], fov: 50 }} dpr={[1, 1.5]}>
         <ambientLight intensity={0.35} />
-        <pointLight position={[0, 0, 0]} intensity={0.8} color="#d4a574" />
+        <pointLight position={[0, 0, 0]} intensity={0.8} color={amberHex} />
         <Stars radius={80} depth={40} count={2600} factor={3.2} saturation={0} fade speed={reduce ? 0 : 0.6} />
 
         {/* 中央恒星 */}
         <mesh position={[0, 0, 0]}>
           <sphereGeometry args={[1.35, 32, 32]} />
-          <meshStandardMaterial color="#d4a574" emissive="#d4a574" emissiveIntensity={0.9} roughness={0.2} />
+          <meshStandardMaterial color={amberHex} emissive={amberHex} emissiveIntensity={0.9} roughness={0.2} />
         </mesh>
-        <pointLight position={[0, 0, 0]} color="#d4a574" intensity={2.2} distance={40} />
+        <pointLight position={[0, 0, 0]} color={amberHex} intensity={2.2} distance={40} />
 
         <Galaxy
           nodes={nodes}
@@ -269,6 +280,8 @@ export default function StarMap3D(props: StarMap3DProps) {
           traceChain={traceChain}
           traceRoot={traceRoot}
           positions={positions}
+          amberHex={amberHex}
+          amberColor={amberColor}
         />
 
         <OrbitControls

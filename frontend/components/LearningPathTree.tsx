@@ -1,5 +1,7 @@
 "use client";
 
+import { useThemeVar } from "@/lib/theme";
+
 /** 缩略版星系路径（M4r7 需求 4，呼应 3D 宇宙）：
  * - 背景微星空点 + 每个行星的轨道椭圆环
  * - 行星节点：径向渐变（受光面亮/背光暗）+ 光晕；掌握度冷灰→暖绿着色
@@ -26,6 +28,8 @@ function color(p?: number) {
 export default function LearningPathTree({ path, mastery, names, height = 150 }: LearningPathTreeProps) {
   const n = path.length;
   if (n === 0) return null;
+  // 主题强调色（根因暖色描边/脉冲环，随色板切换）
+  const amber = useThemeVar("--amber", "#d4a574");
   const padX = 40;
   const nodeR = 17;
   const step = n > 1 ? (100 - padX * 2) / (n - 1) : 0;
@@ -101,11 +105,11 @@ export default function LearningPathTree({ path, mastery, names, height = 150 }:
             {/* 光晕 */}
             <circle cx={nd.cx} cy={cy} r={nodeR + 5} fill={base} opacity={0.18} />
             {/* 行星体 */}
-            <circle cx={nd.cx} cy={cy} r={nodeR} fill={base} stroke={isRoot ? "#d4a574" : "rgba(148,163,184,0.6)"} strokeWidth={isRoot ? 2 : 1} />
+            <circle cx={nd.cx} cy={cy} r={nodeR} fill={base} stroke={isRoot ? amber : "rgba(148,163,184,0.6)"} strokeWidth={isRoot ? 2 : 1} />
             {/* 光照层（受光面亮） */}
             <circle cx={nd.cx} cy={cy} r={nodeR} fill="url(#planetGrad)" />
             {/* 根因呼吸脉冲环 */}
-            {isRoot && <circle cx={nd.cx} cy={cy} r={nodeR + 4.5} fill="none" stroke="#d4a574" strokeWidth={1.2} opacity={0.6} />}
+            {isRoot && <circle cx={nd.cx} cy={cy} r={nodeR + 4.5} fill="none" stroke={amber} strokeWidth={1.2} opacity={0.6} />}
             {/* 编号 */}
             <text x={nd.cx} y={cy + 4} textAnchor="middle" fontSize={11} fill="#0f172a" fontWeight={700}>
               {nd.id.replace(/[a-z]/g, "")}

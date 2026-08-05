@@ -2,33 +2,128 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ---- 05 规范 §2 明暗双主题（跟随系统）---- */
+/* ---- 05 规范 §2 明暗双主题（默认跟随系统，可手动覆盖 data-mode）----
+   主题色板：data-accent 属性切换（ink/violet/forest/ocean/sunset），默认 ink（墨蓝）。
+   每套色板含亮/暗两套 --accent/--accent-soft（主色）与 --amber/--amber-soft（副色）。
+   亮色为深色调主色，暗色为亮化变体（暗色下"一束光"设计）。 */
 :root {
   --bg: #fafaf9;              /* 柔和米白 */
   --surface: #ffffff;         /* 卡片白底 */
   --text: #1a1a1a;            /* 深灰正文 */
   --muted: #6b7280;           /* 次级文字 */
   --border: #e5e7eb;
+  --success: #7ec8a0;         /* 掌握/成功语义色（不随色板） */
+  --cold: #94a3b8;            /* 掌握度色阶起点（不随色板） */
+  --warn: #b3543c;            /* 低饱和错误红（不随色板） */
+
+  /* 色板 ink·墨蓝（默认）：亮 */
   --accent: #2c3e50;          /* 墨蓝（克制、安静） */
   --accent-soft: #eef1f4;
-  --success: #7ec8a0;         /* 掌握/成功语义色 */
-  --cold: #94a3b8;            /* 掌握度色阶起点 */
-  --warn: #b3543c;            /* 低饱和错误红 */
+  --amber: #d4a574;           /* 暗琥珀（副强调） */
+  --amber-soft: #f6ede3;
 }
 
+/* 色板 violet·星夜紫 */
+:root[data-accent="violet"] {
+  --accent: #6c5ce7;
+  --accent-soft: #efedfc;
+  --amber: #e0a96d;
+  --amber-soft: #f7efe4;
+}
+/* 色板 forest·森绿 */
+:root[data-accent="forest"] {
+  --accent: #2e6b4f;
+  --accent-soft: #e9f2ed;
+  --amber: #d9b36a;
+  --amber-soft: #f6efe1;
+}
+/* 色板 ocean·海洋蓝 */
+:root[data-accent="ocean"] {
+  --accent: #1e6091;
+  --accent-soft: #e6eff5;
+  --amber: #e5b96b;
+  --amber-soft: #f8efe0;
+}
+/* 色板 sunset·落日橙 */
+:root[data-accent="sunset"] {
+  --accent: #c05b2e;
+  --accent-soft: #faeee7;
+  --amber: #e3b795;
+  --amber-soft: #f8efe6;
+}
+
+/* 暗色：跟随系统（auto），手动 data-mode="light" 时排除 */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-mode="light"]) {
     --bg: #1e1e1e;            /* 深灰背景 */
     --surface: #262626;       /* 卡片 */
     --text: #e8e6e3;          /* 暖白正文 */
     --muted: #9aa0ab;
     --border: #3a3a3a;
-    --accent: #d4a574;        /* 琥珀（一束温暖的光） */
-    --accent-soft: #2b2620;
     --success: #7ec8a0;
     --cold: #94a3b8;
     --warn: #d9907a;
+
+    /* ink·墨蓝 暗：琥珀（一束温暖的光，05 原创设计） */
+    --accent: #d4a574;
+    --accent-soft: #2b2620;
+    --amber: #e8c9a0;
+    --amber-soft: #362d22;
   }
+  /* 各色板暗色值 */
+  :root[data-accent="violet"] {
+    --accent: #a29bfe;
+    --accent-soft: #2e2a45;
+    --amber: #f0c08a;
+    --amber-soft: #3a3020;
+  }
+  :root[data-accent="forest"] {
+    --accent: #7fbfa0;
+    --accent-soft: #23332b;
+    --amber: #eacb8a;
+    --amber-soft: #37301f;
+  }
+  :root[data-accent="ocean"] {
+    --accent: #7fb3d9;
+    --accent-soft: #1e2b38;
+    --amber: #f0cc8f;
+    --amber-soft: #39301d;
+  }
+  :root[data-accent="sunset"] {
+    --accent: #e8956a;
+    --accent-soft: #3a271e;
+    --amber: #f0cda8;
+    --amber-soft: #3b2d21;
+  }
+}
+
+/* 手动 data-mode="dark"：与 auto 暗色一致 */
+:root[data-mode="dark"] {
+  --bg: #1e1e1e;
+  --surface: #262626;
+  --text: #e8e6e3;
+  --muted: #9aa0ab;
+  --border: #3a3a3a;
+  --success: #7ec8a0;
+  --cold: #94a3b8;
+  --warn: #d9907a;
+
+  --accent: #d4a574;
+  --accent-soft: #2b2620;
+  --amber: #e8c9a0;
+  --amber-soft: #362d22;
+}
+:root[data-mode="dark"][data-accent="violet"] {
+  --accent: #a29bfe; --accent-soft: #2e2a45; --amber: #f0c08a; --amber-soft: #3a3020;
+}
+:root[data-mode="dark"][data-accent="forest"] {
+  --accent: #7fbfa0; --accent-soft: #23332b; --amber: #eacb8a; --amber-soft: #37301f;
+}
+:root[data-mode="dark"][data-accent="ocean"] {
+  --accent: #7fb3d9; --accent-soft: #1e2b38; --amber: #f0cc8f; --amber-soft: #39301d;
+}
+:root[data-mode="dark"][data-accent="sunset"] {
+  --accent: #e8956a; --accent-soft: #3a271e; --amber: #f0cda8; --amber-soft: #3b2d21;
 }
 
 body {
