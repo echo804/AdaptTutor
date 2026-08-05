@@ -42,6 +42,9 @@ def judge_choice(user_choice: str, question: Question) -> JudgeResult:
     M4r7f：兼容直接输入选项内容（如答案"10"而非字母"C"）。
     """
     u = user_choice.strip().upper()
+    # M4r7g：用户输入含过程（"-3-5=-8"）→ 取等号后作为答案再比对
+    if "=" in u:
+        u = u.split("=")[-1].strip().upper() or u
     ans = question.answer.strip().upper()
     correct = u == ans
     if not correct:

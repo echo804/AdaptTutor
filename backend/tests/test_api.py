@@ -321,7 +321,22 @@ async def test_tutor_verify_auto_judge(client):
     assert r.status_code == 200, r.text
     sid = r.json()["session_id"]
 
-    # 推进到 VERIFY 态：ELICIT(答) → IDENTIFY(答) → HINT(任意) → VERIFY
+    # ELICIT 态直接作答（M4r7g）：读初始题答案，答对 → 直接通过进入变式
+    factory = get_session_factory()
+    async with factory() as db:
+        s = await repo.get_session(db, sid)
+        t = TutorOrchestrator()
+        t.restore_state(s.context or {})
+        initial_q = t.verify_question
+        assert initial_q is not None
+
+    r = await client.post(f"/api/v1/sessions/{sid}/messages", json={"kind": "message", "content": f"{initial_q.answer}"}, headers=h)
+    assert r.status_code == 200
+    body = r.json()
+    assert body["correct"] is True, body  # ELICIT 直接答对
+    assert body["state"] in ("done", "verify")
+
+    # 推进到 VERIFY 态（答错 → 识别 → 提示 → 回应 → VERIFY）
     await client.post(f"/api/v1/sessions/{sid}/messages", json={"kind": "message", "content": "我的思路是移项"}, headers=h)
     await client.post(f"/api/v1/sessions/{sid}/messages", json={"kind": "message", "content": "第一步先合并同类项"}, headers=h)
     r = await client.post(f"/api/v1/sessions/{sid}/messages", json={"kind": "message", "content": "好"}, headers=h)
@@ -329,7 +344,6 @@ async def test_tutor_verify_auto_judge(client):
     assert r.json()["state"] == "verify", r.text
 
     # 读 verify_question 的标准答案
-    factory = get_session_factory()
     async with factory() as db:
         s = await repo.get_session(db, sid)
         t = TutorOrchestrator()

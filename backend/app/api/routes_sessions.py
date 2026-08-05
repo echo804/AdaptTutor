@@ -182,14 +182,14 @@ async def api_send_message(
                 answered=st.get("answered"),
             )
     else:
-        # M4r7f：辅导会话作答自动判题——VERIFY 态（变式验证）用户消息视为作答
+        # M4r7f：辅导会话作答自动判题——ELICIT（初题作答）/ VERIFY（变式验证）用户消息视为作答
         from app.engine.evaluator import judge as judge_answer
         from app.engine.state_machine.states import State as SMState
 
-        if t.sm.state == SMState.VERIFY and t.verify_question and (body.content or "").strip():
+        if t.sm.state in (SMState.ELICIT, SMState.VERIFY) and t.verify_question and (body.content or "").strip():
             j = judge_answer(body.content, t.verify_question)
-            # M4r7f：非答案输入（"好"等）→ 温和提示重答，不推进状态机
-            if j.indeterminate:
+            if j.indeterminate and t.sm.state == SMState.VERIFY:
+                # M4r7f：VERIFY 非答案输入（"好"等）→ 温和提示重答，不推进状态机
                 reply = MessageReply(
                     state="verify",
                     message=j.feedback,
@@ -198,6 +198,12 @@ async def api_send_message(
                     correct=False,
                     feedback=j.feedback,
                     judge_method="rule",
+                )
+            elif j.indeterminate:
+                # ELICIT 非答案（说思路/闲聊）→ 正常对话流转（"先说说你的思路"）
+                r = t.tutor_step(body.content, correct=None)
+                reply = MessageReply(
+                    state=r.state, message=r.message, degraded=r.degraded, mock=r.mock
                 )
             else:
                 r = t.tutor_step(body.content, correct=j.correct)

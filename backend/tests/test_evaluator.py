@@ -53,6 +53,14 @@ def test_judge_choice_accepts_option_content():
     assert not judge_choice("3", q).correct
 
 
+def test_judge_choice_accepts_full_work():
+    """M4r7g：choice 题输入完整过程（"-3-5=-8"）→ 取等号后答案判对。"""
+    q = _q("c6", "choice", "-3-5=?", "B", options=["2", "-8", "-2", "8"])
+    assert judge_choice("-3-5=-8", q).correct
+    assert judge_choice("3-5=-8", q).correct
+    assert not judge_choice("-3-5=8", q).correct
+
+
 def test_judge_choice_indeterminate_on_non_answer():
     """M4r7f：choice 题非答案输入（"好"）→ indeterminate。"""
     q = _q("c5", "choice", "1+1=?", "B", options=["0", "1", "2", "3"])
