@@ -1,0 +1,21 @@
+{
+  "nodes": [
+    {"id": "k1", "name": "整数运算", "difficulty": 0.3, "importance": 0.9, "error_modes": ["符号错误", "优先级错误"]},
+    {"id": "k2", "name": "有理数运算", "difficulty": 0.4, "importance": 0.9, "error_modes": ["分数通分错误", "负数运算错误"]},
+    {"id": "k3", "name": "合并同类项", "difficulty": 0.45, "importance": 0.8, "error_modes": ["系数合并错误", "漏项"]},
+    {"id": "k4", "name": "移项", "difficulty": 0.5, "importance": 0.9, "error_modes": ["移项不变号", "漏移项"]},
+    {"id": "k5", "name": "系数化为1", "difficulty": 0.5, "importance": 0.9, "error_modes": ["两边不同乘", "除数为负忘变号"]},
+    {"id": "k6", "name": "一元一次方程应用", "difficulty": 0.7, "importance": 0.8, "error_modes": ["设列错误", "等量关系错误"]},
+    {"id": "k7", "name": "不等式的性质", "difficulty": 0.5, "importance": 0.8, "error_modes": ["乘除负数忘变向"]},
+    {"id": "k8", "name": "解一元一次不等式", "difficulty": 0.65, "importance": 0.8, "error_modes": ["解集方向错误", "端点取舍错误"]}
+  ],
+  "edges": [
+    {"from": "k1", "to": "k2", "type": "prerequisite"},
+    {"from": "k2", "to": "k3", "type": "prerequisite"},
+    {"from": "k3", "to": "k4", "type": "prerequisite"},
+    {"from": "k4", "to": "k5", "type": "prerequisite"},
+    {"from": "k5", "to": "k6", "type": "prerequisite"},
+    {"from": "k3", "to": "k7", "type": "prerequisite"},
+    {"from": "k7", "to": "k8", "type": "prerequisite"}
+  ]
+}

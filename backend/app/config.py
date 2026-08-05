@@ -34,7 +34,7 @@ class Settings(BaseSettings):
     invite_only: bool = True
 
     # --- 领域包 ---
-    domain_pack_path: str = "./domain_packs"
+    domain_pack_path: str = "../domain_packs"
     active_domain_pack: str = "junior_math_eq_ineq"
 
     # --- 评估 ---
