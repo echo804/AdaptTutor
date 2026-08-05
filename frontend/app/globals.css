@@ -493,6 +493,18 @@ body:has(.note-page) {
   .star-loading .twinkle { animation: none; opacity: 0.6; }
 }
 
+/* ---- M4r11h 星空浮现：从书页中心向外扩散 + 淡入（翻书动画结束后触发） ---- */
+.star-reveal {
+  animation: star-reveal-in 0.9s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+@keyframes star-reveal-in {
+  0%   { opacity: 0; transform: scale(0.86); filter: brightness(1.6); }
+  100% { opacity: 1; transform: scale(1);   filter: brightness(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .star-reveal { animation: none; }
+}
+
 /* ---- M4r12 苏格拉底水印：主框架各功能页背景（mask 蒙版 + 主题对比色） ----
  * 用透明 PNG 线稿作 alpha 蒙版，背景色 = --amber（与 --accent 主色对比，
  * 随色板/明暗联动：浅色琥珀 / 暗色亮琥珀）。极低透明，不干扰内容阅读。

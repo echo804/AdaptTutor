@@ -124,30 +124,31 @@ export default function GraphPage() {
   // ---- 展开状态：星辰图 ----
   if (open) {
     return (
-      <div className="fixed inset-0 z-40" style={{ background: "#060a14" }}>
-        {/* 顶部控制栏（浮在星空上） */}
-        <div className="absolute inset-x-0 top-0 z-20 flex items-center justify-between p-4">
-          <h1 className="text-lg font-semibold" style={{ color: "#e8e6e3" }}>
-            知识图谱 · 星辰 ——《{open.subject}》
-          </h1>
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-3 text-xs" style={{ color: "rgba(232,230,225,0.7)" }}>
-              <span className="flex items-center gap-1"><span className="inline-block h-2.5 w-2.5 rounded-full" style={{ background: amber, boxShadow: `0 0 6px ${amber}` }} /> 已点亮</span>
-              <span className="flex items-center gap-1"><span className="inline-block h-2.5 w-2.5 rounded-full" style={{ background: "rgba(148,163,184,0.5)" }} /> 未完成</span>
-              <span className="flex items-center gap-1"><span className="inline-block h-2.5 w-2.5 rounded-full border" style={{ background: "rgba(148,163,184,0.25)" }} /> 未测</span>
-            </div>
-            <button
-              className="rounded-full px-4 py-1.5 text-sm font-medium transition-opacity hover:opacity-80"
-              style={{ background: "rgba(232,230,225,0.12)", color: "#e8e6e3", border: "1px solid rgba(232,230,225,0.25)" }}
-              onClick={() => {
-                setOpen(null);
-                setGraph(null);
-                setSelected(null);
-                setErr(null);
-              }}
-            >
-              ← 合上书
-            </button>
+      <div className="star-reveal fixed inset-0 z-40" style={{ background: "#060a14" }}>
+        {/* 顶部悬浮条（细窄，弱化存在感） */}
+        <div className="absolute inset-x-0 top-0 z-20 flex items-center justify-between px-4 py-2.5" style={{ background: "linear-gradient(180deg, rgba(6,10,20,0.55), transparent)", pointerEvents: "none" }}>
+          {/* 左：合上书（书角小按钮） */}
+          <button
+            className="rounded-full px-3 py-1 text-xs font-medium transition-opacity hover:opacity-80"
+            style={{ background: "rgba(232,230,225,0.1)", color: "rgba(232,230,225,0.85)", border: "1px solid rgba(232,230,225,0.2)", pointerEvents: "auto" }}
+            onClick={() => {
+              setOpen(null);
+              setGraph(null);
+              setSelected(null);
+              setErr(null);
+            }}
+          >
+            ← 合上书
+          </button>
+          {/* 中：书名（小字，低调） */}
+          <span className="text-xs tracking-widest" style={{ color: "rgba(232,230,225,0.45)" }}>
+            《{open.subject}》
+          </span>
+          {/* 右：图例（细条小字） */}
+          <div className="flex items-center gap-3 text-[10px]" style={{ color: "rgba(232,230,225,0.55)" }}>
+            <span className="flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-full" style={{ background: amber, boxShadow: `0 0 6px ${amber}` }} /> 点亮</span>
+            <span className="flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-full" style={{ background: "rgba(148,163,184,0.5)" }} /> 未完成</span>
+            <span className="flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-full border" style={{ background: "rgba(148,163,184,0.25)" }} /> 未测</span>
           </div>
         </div>
 
