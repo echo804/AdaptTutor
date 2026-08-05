@@ -5,41 +5,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getToken } from "@/lib/api";
 
-/** 欢迎页（M4r9f）：淡黄素描纸 + 正中苏格拉底正面雕像剪影（卷发环绕头像）+ 文字浮于剪影上。
+/** 欢迎页（M4r9j）：淡黄素描纸 + 精细单线手绘苏格拉底正面头像线稿（古希腊雕像质感，浅灰线条）+ 文字浮于其上。
+ * 素材：AI 生成的矢量线稿风格苏格拉底头像（波浪卷发/长胡须/分层排线），透明背景。
  * 已登录 → 直接进入 /chat；未登录 → 展示欢迎页 + 登录/注册 CTA。
  */
 
 const BRAND = "AdaptTutor";
 const TITLE = "不是给予答案，而是唤醒思考";
-
-/** 苏格拉底正面大头照剪影：国字脸（方额/直颊/方腮）+ 茂密卷曲短发 + 浓密大胡须，无五官、无脖子 */
-function SocratesWatermark({ className = "" }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 420 480"
-      className={className}
-      aria-hidden
-      preserveAspectRatio="xMidYMid meet"
-    >
-      <g fill="#2c3e50" opacity="0.5">
-        {/* 国字脸 + 大胡须一体轮廓（方额 → 直颊 → 方腮 → 浓密胡须） */}
-        <path d="M210 60 C270 60 306 92 312 138 L316 178 C318 210 314 240 306 262 L300 292 C296 312 294 330 296 348 C298 372 306 394 318 408 C330 418 340 424 344 432 C316 438 286 440 258 436 C242 433 226 431 210 432 C194 431 178 433 162 436 C134 440 104 438 76 432 C80 424 90 418 102 408 C114 394 122 372 124 348 C126 330 124 312 120 292 L114 262 C106 240 102 210 104 178 L108 138 C114 92 150 60 210 60 Z" />
-        {/* 茂密卷曲短发帽（覆盖头顶，外缘卷曲波浪） */}
-        <path d="M108 168 C104 128 114 92 138 68 C162 44 190 30 210 30 C230 30 258 44 282 68 C306 92 316 128 312 168 C320 136 316 102 300 76 C284 50 258 34 230 30 C202 26 178 28 154 36 C128 46 106 64 92 90 C80 114 76 142 108 168 Z" />
-        {/* 五官（纸色雕刻感：眉毛/杏眼/鼻/嘴） */}
-        <g fill="#f6ecdc" opacity="0.9">
-          <path d="M150 160 C160 153 172 151 182 156" stroke="#f6ecdc" strokeWidth="6" strokeLinecap="round" fill="none" />
-          <path d="M238 156 C248 151 260 153 270 160" stroke="#f6ecdc" strokeWidth="6" strokeLinecap="round" fill="none" />
-          <path d="M152 180 C158 172 168 172 174 180 C168 188 158 188 152 180 Z" />
-          <path d="M246 180 C252 172 262 172 268 180 C262 188 252 188 246 180 Z" />
-          <path d="M210 186 C207 200 201 208 194 214 C202 218 218 218 226 214 C219 208 213 200 210 186 Z" />
-          <path d="M210 186 L210 204" stroke="#f6ecdc" strokeWidth="4" strokeLinecap="round" fill="none" opacity="0.8" />
-          <path d="M188 322 C198 330 222 330 232 322" stroke="#f6ecdc" strokeWidth="6" strokeLinecap="round" fill="none" />
-        </g>
-      </g>
-    </svg>
-  );
-}
 
 export default function WelcomePage() {
   const router = useRouter();
@@ -70,10 +42,17 @@ export default function WelcomePage() {
 
   return (
     <div className="welcome-paper relative flex min-h-screen items-center justify-center overflow-hidden">
-      {/* 中屏正面剪影（水印层，z-0） */}
-      <SocratesWatermark className="pointer-events-none absolute z-0 w-[68vw] max-w-[700px]" />
+      {/* 精细线稿水印（z-0，透明 PNG/WebP） */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/socrates-lineart-vertical.webp"
+        alt=""
+        aria-hidden
+        className="pointer-events-none absolute z-0 h-[92vh] w-auto max-w-none select-none"
+        draggable={false}
+      />
 
-      {/* 文字浮于剪影上（z-10） */}
+      {/* 文字浮于线稿上（z-10） */}
       <main className="relative z-10 flex flex-col items-center px-6 py-16 text-center">
         <h1
           className="font-mono text-4xl font-bold tracking-[0.14em] sm:text-5xl"

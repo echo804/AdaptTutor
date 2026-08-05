@@ -234,8 +234,3 @@ code, pre, .katex {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: none; }
 }
-/* 苏格拉底剪影：墨色墨水感（轻微下坠阴影 + 干刷边缘） */
-.socrates-silhouette {
-  filter: drop-shadow(0 2px 0 rgba(44, 62, 80, 0.12));
-  opacity: 0.92;
-}
