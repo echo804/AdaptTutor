@@ -5,37 +5,54 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getToken } from "@/lib/api";
 
-/** 欢迎页（M4r9）：淡黄素描纸 + 苏格拉底剪影 + 品牌名科技风格逐字打印 + 宣传语。
+/** 欢迎页（M4r9c）：淡黄素描纸 + 左侧苏格拉底侧脸剪影（卷发/大胡子/长袍）+ 右侧品牌打印与 CTA。
  * 已登录 → 直接进入 /chat；未登录 → 展示欢迎页 + 登录/注册 CTA。
  */
 
 const BRAND = "AdaptTutor";
 const TAGLINE = "AI 苏格拉底式自适应学习 — 智能诊断薄弱点，只给提示不给答案，在知识宇宙中点亮每一颗星";
 
-/** 苏格拉底剪影：秃顶大胡子 + 长袍的哲学家半身像（墨色墨水感） */
-function SocratesSilhouette() {
+/** 苏格拉底侧脸剪影：卷发 + 大胡子 + 长袍（朝右的哲学家侧像，墨色墨水感） */
+function SocratesSilhouette({ className = "" }: { className?: string }) {
   return (
     <svg
-      viewBox="0 0 120 150"
-      className="socrates-silhouette h-32 w-auto sm:h-40"
+      viewBox="0 0 360 520"
+      className={`socrates-silhouette ${className}`}
       aria-hidden
+      preserveAspectRatio="xMidYMid meet"
     >
-      {/* 长袍 */}
+      {/* 长袍（肩部 → 下摆） */}
       <path
-        d="M34 78 C34 60 48 50 60 50 C72 50 86 60 86 78 L94 138 C92 146 76 150 60 150 C44 150 28 146 26 138 Z"
+        d="M140 210 C120 216 96 236 84 268 C72 300 66 340 64 380 L64 520 L296 520 C296 480 294 430 288 384 C282 336 268 296 248 266 C232 242 208 228 196 224 C180 216 158 210 140 210 Z"
         fill="#2c3e50"
       />
-      {/* 长袍衣领褶皱 */}
-      <path d="M48 52 C54 62 66 62 72 52" stroke="#f6ecdc" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-      {/* 头（秃顶圆头） */}
-      <circle cx="60" cy="32" r="20" fill="#2c3e50" />
-      {/* 大胡子（苏格拉底标志性浓密胡须，环绕下巴） */}
+      {/* 长袍衣领 */}
+      <path d="M176 222 C200 228 224 228 244 244" stroke="#f6ecdc" strokeWidth="4" fill="none" strokeLinecap="round" />
+      {/* 长袍褶皱（纸色细线） */}
+      <path d="M118 300 C150 320 200 330 250 322" stroke="#f6ecdc" strokeWidth="3.5" fill="none" strokeLinecap="round" opacity="0.85" />
+      <path d="M108 400 C160 420 220 428 272 420" stroke="#f6ecdc" strokeWidth="3.5" fill="none" strokeLinecap="round" opacity="0.85" />
+      <path d="M100 468 C150 484 210 490 264 484" stroke="#f6ecdc" strokeWidth="3" fill="none" strokeLinecap="round" opacity="0.7" />
+
+      {/* 头发（头顶卷发，覆盖前额） */}
       <path
-        d="M46 36 C42 52 46 62 52 68 C56 71 64 71 68 68 C74 62 78 52 74 36 C69 44 51 44 46 36 Z"
+        d="M132 108 C130 62 158 30 202 26 C246 22 282 48 288 84 C296 64 292 40 274 26 C256 12 220 8 194 14 C158 22 134 56 132 108 Z"
         fill="#2c3e50"
       />
-      {/* 眉毛（沉思神情） */}
-      <path d="M52 27 C55 25 58 25 61 27" stroke="#f6ecdc" strokeWidth="1.6" fill="none" strokeLinecap="round" />
+
+      {/* 侧脸轮廓（额头 → 鼻梁 → 鼻尖 → 人中 → 嘴唇 → 下巴） */}
+      <path
+        d="M188 96 C198 84 210 82 218 88 L236 108 C244 118 248 124 250 128 L234 134 C232 140 230 146 230 150 L244 158 C240 164 236 168 234 172 L238 178 C226 190 216 196 208 202"
+        fill="#2c3e50"
+      />
+
+      {/* 大胡子（从鼻下沿脸颊垂到胸前，分缕波浪） */}
+      <path
+        d="M230 130 C244 148 252 172 250 196 C248 220 238 236 232 252 C224 272 224 292 230 310 C240 320 254 322 260 314 C252 296 250 276 248 260 C250 276 248 296 244 314 C236 322 220 324 212 316 C200 296 196 272 200 248 C204 224 210 206 218 192 C204 182 190 172 184 160 C176 146 176 134 180 124 C190 130 206 132 218 130 C222 130 226 130 230 130 Z"
+        fill="#2c3e50"
+      />
+      {/* 胡子分缕（纸色细线） */}
+      <path d="M214 200 C206 220 204 248 212 272" stroke="#f6ecdc" strokeWidth="2.5" fill="none" strokeLinecap="round" opacity="0.7" />
+      <path d="M232 208 C236 232 234 258 228 282" stroke="#f6ecdc" strokeWidth="2.5" fill="none" strokeLinecap="round" opacity="0.7" />
     </svg>
   );
 }
@@ -68,28 +85,33 @@ export default function WelcomePage() {
   }, [printed, showTag, showCta]);
 
   return (
-    <div className="welcome-paper flex min-h-screen items-center justify-center">
-      <main className="relative z-10 flex flex-col items-center px-6 text-center">
-        {/* 苏格拉底剪影 */}
-        <SocratesSilhouette />
+    <div className="welcome-paper flex min-h-screen">
+      {/* 左半屏：苏格拉底侧脸剪影 */}
+      <div className="hidden flex-1 items-center justify-center sm:flex sm:w-1/2">
+        <SocratesSilhouette className="max-h-[86vh] w-auto max-w-full px-6 py-10" />
+      </div>
 
-        {/* 品牌名（逐字打印，墨蓝字 + 琥珀光标） */}
+      {/* 右半屏：品牌 + 宣传语 + CTA */}
+      <main className="flex flex-1 flex-col items-start justify-center px-8 py-16 sm:w-1/2 sm:px-14">
+        {/* 移动端小剪影 */}
+        <div className="mb-6 flex justify-center sm:hidden">
+          <SocratesSilhouette className="h-40 w-auto" />
+        </div>
+
         <h1
-          className="mt-5 font-mono text-5xl font-bold tracking-[0.12em] sm:text-6xl"
+          className="font-mono text-5xl font-bold tracking-[0.12em] sm:text-6xl"
           style={{ color: "#2c3e50" }}
         >
           {BRAND.slice(0, printed)}
           <span className="type-cursor" style={{ display: printed >= BRAND.length ? "none" : "inline-block" }} />
         </h1>
 
-        {/* 宣传语（打印完成后淡入） */}
         {showTag && (
-          <p className="welcome-fade mt-4 max-w-xl text-sm leading-relaxed tracking-wide sm:text-base" style={{ color: "rgba(44,62,80,0.72)" }}>
+          <p className="welcome-fade mt-5 max-w-md text-sm leading-relaxed tracking-wide sm:text-base" style={{ color: "rgba(44,62,80,0.72)" }}>
             {TAGLINE}
           </p>
         )}
 
-        {/* CTA（延迟淡入） */}
         {showCta && (
           <div className="welcome-fade mt-10 flex items-center gap-4">
             <Link
