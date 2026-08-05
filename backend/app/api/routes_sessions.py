@@ -19,6 +19,7 @@ from app.api.schemas import (
     SessionCreated,
     SessionCreateRequest,
     SessionDetail,
+    SessionList,
 )
 from app.domain.schemas import Question
 from app.engine.tutor_orchestrator import TutorOrchestrator
@@ -87,6 +88,16 @@ async def api_create_session(
     )
 
 
+@router.get("/sessions", response_model=SessionList)
+async def api_list_sessions(
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> SessionList:
+    """会话列表（M4r3 仪表盘"最近会话"数据源）。"""
+    rows = await session_service.list_sessions(db, user.id)
+    return SessionList(sessions=rows)
+
+
 @router.post("/sessions/{sid}/messages", response_model=MessageReply)
 async def api_send_message(
     sid: int,
@@ -101,23 +112,38 @@ async def api_send_message(
 
     trace_id = f"{sid}-{uuid.uuid4().hex[:8]}"
     await repo.add_message(
-        db, sid, trace_id, "user", body.content or ("作答" if body.kind == "answer" else ""), None
+        db,
+        sid,
+        trace_id,
+        "user",
+        body.answer or body.content or "",
+        None,
     )
 
     if body.kind == "answer":
-        st = t.diagnose(body.correct is True)
-        q = st.get("question")
+        q = t.current_question
+        if q is None or not body.answer:
+            raise HTTPException(status_code=400, detail="缺少作答内容")
+        # M4r1：AI 判题（choice 比对 / open LLM+规则兜底），用户不再自判
+        from app.engine.evaluator import judge
+
+        result = judge(body.answer, q)
+        st = t.diagnose(result.correct)
+        nq = st.get("question")
         reply_text = (
-            "答对了，继续！下一题：" + (q.content if q else "（诊断完成）")
-            if body.correct
-            else "没关系，记下这个薄弱点。下一题：" + (q.content if q else "（诊断完成）")
+            f"答对了！{result.feedback} 下一题：{nq.content}"
+            if result.correct
+            else f"答错了。{result.feedback} 下一题：{nq.content if nq else '（诊断完成）'}"
         )
         reply = MessageReply(
             state="diagnose",
             message=reply_text,
-            question=_question_to_dict(q),
+            question=_question_to_dict(nq),
             terminated=bool(st.get("terminated", False)),
             done=bool(st.get("done", False)),
+            correct=result.correct,
+            feedback=result.feedback,
+            judge_method=result.method,
         )
     else:
         r = t.tutor_step(body.content or "", correct=body.correct)

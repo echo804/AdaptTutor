@@ -50,3 +50,26 @@ async def load_session_state(
     """读取状态快照；无快照返回 None。"""
     s = await repo.get_session(db, session_id)
     return s.context if s is not None else None
+
+
+async def list_sessions(
+    db: AsyncSession, student_id: int, limit: int = 20
+) -> list[dict]:
+    """会话列表（M4r3 仪表盘"最近会话"）。"""
+    from sqlalchemy import select
+
+    rows = await db.execute(
+        select(Session)
+        .where(Session.student_id == student_id)
+        .order_by(Session.started_at.desc())
+        .limit(limit)
+    )
+    return [
+        {
+            "id": s.id,
+            "type": s.type,
+            "status": s.status,
+            "created_at": s.started_at.isoformat(),
+        }
+        for s in rows.scalars().all()
+    ]

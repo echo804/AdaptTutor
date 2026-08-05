@@ -132,12 +132,13 @@ async def test_diagnostic_session_flow(client):
     sid = r.json()["session_id"]
     assert r.json()["first_message"]
 
-    # 作答两轮
-    r = await client.post(f"/api/v1/sessions/{sid}/messages", json={"kind": "answer", "correct": True}, headers=h)
+    # 作答两轮（M4r1：AI 判题，传答案内容）
+    r = await client.post(f"/api/v1/sessions/{sid}/messages", json={"kind": "answer", "answer": "A"}, headers=h)
     assert r.status_code == 200
     assert r.json()["message"]
+    assert "correct" in r.json() and "feedback" in r.json()
 
-    r = await client.post(f"/api/v1/sessions/{sid}/messages", json={"kind": "answer", "correct": False}, headers=h)
+    r = await client.post(f"/api/v1/sessions/{sid}/messages", json={"kind": "answer", "answer": "B"}, headers=h)
     assert r.status_code == 200
 
     # 消息历史
@@ -178,7 +179,7 @@ async def test_mastery_dashboard_data(client):
     await client.put("/me/api-keys/deepseek", json={"provider": "deepseek", "api_key": "sk-secret-abcdefgh"}, headers=h)
     r = await client.post("/api/v1/sessions", json={"type": "diagnostic"}, headers=h)
     sid = r.json()["session_id"]
-    await client.post(f"/api/v1/sessions/{sid}/messages", json={"kind": "answer", "correct": True}, headers=h)
+    await client.post(f"/api/v1/sessions/{sid}/messages", json={"kind": "answer", "answer": "A"}, headers=h)
 
     r = await client.get(f"/api/v1/students/{uid}/mastery", headers=h)
     assert r.status_code == 200

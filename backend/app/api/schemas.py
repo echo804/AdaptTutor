@@ -69,9 +69,10 @@ class SessionCreated(BaseModel):
 
 
 class MessageSendRequest(BaseModel):
-    kind: str = Field(pattern="^(answer|message)$")  # answer=诊断作答 / message=辅导对话
-    correct: bool | None = None       # kind=answer 必填；kind=message 可空
-    content: str = ""                 # 学生回复文本
+    kind: str = Field(pattern="^(answer|message)$")  # answer=作答（AI 判题）/ message=辅导对话
+    answer: str | None = None        # kind=answer：选择题传选项字母，填空/解答传文本
+    correct: bool | None = None      # 兼容旧字段（M4r1 后由 AI 判题，前端不再传）
+    content: str = ""                # 学生回复文本
 
 
 class MessageReply(BaseModel):
@@ -82,6 +83,9 @@ class MessageReply(BaseModel):
     question: dict | None = None      # 诊断下一题（kind=answer）
     terminated: bool = False
     done: bool = False
+    correct: bool | None = None       # AI 判题结果（M4r1）
+    feedback: str | None = None       # 判题反馈
+    judge_method: str | None = None   # choice|rule|llm
 
 
 class SessionDetail(BaseModel):
@@ -90,6 +94,17 @@ class SessionDetail(BaseModel):
     status: str
     state: str | None = None
     context: dict | None = None
+
+
+class SessionItem(BaseModel):
+    id: int
+    type: str
+    status: str
+    created_at: str
+
+
+class SessionList(BaseModel):
+    sessions: list[SessionItem]
 
 
 class MessageOut(BaseModel):

@@ -83,6 +83,9 @@ export interface MessageReply {
   question: Question | null;
   terminated: boolean;
   done: boolean;
+  correct: boolean | null;
+  feedback: string | null;
+  judge_method: string | null;
 }
 
 export interface SessionCreated {

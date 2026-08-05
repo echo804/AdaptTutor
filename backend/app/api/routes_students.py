@@ -69,3 +69,16 @@ async def api_trace(
     chain = sorted(graph.ancestors(node_id))
     root = trace_root_evidenced(graph, node_id, mastery, answered=set(mastery))
     return TraceOut(wrong_node=node_id, root=root, chain=chain)
+
+
+@router.get("/{sid}/trend")
+async def api_trend(
+    sid: int,
+    days: int = 14,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """学习趋势（M4r3）：近 N 天每日作答事件数（learning_events，event_type='answer'）。"""
+    _check_self(user.id, sid)
+    rows = await repo.get_trend(db, user.id, days)
+    return {"trend": rows}

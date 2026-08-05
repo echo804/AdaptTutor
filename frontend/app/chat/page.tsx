@@ -27,6 +27,10 @@ export default function ChatPage() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  // M4r1：AI 判题——作答输入（choice→选项字母；blank/open→文本）
+  const [selectedChoice, setSelectedChoice] = useState<string | null>(null);
+  const [answerText, setAnswerText] = useState("");
+  const [judgeResult, setJudgeResult] = useState<{ correct: boolean; feedback: string; method?: string } | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -55,24 +59,42 @@ export default function ChatPage() {
     }
   }
 
-  async function send(kind: "answer" | "message", correct?: boolean) {
+  async function send(kind: "answer" | "message", answer?: string) {
     if (!sessionId || loading) return;
     setErr(null);
     setLoading(true);
     try {
-      if (kind === "answer" && currentQuestion) {
-        setBubbles((b) => [...b, { role: "user", content: `${currentQuestion.content} → ${correct ? "答对" : "答错"}` }]);
-      } else if (input.trim()) {
-        setBubbles((b) => [...b, { role: "user", content: input.trim() }]);
-        setInput("");
-      }
+      const userText =
+        kind === "answer"
+          ? (answer ?? "").trim() || "作答"
+          : input.trim();
+      if (kind === "message" && input.trim()) setInput("");
+
+      const body =
+        kind === "answer"
+          ? { kind, answer: (answer ?? "").trim() }
+          : { kind, content: userText || "继续" };
+
       const r = await api<MessageReply>(`/api/v1/sessions/${sessionId}/messages`, {
         method: "POST",
-        body: kind === "answer" ? { kind, correct } : { kind, content: input.trim() || "继续" },
+        body,
       });
+
       setState(r.state);
       setCurrentQuestion(r.question);
-      setBubbles((b) => [...b, { role: "assistant", content: r.message, state: r.state }]);
+      // AI 判题反馈（M4r1）
+      if (kind === "answer" && r.correct !== null) {
+        setJudgeResult({ correct: r.correct, feedback: r.feedback || "", method: r.judge_method || undefined });
+        setBubbles((b) => [...b, { role: "user", content: userText }]);
+        setBubbles((b) => [...b, { role: "assistant", content: `${r.correct ? "✓ 答对了" : "✗ 答错了"}：${r.feedback || ""}`, state: r.state }]);
+      } else {
+        setJudgeResult(null);
+        setBubbles((b) => [...b, { role: "user", content: userText }]);
+        setBubbles((b) => [...b, { role: "assistant", content: r.message, state: r.state }]);
+      }
+      // 作答态复位
+      setSelectedChoice(null);
+      setAnswerText("");
     } catch (e: any) {
       setErr(e.message || "发送失败");
     } finally {
@@ -143,7 +165,7 @@ export default function ChatPage() {
         {/* 消息列表 */}
         <div className="flex-1 space-y-3 overflow-auto p-4">
           {bubbles.map((b, i) => (
-            <div key={i} className={`flex ${b.role === "user" ? "justify-end" : "justify-start"}`}>
+            <div key={i} className={`flex animate-fade ${b.role === "user" ? "justify-end" : "justify-start"}`}>
               <div
                 className="max-w-[80%] whitespace-pre-wrap rounded-xl px-4 py-2 text-sm"
                 style={{
@@ -157,29 +179,96 @@ export default function ChatPage() {
             </div>
           ))}
 
-          {/* 当前题目（诊断态） */}
+          {/* 当前题目（诊断态）+ AI 判题作答组件（M4r1，对齐 05 §5.1） */}
           {currentQuestion && (
             <div className="rounded-xl border p-4" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
-              <div className="mb-2 text-xs" style={{ color: "var(--muted)" }}>
-                当前题目（{currentQuestion.type === "choice" ? "选择" : currentQuestion.type === "blank" ? "填空" : "解答"}）
+              <div className="mb-2 flex items-center justify-between">
+                <span className="text-xs" style={{ color: "var(--muted)" }}>
+                  当前题目（{currentQuestion.type === "choice" ? "选择" : currentQuestion.type === "blank" ? "填空" : "解答"}）
+                </span>
+                {judgeResult && (
+                  <span className="text-xs" style={{ color: judgeResult.correct ? "var(--success)" : "var(--warn)" }}>
+                    {judgeResult.correct ? "✓ 答对了" : "✗ 答错了"}
+                    {judgeResult.method && `（${judgeResult.method === "llm" ? "AI 判题" : judgeResult.method === "choice" ? "选项比对" : "规则判定"}）`}
+                  </span>
+                )}
               </div>
               <MathText text={currentQuestion.content} />
-              {currentQuestion.options && (
-                <div className="mt-2 space-y-1">
-                  {currentQuestion.options.map((o, i) => (
-                    <div key={i} className="text-sm">
-                      {String.fromCharCode(65 + i)}. <MathText text={o} />
-                    </div>
-                  ))}
+
+              {judgeResult && (
+                <p className="mt-2 text-sm" style={{ color: judgeResult.correct ? "var(--success)" : "var(--warn)" }}>
+                  {judgeResult.feedback}
+                </p>
+              )}
+
+              {/* 选择：选项按钮组 */}
+              {currentQuestion.type === "choice" && currentQuestion.options && (
+                <div className="mt-3 space-y-1.5">
+                  {currentQuestion.options.map((o, i) => {
+                    const letter = String.fromCharCode(65 + i);
+                    const active = selectedChoice === letter;
+                    return (
+                      <button
+                        key={i}
+                        className="flex w-full items-center gap-2 rounded-lg border px-3 py-2 text-left text-sm transition-colors"
+                        style={{
+                          borderColor: active ? "var(--accent)" : "var(--border)",
+                          background: active ? "var(--accent-soft)" : "transparent",
+                          color: "var(--text)",
+                        }}
+                        onClick={() => setSelectedChoice(letter)}
+                        disabled={loading}
+                      >
+                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-medium" style={{ background: active ? "var(--accent)" : "var(--bg)", color: active ? "#fff" : "var(--muted)" }}>
+                          {letter}
+                        </span>
+                        <MathText text={o} />
+                      </button>
+                    );
+                  })}
                 </div>
               )}
+
+              {/* 填空：单行输入 */}
+              {currentQuestion.type === "blank" && (
+                <input
+                  className="mt-3 w-full rounded border px-3 py-2 text-sm outline-none"
+                  style={{ background: "var(--bg)", borderColor: "var(--border)", color: "var(--text)" }}
+                  placeholder="输入你的答案…"
+                  value={answerText}
+                  onChange={(e) => setAnswerText(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && answerText.trim() && send("answer", answerText)}
+                  disabled={loading}
+                />
+              )}
+
+              {/* 解答：多行文本 */}
+              {currentQuestion.type === "open" && (
+                <textarea
+                  className="mt-3 w-full rounded border px-3 py-2 text-sm outline-none"
+                  style={{ background: "var(--bg)", borderColor: "var(--border)", color: "var(--text)", minHeight: 72 }}
+                  placeholder="写出你的思路和答案…"
+                  value={answerText}
+                  onChange={(e) => setAnswerText(e.target.value)}
+                  disabled={loading}
+                />
+              )}
+
               <div className="mt-3 flex gap-2">
-                <button className="rounded px-3 py-1 text-sm text-white" style={{ background: "var(--accent)" }} onClick={() => send("answer", true)} disabled={loading}>
-                  答对
+                <button
+                  className="rounded px-4 py-1.5 text-sm text-white disabled:opacity-50"
+                  style={{ background: "var(--accent)" }}
+                  onClick={() => {
+                    const ans = currentQuestion.type === "choice" ? selectedChoice : answerText;
+                    if (ans?.trim()) send("answer", ans);
+                  }}
+                  disabled={loading || !((currentQuestion.type === "choice" ? selectedChoice : answerText.trim()))}
+                >
+                  提交答案
                 </button>
-                <button className="rounded border px-3 py-1 text-sm" style={{ borderColor: "var(--border)" }} onClick={() => send("answer", false)} disabled={loading}>
-                  答错
-                </button>
+                <span className="self-center text-xs" style={{ color: "var(--muted)" }}>
+                  由 AI 判断对错
+                </span>
               </div>
             </div>
           )}

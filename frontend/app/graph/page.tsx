@@ -1,40 +1,22 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import {
-  ReactFlow,
-  Background,
-  Controls,
-  MiniMap,
-  type Node,
-  type Edge,
-} from "@xyflow/react";
-import "@xyflow/react/dist/style.css";
+import Link from "next/link";
+import StarMap, { StarEdge, StarNode } from "@/components/StarMap";
 import { api, MasteryOut } from "@/lib/api";
 
-interface GNode {
-  id: string;
-  name: string;
-  difficulty: number;
-  importance: number;
-}
-interface GEdge {
-  from: string;
-  to: string;
-  type: string;
-}
-
-/** 图谱可视化（@xyflow/react；05 规范：图谱深色画布，掌握度低节点高亮） */
+/** 知识图谱星辰图页（M4r2：星空 + 知识星点亮；点击星 → 详情卡 + 溯源发光路径） */
 export default function GraphPage() {
-  const [graph, setGraph] = useState<{ nodes: GNode[]; edges: GEdge[] } | null>(null);
+  const [graph, setGraph] = useState<{ nodes: StarNode[]; edges: StarEdge[] } | null>(null);
   const [mastery, setMastery] = useState<Record<string, number>>({});
+  const [selected, setSelected] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
       try {
         const [g, me] = await Promise.all([
-          api<{ nodes: GNode[]; edges: GEdge[] }>("/api/v1/graph"),
+          api<{ nodes: StarNode[]; edges: StarEdge[] }>("/api/v1/graph"),
           api<{ user_id: number }>("/auth/me"),
         ]);
         setGraph(g);
@@ -48,68 +30,101 @@ export default function GraphPage() {
     })();
   }, []);
 
-  const { nodes, edges } = useMemo(() => {
-    if (!graph) return { nodes: [], edges: [] };
-    // 分层布局：按节点 id 前缀分段（a/b/c/d 模块），简单网格
-    const columns: Record<string, number> = {};
-    graph.nodes.forEach((n, i) => {
-      const prefix = n.id.replace(/[0-9]/g, "");
-      columns[prefix] = columns[prefix] ?? 0;
-      columns[prefix] += 1;
-    });
-    const colIndex: Record<string, number> = {};
-    const nid: Node[] = graph.nodes.map((n, i) => {
-      const prefix = n.id.replace(/[0-9]/g, "");
-      const idx = colIndex[prefix] ?? 0;
-      colIndex[prefix] = idx + 1;
-      const p = mastery[n.id];
-      const weak = p !== undefined && p < 0.5;
-      return {
-        id: n.id,
-        position: { x: (Object.keys(columns).indexOf(prefix) - 1) * 220 + 40, y: idx * 90 + 20 },
-        data: { label: `${n.name}` },
-        style: {
-          background: weak ? "#c0392b" : p !== undefined ? "#2e7d32" : "var(--surface)",
-          color: "#fff",
-          border: `1px solid ${weak ? "#e74c3c" : p !== undefined ? "#43a047" : "var(--border)"}`,
-          borderRadius: 8,
-          padding: "6px 10px",
-          fontSize: 12,
-        },
-      } satisfies Node;
-    });
-    const eid: Edge[] = graph.edges.map((e, i) => ({
-      id: `e-${i}`,
-      source: e.from,
-      target: e.to,
-      animated: false,
-      style: { stroke: "var(--border)" },
-    }));
-    return { nodes: nid, edges: eid };
-  }, [graph, mastery]);
+  // 溯源祖先链：沿前置边反向 BFS（暖色路径 + 链首为根因）
+  const trace = useMemo(() => {
+    if (!graph || !selected) return { chain: [], root: null as string | null };
+    const adj: Record<string, string[]> = {};
+    for (const e of graph.edges) {
+      (adj[e.to] = adj[e.to] || []).push(e.from); // 反向：后继→前置
+    }
+    const chain: string[] = [];
+    const visited = new Set<string>();
+    const queue = [selected];
+    visited.add(selected);
+    while (queue.length) {
+      const cur = queue.shift()!;
+      for (const pre of adj[cur] || []) {
+        if (!visited.has(pre)) {
+          visited.add(pre);
+          chain.push(pre);
+          queue.push(pre);
+        }
+      }
+    }
+    // 根因 = 最远前置（链末端）
+    return { chain: [selected, ...chain], root: chain.length ? chain[chain.length - 1] : null };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [graph, selected]);
+
+  const selectedNode = graph?.nodes.find((n) => n.id === selected);
+  const selectedMastery = selected ? mastery[selected] : undefined;
 
   if (err) return <div className="p-6 text-sm text-red-600">{err}</div>;
-  if (!graph) return <div className="p-6 text-sm" style={{ color: "var(--muted)" }}>加载图谱…</div>;
+  if (!graph) return <div className="p-6 text-sm" style={{ color: "var(--muted)" }}>加载星辰图…</div>;
 
   return (
-    <div className="h-full p-4">
+    <div className="relative h-full p-4">
       <div className="mb-3 flex items-center justify-between">
-        <h1 className="text-lg font-semibold">知识图谱</h1>
+        <h1 className="text-lg font-semibold">知识图谱 · 星辰</h1>
         <div className="flex items-center gap-3 text-xs" style={{ color: "var(--muted)" }}>
-          <span className="flex items-center gap-1"><span className="inline-block h-3 w-3 rounded" style={{ background: "#2e7d32" }} /> 掌握（≥0.5）</span>
-          <span className="flex items-center gap-1"><span className="inline-block h-3 w-3 rounded" style={{ background: "#c0392b" }} /> 薄弱（&lt;0.5）</span>
-          <span className="flex items-center gap-1"><span className="inline-block h-3 w-3 rounded border" style={{ background: "var(--surface)", borderColor: "var(--border)" }} /> 未测</span>
+          <span className="flex items-center gap-1"><span className="inline-block h-2.5 w-2.5 rounded-full" style={{ background: "#d4a574", boxShadow: "0 0 6px #d4a574" }} /> 已点亮</span>
+          <span className="flex items-center gap-1"><span className="inline-block h-2.5 w-2.5 rounded-full" style={{ background: "rgba(148,163,184,0.5)" }} /> 未完成</span>
+          <span className="flex items-center gap-1"><span className="inline-block h-2.5 w-2.5 rounded-full border" style={{ background: "rgba(148,163,184,0.25)" }} /> 未测</span>
         </div>
       </div>
-      <div className="h-[calc(100%-3rem)] rounded-xl border" style={{ borderColor: "var(--border)", background: "#14161c" }}>
-        <ReactFlow nodes={nodes} edges={edges} fitView>
-          <Background color="#3a3f4a" gap={18} />
-          <Controls />
-          <MiniMap
-            nodeColor={(n) => (n.style?.background as string) || "#888"}
-            maskColor="rgba(20,22,28,0.7)"
-          />
-        </ReactFlow>
+
+      <div className="h-[calc(100%-3rem)] rounded-xl border" style={{ borderColor: "var(--border)", overflow: "hidden" }}>
+        <StarMap
+          nodes={graph.nodes}
+          edges={graph.edges}
+          mastery={mastery}
+          selected={selected}
+          onSelect={setSelected}
+          traceChain={trace.chain}
+          traceRoot={trace.root || undefined}
+        />
+
+        {/* 详情卡（选中星） */}
+        {selectedNode && (
+          <div
+            className="absolute right-4 top-4 w-60 rounded-xl border p-4 shadow-lg"
+            style={{ background: "var(--surface)", borderColor: "var(--border)" }}
+          >
+            <div className="mb-1 flex items-center justify-between">
+              <span className="text-sm font-medium">{selectedNode.name}</span>
+              <button
+                className="text-xs"
+                style={{ color: "var(--muted)" }}
+                onClick={() => setSelected(null)}
+              >
+                ✕
+              </button>
+            </div>
+            <div className="space-y-1 text-xs" style={{ color: "var(--muted)" }}>
+              <div>节点：{selectedNode.id}</div>
+              <div>
+                掌握度：
+                {selectedMastery !== undefined ? (
+                  <span style={{ color: selectedMastery >= 0.5 ? "var(--accent)" : "var(--warn)" }}>
+                    {Math.round(selectedMastery * 100)}%（{selectedMastery >= 0.5 ? "已点亮" : "未完成"}）
+                  </span>
+                ) : (
+                  "未测"
+                )}
+              </div>
+              {trace.chain.length > 1 && (
+                <div>溯源根因：<span style={{ color: "var(--accent)" }}>{trace.root}</span></div>
+              )}
+            </div>
+            <Link
+              href="/chat"
+              className="mt-3 block rounded px-3 py-1.5 text-center text-xs font-medium text-white"
+              style={{ background: "var(--accent)" }}
+            >
+              开始学习
+            </Link>
+          </div>
+        )}
       </div>
     </div>
   );

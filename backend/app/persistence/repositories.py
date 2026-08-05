@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.persistence.models import (
@@ -181,6 +181,29 @@ async def list_events_by_student(
         .limit(limit)
     )
     return list(res.scalars().all())
+
+
+async def get_trend(
+    db: AsyncSession, student_id: int, days: int = 14
+) -> list[dict]:
+    """近 N 天每日作答事件数（M4r3 趋势图数据源）。"""
+    from datetime import timedelta
+
+    since = _now() - timedelta(days=days)
+    res = await db.execute(
+        select(
+            func.date(LearningEvent.ts).label("d"),
+            func.count().label("n"),
+        )
+        .where(
+            LearningEvent.student_id == student_id,
+            LearningEvent.event_type == "answer",
+            LearningEvent.ts >= since,
+        )
+        .group_by(func.date(LearningEvent.ts))
+        .order_by(func.date(LearningEvent.ts))
+    )
+    return [{"date": row.d.isoformat(), "count": row.n} for row in res.all()]
 
 
 # ---------- evaluations ----------

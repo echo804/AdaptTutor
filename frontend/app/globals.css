@@ -2,35 +2,85 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ---- 05 规范：明暗双主题（跟随系统）---- */
+/* ---- 05 规范 §2 明暗双主题（跟随系统）---- */
 :root {
-  --bg: #f7f8fc;
-  --surface: #ffffff;
-  --text: #1f2430;
-  --muted: #6b7280;
+  --bg: #fafaf9;              /* 柔和米白 */
+  --surface: #ffffff;         /* 卡片白底 */
+  --text: #1a1a1a;            /* 深灰正文 */
+  --muted: #6b7280;           /* 次级文字 */
   --border: #e5e7eb;
-  --accent: #3b5bdb; /* 浅色：墨蓝 */
-  --accent-soft: #e7ebfb;
+  --accent: #2c3e50;          /* 墨蓝（克制、安静） */
+  --accent-soft: #eef1f4;
+  --success: #7ec8a0;         /* 掌握/成功语义色 */
+  --cold: #94a3b8;            /* 掌握度色阶起点 */
+  --warn: #b3543c;            /* 低饱和错误红 */
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #14161c;
-    --surface: #1d212b;
-    --text: #e8e6e1;
+    --bg: #1e1e1e;            /* 深灰背景 */
+    --surface: #262626;       /* 卡片 */
+    --text: #e8e6e3;          /* 暖白正文 */
     --muted: #9aa0ab;
-    --border: #2c313c;
-    --accent: #d9a441; /* 暗色：琥珀 */
+    --border: #3a3a3a;
+    --accent: #d4a574;        /* 琥珀（一束温暖的光） */
     --accent-soft: #2b2620;
+    --success: #7ec8a0;
+    --cold: #94a3b8;
+    --warn: #d9907a;
   }
 }
 
 body {
   background: var(--bg);
   color: var(--text);
+  font-family: var(--font-ui, -apple-system, "PingFang SC", "Microsoft YaHei", "Source Han Sans SC", system-ui, sans-serif);
+  -webkit-font-smoothing: antialiased;
+}
+
+code, pre, .katex {
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Consolas, "Courier New", monospace);
 }
 
 /* KaTeX 数学公式字体 */
 .katex {
   font-size: 1.05em;
+}
+
+/* ---- 05 规范 §6 动效（仅三种：Fade / 路径绘制 / Pulse）---- */
+
+/* Fade：内容出现/消失 */
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-fade {
+  animation: fade-in 0.24s ease-out;
+}
+
+/* Pulse：标记刚更新的状态（如判题反馈） */
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.55; }
+}
+.animate-pulse-soft {
+  animation: pulse-soft 1.2s ease-in-out 2;
+}
+
+/* ---- 05 规范 §1 可访问性 ----
+ * focus 可见（键盘导航焦点环）
+ * prefers-reduced-motion：关闭动效
+ */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
