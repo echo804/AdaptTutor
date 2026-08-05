@@ -100,7 +100,7 @@ export default function SettingsPage() {
 
       <div className="space-y-4">
         {PROVIDERS.map((p) => (
-          <div key={p.id} className="rounded-xl border p-4" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
+          <div key={p.id} className="glass-card rounded-xl border p-4" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
             <div className="mb-2 flex items-center justify-between">
               <div>
                 <span className="text-sm font-medium">{p.label}</span>

@@ -82,7 +82,7 @@ export default function DashboardPage() {
       {err && <p className="text-sm text-red-600">{err}</p>}
 
       {/* 今日推荐（05 §5.4 首屏） */}
-      <div className="rounded-xl border p-4" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
+      <div className="glass-card rounded-xl border p-4" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
         <h2 className="mb-2 text-sm font-medium">今日推荐</h2>
         {weakest ? (
           <div className="flex items-center justify-between">
@@ -102,7 +102,7 @@ export default function DashboardPage() {
 
       <div className="grid gap-4 md:grid-cols-2">
         {/* 掌握度总览：分布 Bar */}
-        <div className="rounded-xl border p-4" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
+        <div className="glass-card rounded-xl border p-4" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
           <h2 className="mb-3 text-sm font-medium">掌握度分布</h2>
           {entries.length === 0 ? (
             <p className="text-sm" style={{ color: "var(--muted)" }}>暂无数据</p>
@@ -124,7 +124,7 @@ export default function DashboardPage() {
         </div>
 
         {/* 薄弱点 Gauge */}
-        <div className="rounded-xl border p-4" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
+        <div className="glass-card rounded-xl border p-4" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
           <h2 className="mb-3 text-sm font-medium">整体掌握度</h2>
           {entries.length === 0 ? (
             <p className="text-sm" style={{ color: "var(--muted)" }}>暂无数据</p>
@@ -154,7 +154,7 @@ export default function DashboardPage() {
       </div>
 
       {/* 学习路径树（05 §5.3） */}
-      <div className="rounded-xl border p-4" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
+      <div className="glass-card rounded-xl border p-4" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
         <h2 className="mb-2 text-sm font-medium">推荐学习路径</h2>
         {path.length === 0 ? (
           <p className="text-sm" style={{ color: "var(--muted)" }}>诊断后将生成路径。</p>
@@ -165,7 +165,7 @@ export default function DashboardPage() {
 
       <div className="grid gap-4 md:grid-cols-2">
         {/* 学习趋势 Area */}
-        <div className="rounded-xl border p-4" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
+        <div className="glass-card rounded-xl border p-4" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
           <h2 className="mb-3 text-sm font-medium">学习趋势（近 14 天作答）</h2>
           {trend.length === 0 ? (
             <p className="text-sm" style={{ color: "var(--muted)" }}>暂无学习记录</p>
@@ -189,7 +189,7 @@ export default function DashboardPage() {
         </div>
 
         {/* 最近会话 */}
-        <div className="rounded-xl border p-4" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
+        <div className="glass-card rounded-xl border p-4" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
           <h2 className="mb-3 text-sm font-medium">最近会话</h2>
           {sessions.length === 0 ? (
             <p className="text-sm" style={{ color: "var(--muted)" }}>暂无会话</p>

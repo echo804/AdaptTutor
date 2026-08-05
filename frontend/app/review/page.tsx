@@ -78,7 +78,7 @@ export default function ReviewPage() {
       </div>
 
       {!current ? (
-        <div className="rounded-xl border p-8 text-center" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
+        <div className="glass-card rounded-xl border p-8 text-center" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
           <p className="text-sm" style={{ color: "var(--muted)" }}>错题集是空的 🎉</p>
           <p className="mt-1 text-xs" style={{ color: "var(--muted)" }}>诊断/练习中答错的题会自动收录到这里，点击卡片翻面查看答案。</p>
         </div>
@@ -92,7 +92,7 @@ export default function ReviewPage() {
             >
               {/* 正面：题目 */}
               <div
-                className="absolute inset-0 flex flex-col rounded-2xl border p-6 [backface-visibility:hidden]"
+                className="glass-card absolute inset-0 flex flex-col rounded-2xl border p-6 [backface-visibility:hidden]"
                 style={{ background: "var(--surface)", borderColor: "var(--border)" }}
               >
                 <div className="mb-2 flex items-center justify-between">
@@ -117,7 +117,7 @@ export default function ReviewPage() {
 
               {/* 背面：答案对照 */}
               <div
-                className="absolute inset-0 flex flex-col rounded-2xl border p-6 [backface-visibility:hidden] [transform:rotateY(180deg)]"
+                className="glass-card absolute inset-0 flex flex-col rounded-2xl border p-6 [backface-visibility:hidden] [transform:rotateY(180deg)]"
                 style={{ background: "var(--surface)", borderColor: "var(--border)" }}
               >
                 <div className="mb-3 flex items-center justify-between">
