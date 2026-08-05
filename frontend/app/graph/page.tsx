@@ -15,6 +15,8 @@ import { loadBookshelf, type BookInfo } from "@/lib/bookshelf";
 export default function GraphPage() {
   const [books, setBooks] = useState<BookInfo[] | null>(null);
   const [bookErr, setBookErr] = useState<string | null>(null);
+  // 翻书动画阶段：正在翻开书（全屏书页翻开效果）
+  const [flipping, setFlipping] = useState<BookInfo | null>(null);
   // 展开状态：当前打开的书（null = 书架）
   const [open, setOpen] = useState<BookInfo | null>(null);
   const [graph, setGraph] = useState<{ nodes: StarNode[]; edges: StarEdge[] } | null>(null);
@@ -92,6 +94,33 @@ export default function GraphPage() {
   const selectedNode = graph?.nodes.find((n) => n.id === selected);
   const selectedMastery = selected ? mastery[selected] : undefined;
 
+  // ---- 翻书动画阶段：全屏深色 + 书页翻开 ----
+  if (flipping) {
+    return (
+      <div
+        className="fixed inset-0 z-40 flex items-center justify-center"
+        style={{ background: "rgba(20,14,8,0.94)" }}
+        aria-hidden
+      >
+        <div className="book-open-scene">
+          {/* 翻开前：封面烫金书名 */}
+          <div className="title-plate">{flipping.subject}</div>
+          {/* 左页 / 右页（封面，翻开动画） */}
+          <div className="page left" />
+          <div className="page right" />
+          {/* 翻开后露出的内页（浅纸色） */}
+          <div className="inner" />
+        </div>
+        <p
+          className="absolute bottom-[18%] text-sm tracking-widest"
+          style={{ color: "rgba(212,165,116,0.75)" }}
+        >
+          翻开《{flipping.subject}》…
+        </p>
+      </div>
+    );
+  }
+
   // ---- 展开状态：星辰图 ----
   if (open) {
     return (
@@ -123,8 +152,29 @@ export default function GraphPage() {
 
         {err && <div className="p-4 text-sm text-red-600">{err}</div>}
         {!graph && !err && (
-          <div className="flex h-[calc(100%-3rem)] items-center justify-center rounded-xl border" style={{ borderColor: "var(--border)", color: "var(--muted)" }}>
-            正在翻开《{open.subject}》… 星空即将显现
+          <div className="star-loading relative flex h-[calc(100%-3rem)] items-center justify-center rounded-xl border" style={{ borderColor: "var(--border)" }}>
+            {/* 闪烁星点 */}
+            {Array.from({ length: 42 }, (_, i) => (
+              <span
+                key={i}
+                className="twinkle"
+                style={{
+                  left: `${(i * 37 + 13) % 100}%`,
+                  top: `${(i * 23 + 7) % 100}%`,
+                  width: `${1 + ((i * 7) % 4)}px`,
+                  height: `${1 + ((i * 7) % 4)}px`,
+                }}
+              />
+            ))}
+            {/* 中央：书名 + 加载提示 */}
+            <div className="relative z-10 text-center">
+              <div className="text-lg font-semibold" style={{ color: "#e8e6e3" }}>
+                《{open.subject}》
+              </div>
+              <div className="mt-3 text-sm tracking-widest" style={{ color: "rgba(212,165,116,0.8)" }}>
+                星空正在显现…
+              </div>
+            </div>
           </div>
         )}
         {graph && (
@@ -253,9 +303,14 @@ export default function GraphPage() {
                 book={b}
                 active={active === b.id}
                 onOpen={() => {
-                  setOpen(b);
+                  // 1) 进入翻书动画（约 1.5s 翻页）→ 2) 动画结束进入展开
+                  setFlipping(b);
                   // 打开时同步切换激活领域（顶栏下拉一致）
                   if (active !== b.id) setActive(b.id).catch(() => {});
+                  window.setTimeout(() => {
+                    setFlipping(null);
+                    setOpen(b);
+                  }, 1550);
                 }}
               />
             ))}
