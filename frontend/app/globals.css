@@ -259,3 +259,123 @@ body:has(.welcome-paper) {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: none; }
 }
+
+/* ---- M4r10 登录/注册页：复古笔记风（与欢迎页素描纸同系列） ---- */
+/* 笔记页背景铺满整个页面 */
+html:has(.note-page) {
+  background-color: #f6ecdc;
+}
+body:has(.note-page) {
+  background-color: #f6ecdc;
+}
+.note-page {
+  min-height: 100vh;
+  overflow: hidden;
+  background-color: #f6ecdc;
+  background-image:
+    radial-gradient(circle at 50% 30%, rgba(255, 255, 255, 0.75), transparent 65%),
+    radial-gradient(circle at 85% 15%, rgba(212, 165, 116, 0.14), transparent 45%),
+    radial-gradient(circle at 12% 85%, rgba(44, 62, 80, 0.06), transparent 45%);
+}
+/* 素描纸噪点纹理（与欢迎页一致） */
+.note-page::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.5;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+}
+
+/* 笔记卡片：白纸 + 横线格 + 左侧红边线 + 轻微下坠阴影 */
+.note-card {
+  position: relative;
+  background-color: #fdf8ee;
+  background-image: repeating-linear-gradient(
+    0deg,
+    transparent 0 27px,
+    rgba(44, 62, 80, 0.055) 27px 28px
+  );
+  border-radius: 3px;
+  box-shadow:
+    0 1px 0 rgba(44, 62, 80, 0.06),
+    0 12px 32px rgba(44, 62, 80, 0.14);
+}
+/* 左侧红色边线（笔记本边线） */
+.note-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 26px;
+  width: 1px;
+  background: rgba(179, 84, 60, 0.45);
+}
+/* 顶部琥珀胶带（半透明，微斜） */
+.note-tape {
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  width: 128px;
+  height: 30px;
+  transform: translateX(-50%) rotate(-2.5deg);
+  background: linear-gradient(180deg, rgba(212, 165, 116, 0.55), rgba(212, 165, 116, 0.35));
+  border-left: 1px dashed rgba(44, 62, 80, 0.18);
+  border-right: 1px dashed rgba(44, 62, 80, 0.18);
+  box-shadow: 0 1px 3px rgba(44, 62, 80, 0.12);
+}
+/* 笔记标题：墨蓝，衬线复古感 */
+.note-title {
+  font-family: var(--font-ui, Georgia, "Times New Roman", serif);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #2c3e50;
+}
+/* 下划线填空式输入框（像在笔记纸上书写） */
+.note-input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-bottom: 1.5px solid rgba(44, 62, 80, 0.35);
+  border-radius: 0;
+  padding: 4px 2px 6px;
+  font-size: 0.95rem;
+  color: #2c3e50;
+  outline: none;
+  transition: border-color 0.18s ease;
+}
+.note-input::placeholder {
+  color: rgba(44, 62, 80, 0.35);
+}
+.note-input:focus {
+  border-bottom-color: var(--amber, #d4a574);
+  border-bottom-width: 2.5px;
+}
+/* 笔记按钮：琥珀 + 墨字（与欢迎页 CTA 一致） */
+.note-btn {
+  border: none;
+  border-radius: 9999px;
+  padding: 0.7rem 1.75rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  background: var(--amber, #d4a574);
+  color: #1a1a1a;
+  box-shadow: 0 4px 18px rgba(212, 165, 116, 0.45);
+  cursor: pointer;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+.note-btn:hover:not(:disabled) {
+  transform: scale(1.04);
+  opacity: 0.92;
+}
+.note-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+/* 笔记错误提示：红墨水感 */
+.note-error {
+  border-bottom: 1.5px dashed rgba(179, 84, 60, 0.55);
+  color: #b3543c;
+  font-size: 0.85rem;
+  padding-bottom: 2px;
+}
