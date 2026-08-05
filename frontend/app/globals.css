@@ -511,14 +511,18 @@ body:has(.note-page) {
   mask-repeat: no-repeat;
   -webkit-mask-position: center bottom;
   mask-position: center bottom;
-  opacity: 0.1;
+  /* 浅色模式：琥珀线条 + 墨蓝投影，冷暖对比冲击 */
+  opacity: 0.22;
+  filter: drop-shadow(0 2px 5px rgba(44, 62, 80, 0.28));
 }
-/* 暗色模式下稍微提亮，保证线条在深灰背景上仍可见 */
+/* 暗色模式下降透明、投影随背景变浅，保证线条在深灰背景上仍可见 */
 @media (prefers-color-scheme: dark) {
   :root:not([data-mode="light"]) .socrates-watermark {
-    opacity: 0.14;
+    opacity: 0.13;
+    filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.5));
   }
 }
 :root[data-mode="dark"] .socrates-watermark {
-  opacity: 0.14;
+  opacity: 0.13;
+  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.5));
 }
