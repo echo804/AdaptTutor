@@ -141,82 +141,117 @@ function clusterLayout(nodes: StarNode[], edges: StarEdge[]) {
   return out;
 }
 
-/** 中央主节点：旋涡星系（中心亮核 + 琥珀星点旋臂，与知识星同语言） */
+/** 中央主节点：粒子旋涡星系（银河系质感——大量微粒子构成螺旋旋臂 + 中心核球，缓慢自转） */
 function GalaxyCore({ amberHex }: { amberHex: string }) {
   const reduce = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const groupRef = useRef<THREE.Group>(null);
-  // 旋臂星点：两条对数螺旋臂（琥珀渐变透明度），共 26 星
-  const arms = useMemo(() => {
-    const pts: { x: number; z: number; s: number; o: number; a: number }[] = [];
-    const ARM = 2;
-    const N = 13;
-    for (let a = 0; a < ARM; a++) {
-      for (let i = 0; i < N; i++) {
-        const t = (i + 0.5) / N;
-        const r = 1.8 + t * 4.6;
-        const ang = t * Math.PI * 2.4 + a * Math.PI;
-        pts.push({
-          x: Math.cos(ang) * r,
-          z: Math.sin(ang) * r,
-          s: 0.16 + t * 0.2,             // 越外越小
-          o: 0.4 + (1 - t) * 0.5,        // 越外越淡
-          a: (i / N) * Math.PI * 2,      // 相位（闪动错开）
-        });
-      }
-    }
-    return pts;
-  }, []);
 
+  // 粒子数据：核球 + 两条螺旋旋臂 + 盘面散布（vertex colors 控制亮度）
+  const particles = useMemo(() => {
+    const amber = new THREE.Color(amberHex);
+    const warm = new THREE.Color("#f0e2c8");
+    const count = 5200;
+    const positions = new Float32Array(count * 3);
+    const colors = new Float32Array(count * 3);
+    const tmp = new THREE.Color();
+
+    // 伪随机（可复现）
+    let seed = 42;
+    const rand = () => {
+      seed = (seed * 16807) % 2147483647;
+      return seed / 2147483647;
+    };
+    const gauss = () => (rand() + rand() + rand() + rand() - 2) / 2; // 近似正态
+
+    const MAX_R = 6.2;
+    const put = (i: number, x: number, y: number, z: number, c: THREE.Color, a = 1) => {
+      positions[i * 3] = x;
+      positions[i * 3 + 1] = y;
+      positions[i * 3 + 2] = z;
+      colors[i * 3] = c.r * a;
+      colors[i * 3 + 1] = c.g * a;
+      colors[i * 3 + 2] = c.b * a;
+    };
+
+    let idx = 0;
+    // 1) 中心核球（bulge）：球状密集，亮
+    const bulgeN = 1200;
+    for (let i = 0; i < bulgeN; i++, idx++) {
+      const r = Math.pow(rand(), 0.5) * 1.5;
+      const th = rand() * Math.PI * 2;
+      const ph = Math.acos(2 * rand() - 1);
+      put(idx, r * Math.sin(ph) * Math.cos(th), r * Math.cos(ph) * 0.6, r * Math.sin(ph) * Math.sin(th),
+        tmp.copy(warm).lerp(amber, rand()), 0.85 + rand() * 0.15);
+    }
+    // 2) 两条螺旋旋臂（对数螺旋 + 宽度抖动，越外越散）
+    const ARM = 2;
+    const armN = 3000;
+    for (let i = 0; i < armN; i++, idx++) {
+      const a = i % ARM;
+      const t = rand() ** 0.75; // 内密外疏
+      const r = 0.4 + t * MAX_R;
+      const theta = t * Math.PI * 2.2 + a * Math.PI + gauss() * 0.12;
+      const spread = 0.18 + t * 0.55; // 越外越散
+      const x = Math.cos(theta) * r + gauss() * spread;
+      const z = Math.sin(theta) * r + gauss() * spread;
+      const y = gauss() * (0.06 + t * 0.12);
+      // 亮度：中心亮、外缘暗（银河盘面渐变）
+      const fade = Math.max(0, 1 - t * 0.85);
+      put(idx, x, y, z, tmp.copy(amber).lerp(new THREE.Color("#e8e6e3"), 0.25), 0.3 + fade * 0.65);
+    }
+    // 3) 盘面稀疏散布（背景微尘）
+    const dustN = 1000;
+    for (let i = 0; i < dustN; i++, idx++) {
+      const r = 1.2 + rand() * MAX_R * 0.9;
+      const th = rand() * Math.PI * 2;
+      put(idx, Math.cos(th) * r, gauss() * 0.15, Math.sin(th) * r,
+        tmp.copy(amber), 0.12 + rand() * 0.15);
+    }
+
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+    geo.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+    return geo;
+  }, [amberHex]);
+
+  // 缓慢自转（银河系旋转）
   useFrame(({ clock }) => {
     if (groupRef.current && !reduce) {
-      groupRef.current.rotation.y = clock.getElapsedTime() * 0.12; // 慢速自转
+      groupRef.current.rotation.y = clock.getElapsedTime() * 0.08;
     }
   });
 
   return (
     <group position={[0, 0, 0]}>
-      {/* 旋臂星点组（自转） */}
+      {/* 粒子星系（点云） */}
       <group ref={groupRef}>
-        {arms.map((p, i) => (
-          <TwinklePoint key={i} x={p.x} z={p.z} size={p.s} opacity={p.o} phase={p.a} amberHex={amberHex} />
-        ))}
+        <points geometry={particles}>
+          <pointsMaterial
+            size={0.09}
+            vertexColors
+            transparent
+            opacity={0.9}
+            depthWrite={false}
+            blending={THREE.AdditiveBlending}
+            sizeAttenuation
+          />
+        </points>
       </group>
-      {/* 中心亮核：发光球体 + 光晕 */}
+      {/* 中心亮核（微光球 + 柔和光晕） */}
       <mesh>
-        <sphereGeometry args={[0.85, 24, 24]} />
-        <meshStandardMaterial color={amberHex} emissive={amberHex} emissiveIntensity={1.5} roughness={0.2} />
-      </mesh>
-      {/* 核外光晕（双层呼吸） */}
-      <mesh>
-        <sphereGeometry args={[1.5, 20, 20]} />
-        <meshBasicMaterial color={amberHex} transparent opacity={0.14} />
+        <sphereGeometry args={[0.42, 20, 20]} />
+        <meshBasicMaterial color={amberHex} transparent opacity={0.85} />
       </mesh>
       <mesh>
-        <sphereGeometry args={[2.2, 20, 20]} />
-        <meshBasicMaterial color={amberHex} transparent opacity={0.05} />
+        <sphereGeometry args={[1.1, 20, 20]} />
+        <meshBasicMaterial color={amberHex} transparent opacity={0.1} />
       </mesh>
-      <pointLight color={amberHex} intensity={2.6} distance={40} />
+      <mesh>
+        <sphereGeometry args={[1.8, 20, 20]} />
+        <meshBasicMaterial color={amberHex} transparent opacity={0.04} />
+      </mesh>
+      <pointLight color={amberHex} intensity={2.0} distance={32} />
     </group>
-  );
-}
-
-/** 旋臂上的闪烁星点（与知识星视觉语言一致） */
-function TwinklePoint({ x, z, size, opacity, phase, amberHex }: { x: number; z: number; size: number; opacity: number; phase: number; amberHex: string }) {
-  const ref = useRef<THREE.Mesh>(null);
-  const reduce = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  useFrame(({ clock }) => {
-    if (ref.current && !reduce) {
-      const t = clock.getElapsedTime();
-      const tw = 0.7 + 0.3 * Math.sin(t * 1.6 + phase);
-      ref.current.scale.setScalar(tw);
-      (ref.current.material as THREE.MeshBasicMaterial).opacity = opacity * tw;
-    }
-  });
-  return (
-    <mesh ref={ref} position={[x, 0, z]}>
-      <sphereGeometry args={[size, 12, 12]} />
-      <meshBasicMaterial color={amberHex} transparent opacity={opacity} />
-    </mesh>
   );
 }
 
