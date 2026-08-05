@@ -12,6 +12,7 @@ const NAV = [
   { href: "/graph", label: "知识图谱" },
   { href: "/review", label: "错题复盘" },
   { href: "/dashboard", label: "仪表盘" },
+  { href: "/domains", label: "我的领域" },
   { href: "/settings", label: "设置" },
 ];
 

@@ -4,7 +4,7 @@
 student_id 即 users.id（04 决策）。
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import (
     Boolean,
@@ -195,3 +195,47 @@ class KnowledgeGraph(Base):
     domain_pack: Mapped[str] = mapped_column(String(64), index=True)
     graph_jsonb: Mapped[dict] = mapped_column(JSONB)
     version: Mapped[str] = mapped_column(String(16))
+
+
+class UserDomain(Base):
+    """用户自建领域（M4r8d）：素材导入 → AI 生成 → 发布/审核。
+
+    visibility: private（仅创建者可见）/ public（公开共享，需审核）
+    status: draft（生成中/未完成）→ published / pending_review / rejected / takedown
+    """
+
+    __tablename__ = "user_domains"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True
+    )
+    pack_id: Mapped[str] = mapped_column(String(64), unique=True)  # 领域包目录名（ud{uid}_{ts}）
+    name: Mapped[str] = mapped_column(String(120))
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    visibility: Mapped[str] = mapped_column(String(16), default="private")  # private|public
+    status: Mapped[str] = mapped_column(String(16), default="draft")  # draft|published|pending_review|rejected|takedown
+    reject_reason: Mapped[str | None] = mapped_column(String(300), nullable=True)
+    nodes_count: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    questions_count: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+
+
+class GenerationTask(Base):
+    """领域生成任务（M4r8d）：异步执行 + 进度（浏览器可轮询）。"""
+
+    __tablename__ = "generation_tasks"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True
+    )
+    domain_id: Mapped[int | None] = mapped_column(
+        ForeignKey("user_domains.id", ondelete="CASCADE"), nullable=True, index=True
+    )
+    status: Mapped[str] = mapped_column(String(16), default="running")  # running|done|failed
+    progress: Mapped[int] = mapped_column(Integer, default=0)  # 0-100
+    stage: Mapped[str | None] = mapped_column(String(64), nullable=True)  # 当前阶段（主题名）
+    error: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)

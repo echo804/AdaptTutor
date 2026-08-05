@@ -22,14 +22,17 @@ export async function api<T = any>(
   options: { method?: string; body?: unknown; token?: string | null } = {},
 ): Promise<T> {
   const { method = "GET", body, token } = options;
-  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  const headers: Record<string, string> = {};
   const t = token !== undefined ? token : getToken();
   if (t) headers.Authorization = `Bearer ${t}`;
+  // FormData 由浏览器自动带 multipart 边界；其余走 JSON
+  const isForm = typeof FormData !== "undefined" && body instanceof FormData;
+  if (!isForm) headers["Content-Type"] = "application/json";
 
   const res = await fetch(`${API_BASE}${path}`, {
     method,
     headers,
-    body: body !== undefined ? JSON.stringify(body) : undefined,
+    body: body !== undefined ? (isForm ? (body as FormData) : JSON.stringify(body)) : undefined,
   });
   if (!res.ok) {
     let detail = `请求失败（${res.status}）`;
