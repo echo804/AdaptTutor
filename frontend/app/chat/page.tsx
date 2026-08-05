@@ -394,10 +394,19 @@ export default function ChatPage() {
                   disabled={loading}
                 >
                   <span
-                    className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl text-lg"
+                    className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl"
                     style={{ background: "var(--accent-soft)", color: "var(--accent)" }}
                   >
-                    🎯
+                    {/* 诊断：简约靶心线稿 */}
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round">
+                      <circle cx="12" cy="12" r="8.5" />
+                      <circle cx="12" cy="12" r="4.5" />
+                      <circle cx="12" cy="12" r="1" fill="currentColor" stroke="none" />
+                      <path d="M12 1.5 v4" />
+                      <path d="M12 18.5 v4" />
+                      <path d="M1.5 12 h4" />
+                      <path d="M18.5 12 h4" />
+                    </svg>
                   </span>
                   <div className="text-base font-medium" style={{ color: "var(--text)" }}>诊断测试</div>
                   <div className="mt-1 text-xs leading-relaxed" style={{ color: "var(--muted)" }}>
@@ -418,10 +427,15 @@ export default function ChatPage() {
                   disabled={loading}
                 >
                   <span
-                    className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl text-lg"
+                    className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl"
                     style={{ background: "rgba(212,165,116,0.16)", color: "#b08a54" }}
                   >
-                    💬
+                    {/* 辅导：简约对话气泡线稿 */}
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M4 5 h16 a2 2 0 0 1 2 2 v8 a2 2 0 0 1 -2 2 h-9 l-5 4 v-4 h-2 a2 2 0 0 1 -2 -2 v-8 a2 2 0 0 1 2 -2 z" />
+                      <path d="M8 10 h8" />
+                      <path d="M8 13.5 h5" />
+                    </svg>
                   </span>
                   <div className="text-base font-medium" style={{ color: "var(--text)" }}>辅导练习</div>
                   <div className="mt-1 text-xs leading-relaxed" style={{ color: "var(--muted)" }}>
