@@ -50,8 +50,8 @@ export default function MagicBook({ book, active, onOpen }: MagicBookProps) {
 
         {/* 书脊（左侧立体边） */}
         <path d="M14 6 L26 12 L26 190 L14 196 Z" fill="#241b14" />
-        {/* 书脊装饰线 */}
-        <line x1="19" y1="22" x2="19" y2="180" stroke={GOLD_DIM} strokeWidth="1.4" />
+        {/* 书脊装饰线（随主题副强调色） */}
+        <line x1="19" y1="22" x2="19" y2="180" stroke={lit ? GOLD_DIM : "rgba(180,175,165,0.4)"} strokeWidth="1.4" />
 
         {/* 封面主体 */}
         <rect x="26" y="4" width="122" height="192" rx="4" fill={`url(#leather-${book.id})`} stroke="#191310" strokeWidth="1.5" />
