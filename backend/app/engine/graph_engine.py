@@ -89,3 +89,28 @@ def trace_root(
     if not chain:
         return wrong_node
     return min(chain, key=lambda nid: mastery_p.get(nid, 0.0))
+
+
+def trace_root_evidenced(
+    graph: KnowledgeGraph,
+    wrong_node: str,
+    mastery_p: dict[str, float],
+    answered: set[str] | None = None,
+) -> str:
+    """错题溯源（M3 精细化，对齐 02 M3"步骤→节点映射 + 依赖链回溯"）。
+
+    仅凭**已探测（作答过）**的证据判根因：
+    1. 沿依赖链收集祖先；2. 在已探测祖先中选掌握度最低者；
+    3. 无已探测祖先 → 保守返回错题节点本身（未测节点不可断言为根因）。
+
+    修复 M2 观察到的缺陷：多个未测节点掌握度相同（默认 P(L0)）时
+    原 trace_root 随机选中，根因判定不可靠。
+    """
+    answered = answered or set()
+    chain = graph.ancestors(wrong_node)
+    if not chain:
+        return wrong_node
+    evidenced = [nid for nid in chain if nid in answered]
+    if not evidenced:
+        return wrong_node
+    return min(evidenced, key=lambda nid: mastery_p.get(nid, 0.0))

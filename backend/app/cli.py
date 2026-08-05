@@ -10,7 +10,7 @@ import random
 
 from app.domain.loader import load_pack
 from app.engine.diagnostic import bkt_update, select_next_question
-from app.engine.graph_engine import KnowledgeGraph, plan_path, trace_root
+from app.engine.graph_engine import KnowledgeGraph, plan_path, trace_root_evidenced
 from app.engine.tutor_orchestrator import TutorOrchestrator
 
 
@@ -56,7 +56,9 @@ def run_diagnosis(pack_id: str, seed: int = 42) -> None:
 
     weak_nodes = sorted(mastery, key=mastery.get)[:3]
     path = plan_path(graph, weak_nodes)
-    root = trace_root(graph, weak_nodes[0], mastery)
+    root = trace_root_evidenced(
+        graph, weak_nodes[0], mastery, answered=set(answered_counts)
+    )
 
     print(f"领域包: {pack.manifest.id} v{pack.manifest.version}（{pack.manifest.subject}）")
     print(f"作答 {count} 题: " + " ".join(f"{qid}:{'对' if c else '错'}" for qid, c in answered))

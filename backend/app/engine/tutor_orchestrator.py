@@ -202,6 +202,31 @@ class TutorOrchestrator:
         cands = [q for q in self.pack.questions if node in q.step_node_map.values()]
         return cands[-1] if cands else None
 
+    # ---------- 状态快照（M3 会话恢复） ----------
+
+    def save_state(self) -> dict:
+        """导出可持久化状态快照（存 sessions.context）。"""
+        return {
+            "sm": self.sm.to_dict(),
+            "mastery": dict(self.mastery),
+            "path": list(self.path),
+            "weak_nodes": list(self.weak_nodes),
+            "answered_counts": dict(self.answered_counts),
+            "pack_id": self.pack.manifest.id,
+        }
+
+    def restore_state(self, state: dict) -> None:
+        """从快照恢复（重启后重建会话，恢复 100%）。"""
+        if state.get("pack_id") and state["pack_id"] != self.pack.manifest.id:
+            raise ValueError(
+                f"快照领域包 {state['pack_id']} 与当前 {self.pack.manifest.id} 不一致"
+            )
+        self.sm = TutorStateMachine.from_dict(state["sm"])
+        self.mastery.update(state.get("mastery", {}))
+        self.path = list(state.get("path", []))
+        self.weak_nodes = list(state.get("weak_nodes", []))
+        self.answered_counts = dict(state.get("answered_counts", {}))
+
     # ---------- 阶段 4：反馈 ----------
 
     def summary(self) -> str:
