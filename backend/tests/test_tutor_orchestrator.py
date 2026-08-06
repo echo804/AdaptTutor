@@ -139,3 +139,36 @@ def test_summary_contains_weak_nodes():
     s = t.summary()
     assert "薄弱点" in s
     assert "路径" in s
+
+
+# ---- M4r20 辅导出题优化 ----
+
+def test_verify_excludes_current_question():
+    """M4r20 T2：变式题排除当前题，避免重复。"""
+    t = _tutor()
+    t.tutor_start()
+    first = t.verify_question
+    t.tutor_step("我的思路是代入公式。", correct=True)  # ELICIT 答对 → 变式
+    v = t.verify_question
+    if v is not None:
+        assert v.id != first.id
+
+
+def test_frustration_sets_ease_flag():
+    """M4r20 T3：挫败切讲解后设置降档标记。"""
+    t = _tutor()
+    t.tutor_start()
+    t.tutor_step("不会。", correct=False)
+    r = t.tutor_step("太难了。", correct=False)  # switch_explain
+    assert r.state == State.DONE.value
+    assert t._ease_verify is True
+
+
+def test_ease_flag_roundtrips_in_snapshot():
+    """M4r20 T3：降档标记随会话快照保存/恢复。"""
+    t = _tutor()
+    t._ease_verify = True
+    st = t.save_state()
+    t2 = _tutor()
+    t2.restore_state(st)
+    assert t2._ease_verify is True

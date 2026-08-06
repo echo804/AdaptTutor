@@ -28,11 +28,14 @@ def select_next_question(
     mastery: dict[str, float],
     questions: list[Question],
     rules: DiagnosticRules,
+    recent: dict[str, int] | None = None,
 ) -> Question | None:
-    """KST 简化选题：薄弱节点（掌握度最低）+ 难度匹配。
+    """KST 简化选题：薄弱节点（掌握度最低）+ 难度匹配 + 出题轮换。
 
     mastery: {node_id: 掌握概率}，未记录视为 0（未学）。
-    返回候选集中 priority 最高者（薄弱度优先、难度贴近 0.6）。
+    recent: {node_id: 连续作答次数}——M4r20 出题轮换：连续作答节点降权，
+    避免"同一薄弱点连出多题"；非薄弱点也轮到，覆盖更广。
+    返回候选集中 priority 最高者（薄弱度优先、难度贴近 0.6、轮换加成）。
     """
     if not questions:
         return None
@@ -41,7 +44,9 @@ def select_next_question(
         node_mastery = [mastery.get(n, 0.0) for n in q.step_node_map.values()]
         weakness = 1 - (min(node_mastery) if node_mastery else 0.5)
         diff_penalty = abs(q.difficulty - 0.6)
-        return weakness * 10 - diff_penalty
+        # 出题轮换：该题涉及节点最近连续作答越多，优先级越低（防连出）
+        recency = max((recent or {}).get(n, 0) for n in q.step_node_map.values())
+        return weakness * 10 - diff_penalty - recency * 2.5
 
     return max(questions, key=priority)
 

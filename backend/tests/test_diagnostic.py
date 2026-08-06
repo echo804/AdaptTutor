@@ -64,3 +64,16 @@ def test_terminate_on_confidence():
 def test_no_terminate_early():
     rules = DiagnosticRules()
     assert not should_terminate({"k1": 0.6}, 2, rules)
+
+
+def test_select_rotates_recent_nodes():
+    """M4r20 D1：连续作答节点降权，出题轮换到其他节点。"""
+    mastery = {"k1": 0.2, "k2": 0.25}
+    q1 = _q("q1", 0.6, ["k1"])
+    q2 = _q("q2", 0.6, ["k2"])
+    # k1 已连续答 3 次 → 应轮到 k2
+    chosen = select_next_question(mastery, [q1, q2], DiagnosticRules(), recent={"k1": 3})
+    assert chosen.id == "q2"
+    # 无 recent 时仍优先薄弱 k1
+    chosen0 = select_next_question(mastery, [q1, q2], DiagnosticRules())
+    assert chosen0.id == "q1"

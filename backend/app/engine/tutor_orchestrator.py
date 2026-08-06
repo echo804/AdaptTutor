@@ -55,6 +55,7 @@ class TutorOrchestrator:
             nid: self.rules.bkt.p_l0 for nid in self.graph.node_ids
         }
         self.answered_counts: dict[str, int] = {}
+        self.recent: dict[str, int] = {}  # M4r20：节点连续作答次数（出题轮换）
         self.pool: list = list(self.pack.questions)
         self.current_question = None
         self.path: list[str] = []
@@ -68,6 +69,7 @@ class TutorOrchestrator:
         self.max_rounds: int = 1
         self.practice_rounds: int = 0
         self.current_node: str | None = None  # M4r7i：当前辅导知识点（变式题匹配依据）
+        self._ease_verify: bool = False  # M4r20 T3：挫败后变式降档标记
 
     # ---------- 阶段 1：诊断 ----------
 
@@ -84,23 +86,35 @@ class TutorOrchestrator:
             lo, hi = {"easy": (0, 0.34), "medium": (0.34, 0.66), "hard": (0.66, 1.01)}[diff]
             pool = [q for q in pool if lo <= q.difficulty < hi]
         self.pool = pool
+        self.recent = {}
         self.current_question = select_next_question(
-            self.mastery, self.pool, self.rules
+            self.mastery, self.pool, self.rules, self.recent
         )
         return self._diag_state()
 
     def diagnose(self, correct: bool) -> dict:
         """提交一题作答，推进 BKT 与选题；返回当前收敛状态。"""
         if self.current_question is None:
-            self.current_question = select_next_question(self.mastery, self.pool, self.rules)
+            self.current_question = select_next_question(
+                self.mastery, self.pool, self.rules, self.recent
+            )
             return self._diag_state()
         q = self.current_question
+        # M4r20：更新连续作答计数（本轮涉及的节点 +1，其他节点清零）
+        touched = set(q.step_node_map.values())
+        for nid in self.recent:
+            if nid not in touched:
+                self.recent[nid] = 0
+        for nid in touched:
+            self.recent[nid] = self.recent.get(nid, 0) + 1
         for nid in q.step_node_map.values():
             self.mastery[nid] = bkt_update(self.mastery[nid], correct, self.rules.bkt)
             self.answered_counts[nid] = self.answered_counts.get(nid, 0) + 1
         if q in self.pool:
             self.pool.remove(q)
-        self.current_question = select_next_question(self.mastery, self.pool, self.rules)
+        self.current_question = select_next_question(
+            self.mastery, self.pool, self.rules, self.recent
+        )
         return self._diag_state()
 
     def _diag_state(self) -> dict:
@@ -108,11 +122,21 @@ class TutorOrchestrator:
         answered = sum(self.answered_counts.values())
         max_q = int(self.diag_config.get("qcount", 10))
         if self.current_question is None or answered >= max_q:
+            # M4r20 D3：结束语带薄弱点总结 + 引导下一步
+            weak = min(self.mastery, key=self.mastery.get) if self.mastery else None
+            summary = (
+                f"诊断完成。最薄弱的是「{weak}」（掌握度 {round(self.mastery[weak] * 100)}%），"
+                "建议进入辅导练习针对性地巩固。"
+                if weak
+                else "诊断完成。"
+            )
             return {
                 "stage": "diagnose",
                 "done": True,
                 "qcount": max_q,
                 "answered": answered,
+                "weakest": weak,
+                "summary": summary,
             }
         weak = min(self.mastery, key=self.mastery.get)
         confident = (1 - self.mastery[weak]) >= self.rules.termination.confidence_threshold
@@ -163,15 +187,59 @@ class TutorOrchestrator:
             self.build_path()
         return self._tutor_start_round()
 
-    def _pick_node_question(self):
-        """从路径中顺延选择首个有可用题的节点；路径无匹配则放宽到全图（M4r7i）。"""
+    def _pick_node_question(self, exclude_id: str | None = None):
+        """从路径中顺延选择首个有可用题的节点；同节点内按难度递进（M4r20 T1）。
+
+        exclude_id: 排除某题（变式验证避免重复原题，T2）。
+        """
         path = self.path or []
         candidates = list(path) + [n for n in self.graph.node_ids if n not in path]
         for n in candidates:
-            q = next((q for q in self.tutor_pool if n in q.step_node_map.values()), None)
-            if q:
-                return n, q
+            qs = [
+                q for q in self.tutor_pool
+                if n in q.step_node_map.values() and q.id != exclude_id
+            ]
+            if not qs:
+                continue
+            # 难度递进：先易后难（辅导从低难度题切入，逐步加难）
+            return n, min(qs, key=lambda q: q.difficulty)
         return None, None
+
+    def _pick_verify(self):
+        """变式验证题：同节点、排除当前题、难度略高于原题（形成梯度，T1+T2）。
+
+        无排除后可用题 → 用 variant_generator 生成变式；仍无 → None。
+        挫败降档（T3）：_ease_verify 为真时选更低难度，用后复位。
+        """
+        node = self.current_node or (self.path[0] if self.path else None)
+        cur = self.verify_question
+        cands = [
+            q for q in self.tutor_pool
+            if node in q.step_node_map.values() and q.id != (cur.id if cur else None)
+        ]
+        base = cur.difficulty if cur else 0.5
+        if self._ease_verify:
+            # 挫败降档：选明显更低难度的题
+            self._ease_verify = False
+            lower = [q for q in cands if q.difficulty <= base - 0.15]
+            return min(lower, key=lambda q: q.difficulty) if lower else (
+                min(cands, key=lambda q: q.difficulty) if cands else None
+            )
+        if cands:
+            # 难度递进：选略高于当前题难度的（若存在），否则取最高
+            higher = [q for q in cands if q.difficulty >= base - 0.05]
+            return min(higher, key=lambda q: q.difficulty) if higher else min(cands, key=lambda q: q.difficulty)
+        # 同节点无其他题 → 生成变式（排除原题，参数化改数字）
+        if cur is not None:
+            try:
+                from app.engine.variant_generator import generate_variant
+
+                res = generate_variant(cur, seed=hash(node) & 0xFFFF)
+                if res.question is not None:
+                    return res.question
+            except Exception:
+                pass
+        return None
 
     def _tutor_start_round(self) -> TurnResult:
         """启动一轮辅导：从路径中顺延选择首个有可用题的节点（M4r7i）。"""
@@ -204,6 +272,8 @@ class TutorOrchestrator:
             fa = assess_frustration(self.sm.context, user_msg)
             if fa.action == "switch_explain":
                 self.sm.step(Event.GIVE_UP, frustrate="switch_explain")
+                # M4r20 T3：挫败降档——后续变式题自动选更低难度
+                self._ease_verify = True
                 return TurnResult(
                     state=self.sm.state.value,
                     message="没关系，我们换个方式：先看看这类题的关键步骤，再试一次。",
@@ -307,11 +377,6 @@ class TutorOrchestrator:
             context=dict(self.sm.context),
         )
 
-    def _pick_verify(self):
-        node = self.current_node or (self.path[0] if self.path else None)
-        cands = [q for q in self.tutor_pool if node in q.step_node_map.values()]
-        return cands[-1] if cands else None
-
     # ---------- 状态快照（M3 会话恢复） ----------
 
     def save_state(self) -> dict:
@@ -334,6 +399,7 @@ class TutorOrchestrator:
             "practice_rounds": self.practice_rounds,
             "max_rounds": self.max_rounds,
             "current_node": self.current_node,
+            "ease_verify": self._ease_verify,
         }
 
     def restore_state(self, state: dict) -> None:
@@ -370,6 +436,7 @@ class TutorOrchestrator:
         self.max_rounds = int(state.get("max_rounds", self.max_rounds))
         self.practice_rounds = int(state.get("practice_rounds", 0))
         self.current_node = state.get("current_node")
+        self._ease_verify = bool(state.get("ease_verify", False))  # M4r20 T3
         qtypes = self.diag_config.get("qtypes") or ["choice", "blank", "open"]
         diff = self.diag_config.get("difficulty", "auto")
         pool = [q for q in self.pack.questions if q.type in qtypes]
