@@ -81,10 +81,23 @@ class TutorOrchestrator:
             self.diag_config = merged
         qtypes = self.diag_config.get("qtypes") or ["choice", "blank", "open"]
         diff = self.diag_config.get("difficulty", "auto")
-        pool = [q for q in self.pack.questions if q.type in qtypes]
+        base_pool = [q for q in self.pack.questions if q.type in qtypes]
+        qcount_target = int(self.diag_config.get("qcount", 10))
         if diff != "auto":
-            lo, hi = {"easy": (0, 0.34), "medium": (0.34, 0.66), "hard": (0.66, 1.01)}[diff]
-            pool = [q for q in pool if lo <= q.difficulty < hi]
+            # M4r21g：难度过滤后若题库不足 qcount，自动放宽难度（easy→medium→hard）凑够，
+            # 避免"选了 15 题实际只出 3 题就结束"
+            levels = ["easy", "medium", "hard"]
+            lo_hi = {"easy": (0, 0.34), "medium": (0.34, 0.66), "hard": (0.66, 1.01)}
+            pool = [q for q in base_pool if lo_hi[diff][0] <= q.difficulty < lo_hi[diff][1]]
+            start_idx = levels.index(diff)
+            for lv in levels[start_idx + 1 :]:
+                if len(pool) >= qcount_target:
+                    break
+                pool.extend(q for q in base_pool if lo_hi[lv][0] <= q.difficulty < lo_hi[lv][1])
+            # 记录实际放宽后的难度范围（供结束语提示）
+            self.diag_config["_actual_difficulty"] = diff if len(pool) >= qcount_target else "easy→hard"
+        else:
+            pool = list(base_pool)
         self.pool = pool
         self.recent = {}
         self.current_question = select_next_question(

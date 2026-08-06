@@ -215,11 +215,19 @@ async def api_send_message(
                     t.build_path()  # 诊断后生成薄弱路径（供总结与仪表盘）
                 weak = "、".join((t.weak_nodes or [])[:3]) or "—"
                 answered = st.get("answered") or 0
+                # M4r21g：难度不足自动放宽时，提示实际难度
+                actual_diff = t.diag_config.get("_actual_difficulty")
+                diff_note = (
+                    f"\n（所选难度题量不足，已自动放宽到 {actual_diff}）"
+                    if actual_diff and actual_diff != t.diag_config.get("difficulty")
+                    else ""
+                )
                 reply_text = (
                     f"{last_judge}\n\n"
                     f"🎉 诊断完成！共诊断 {answered} 题。"
                     f"薄弱知识点：{weak}。推荐学习路径已生成，"
                     "可去仪表盘查看，或开始辅导练习巩固。"
+                    f"{diff_note}"
                 )
             else:
                 # M4r21d：AI 气泡只含简短判题反馈（避免"答错了+答案不太对"重复）；下一题由题目卡展示
