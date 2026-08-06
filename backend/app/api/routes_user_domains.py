@@ -22,7 +22,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user, get_db
 from app.config import get_settings
-from app.engine.pack_factory import generate_domain
+from app.engine.pack_factory import _write_pack, generate_domain
 from app.persistence.models import GenerationTask, User, UserDomain
 
 router = APIRouter(prefix="/api/v1", tags=["user-domains"])
@@ -81,6 +81,39 @@ async def _save_uploads(
     if text and text.strip():
         (general / "01_粘贴文本.md").write_text(text, encoding="utf-8")
     return base
+
+
+@router.post("/user-domains/blank")
+async def api_create_blank_domain(
+    name: str = Form(""),
+    description: str = Form(""),
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """创建空白领域包：空图谱 + 空题库，直接进入编辑器手工构建。
+
+    status 置 published（而非 draft）——draft 会被领域列表过滤且无「编辑」入口；
+    visibility 固定 private（要公开共享走 /publish 审核流）。
+    """
+    if not (0 < len(name.strip()) <= 60):
+        raise HTTPException(status_code=400, detail="名称需 1-60 字")
+    pack_id = f"ud{user.id}_{int(time.time()) % 100000000}_{uuid.uuid4().hex[:4]}"
+    out_dir = Path(get_settings().domain_pack_path) / pack_id
+    _write_pack(out_dir, pack_id, name.strip(), {"nodes": {}, "edges": set(), "questions": {}})
+    d = UserDomain(
+        user_id=user.id,
+        pack_id=pack_id,
+        name=name.strip(),
+        description=description.strip() or None,
+        visibility="private",
+        status="published",
+        nodes_count=0,
+        questions_count=0,
+    )
+    db.add(d)
+    await db.commit()
+    await db.refresh(d)
+    return {"domain_id": d.id, "pack_id": pack_id, "status": "published"}
 
 
 @router.post("/user-domains")

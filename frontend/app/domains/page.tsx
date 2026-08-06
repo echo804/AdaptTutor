@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 
 /** 我的领域（M4r8d）：用户自助导入素材 → AI 生成 → 发布/审核。
@@ -45,6 +46,7 @@ export default function DomainsPage() {
 
   // 创建表单
   const [showCreate, setShowCreate] = useState(false);
+  const [mode, setMode] = useState<"ai" | "blank">("ai");
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [visibility, setVisibility] = useState<"private" | "public">("private");
@@ -52,6 +54,7 @@ export default function DomainsPage() {
   const [zipFile, setZipFile] = useState<File | null>(null);
   const [text, setText] = useState("");
   const [creating, setCreating] = useState(false);
+  const router = useRouter();
 
   // 审阅清单
   const [checklist, setChecklist] = useState<string | null>(null);
@@ -136,6 +139,32 @@ export default function DomainsPage() {
     }
   }
 
+  async function createBlank() {
+    setErr(null);
+    setMsg(null);
+    if (!name.trim()) {
+      setErr("请填写领域名称");
+      return;
+    }
+    setCreating(true);
+    try {
+      const fd = new FormData();
+      fd.append("name", name.trim());
+      fd.append("description", description.trim());
+      const r = await api<{ pack_id: string }>("/api/v1/user-domains/blank", { method: "POST", body: fd });
+      setMsg(`空白领域「${name.trim()}」已创建，进入编辑器构建内容…`);
+      setShowCreate(false);
+      setName("");
+      setDescription("");
+      router.push(`/editor/${r.pack_id}`);
+      await load();
+    } catch (e: any) {
+      setErr(e.message || "创建失败");
+    } finally {
+      setCreating(false);
+    }
+  }
+
   async function publish(id: number, vis: string) {
     setErr(null);
     if (vis === "public" && !window.confirm("公开领域需管理员审核通过后其他用户才能看到，确认提交审核？")) return;
@@ -208,6 +237,26 @@ export default function DomainsPage() {
       {showCreate && (
         <div className="mb-5 rounded-xl border p-4" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
           <h2 className="mb-3 text-sm font-medium" style={{ color: "var(--text)" }}>新建领域</h2>
+          {/* 模式切换：AI 素材生成 / 空白手工构建 */}
+          <div className="mb-3 flex gap-2">
+            {([
+              ["ai", "AI 素材生成"],
+              ["blank", "空白手工构建"],
+            ] as const).map(([m, label]) => (
+              <button
+                key={m}
+                onClick={() => setMode(m)}
+                className="rounded px-3 py-1.5 text-sm transition-opacity hover:opacity-80"
+                style={
+                  mode === m
+                    ? { background: "var(--accent)", color: "#fff" }
+                    : { background: "var(--bg)", color: "var(--muted)", border: "1px solid var(--border)" }
+                }
+              >
+                {label}
+              </button>
+            ))}
+          </div>
           <div className="mb-3 grid gap-3">
             <input
               placeholder="领域名称（如：Python 基础）"
@@ -234,7 +283,13 @@ export default function DomainsPage() {
               <option value="public">公开共享（需管理员审核）</option>
             </select>
           </div>
-          <div className="mb-3 grid gap-3 text-sm">
+          {mode === "blank" && (
+            <p className="mb-3 text-sm" style={{ color: "var(--muted)" }}>
+              创建一个空的知识图谱 + 题库，之后在<a href="#" onClick={(e) => { e.preventDefault(); setMode("ai"); }}>编辑器</a>里手工添加节点、连线和题目。
+            </p>
+          )}
+          {mode === "ai" && (
+            <div className="mb-3 grid gap-3 text-sm">
             <label className="block">
               <span style={{ color: "var(--muted)" }}>上传 .md / .txt 素材（可多选，建议每篇 ≥ 200 字）</span>
               <input
@@ -260,15 +315,16 @@ export default function DomainsPage() {
                 style={{ background: "var(--bg)", borderColor: "var(--border)", color: "var(--text)" }}
               />
             </label>
-          </div>
+            </div>
+          )}
           <div className="flex gap-2">
             <button
               className="rounded px-4 py-2 text-sm font-medium transition-opacity hover:opacity-80 disabled:opacity-50"
               style={{ background: "var(--accent)", color: "#fff" }}
-              onClick={create}
+              onClick={mode === "blank" ? createBlank : create}
               disabled={creating}
             >
-              {creating ? "提交中…" : "开始 AI 生成"}
+              {creating ? "提交中…" : mode === "blank" ? "创建空白领域 →" : "开始 AI 生成"}
             </button>
             <button className="rounded px-4 py-2 text-sm" style={{ color: "var(--muted)" }} onClick={() => setShowCreate(false)}>
               取消

@@ -4,7 +4,7 @@
  * 布局：顶部工具栏 / 左侧图谱画布 / 右侧题目或节点属性面板。
  * 只读包（editable=false）全部禁用；节点位置存 localStorage（不进 schema）。
  */
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -103,6 +103,12 @@ export default function EditorPage() {
   const [selEdgeId, setSelEdgeId] = useState<string | null>(null);
   const [selQid, setSelQid] = useState<string | null>(null);
 
+  // M6：撤销/重做（快照 (pack, nodes, edges) 三元组）
+  type Snap = { pack: DomainPackOut; nodes: Node[]; edges: Edge[] };
+  const [past, setPast] = useState<Snap[]>([]);
+  const [future, setFuture] = useState<Snap[]>([]);
+  const snapRef = useRef<Snap | null>(null);
+
   const loaded = useRef(false);
 
   useEffect(() => {
@@ -149,6 +155,61 @@ export default function EditorPage() {
     localStorage.setItem(POS_KEY(packId), JSON.stringify(posMap));
   };
 
+  // M6：撤销/重做实现。pushUndo 把「操作前状态」入栈（JSON 去重防表单连发）；
+  // 文本输入框内 Ctrl+Z 不拦截（浏览器原生文本撤销），仅编辑器操作可撤销。
+  const pushUndo = useCallback(() => {
+    if (!pack || !editable) return;
+    const s: Snap = { pack: structuredClone(pack), nodes: structuredClone(nodes), edges: structuredClone(edges) };
+    if (snapRef.current && JSON.stringify(snapRef.current) === JSON.stringify(s)) return;
+    snapRef.current = s;
+    setPast((p) => [...p.slice(-49), s]);
+    setFuture([]);
+  }, [pack, nodes, edges, editable]);
+
+  const undo = useCallback(() => {
+    if (!editable || past.length === 0 || !pack) return;
+    const prev = past[past.length - 1];
+    setFuture((f) => [...f, { pack: structuredClone(pack), nodes: structuredClone(nodes), edges: structuredClone(edges) }]);
+    setPack(prev.pack);
+    setNodes(prev.nodes);
+    setEdges(prev.edges);
+    persistPos(prev.nodes);
+    setPast((p) => p.slice(0, -1));
+    snapRef.current = prev;
+  }, [past, pack, nodes, edges, editable]);
+
+  const redo = useCallback(() => {
+    if (!editable || future.length === 0 || !pack) return;
+    const next = future[future.length - 1];
+    setPast((p) => [...p, { pack: structuredClone(pack), nodes: structuredClone(nodes), edges: structuredClone(edges) }]);
+    setPack(next.pack);
+    setNodes(next.nodes);
+    setEdges(next.edges);
+    persistPos(next.nodes);
+    setFuture((f) => f.slice(0, -1));
+    snapRef.current = next;
+  }, [future, pack, nodes, edges, editable]);
+
+  // 快捷键：Ctrl/⌘+Z 撤销、Ctrl/⌘+Shift+Z 或 Ctrl/⌘+Y 重做（输入框内不拦截）
+  useEffect(() => {
+    const h = (e: KeyboardEvent) => {
+      const t = e.target as HTMLElement | null;
+      if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable)) return;
+      if (!(e.ctrlKey || e.metaKey)) return;
+      const k = e.key.toLowerCase();
+      if (k === "z") {
+        e.preventDefault();
+        if (e.shiftKey) redo();
+        else undo();
+      } else if (k === "y") {
+        e.preventDefault();
+        redo();
+      }
+    };
+    window.addEventListener("keydown", h);
+    return () => window.removeEventListener("keydown", h);
+  }, [undo, redo]);
+
   const onNodesChange = (changes: any[]) => {
     setNodes((nds) => {
       const next = applyNodeChanges(changes, nds);
@@ -160,11 +221,14 @@ export default function EditorPage() {
   const onConnect = (conn: Connection) => {
     if (!editable) return;
     if (conn.source === conn.target) return;
+    pushUndo();
     setEdges((eds) => {
       if (eds.some((e) => e.source === conn.source && e.target === conn.target)) return eds;
       return addEdge({ ...conn, type: "smoothstep", style: { stroke: "var(--border)" } }, eds);
     });
   };
+
+  const onNodeDragStop = () => pushUndo();
 
   /** 点击边选中（高亮）；再次点击空白取消。 */
   const onEdgeClick = (_: unknown, edge: Edge) => {
@@ -181,6 +245,7 @@ export default function EditorPage() {
   /** 删除选中的边（连线撤回）。 */
   const deleteEdge = () => {
     if (!editable || !selEdgeId) return;
+    pushUndo();
     setEdges((eds) => eds.filter((e) => e.id !== selEdgeId));
     setSelEdgeId(null);
   };
@@ -192,6 +257,7 @@ export default function EditorPage() {
 
   const addNode = () => {
     if (!editable || !pack) return;
+    pushUndo();
     const used = new Set(pack.graph.nodes.map((n) => n.id));
     let i = 1;
     while (used.has(`n${String(i).padStart(2, "0")}`)) i++;
@@ -212,6 +278,7 @@ export default function EditorPage() {
 
   const deleteSelected = () => {
     if (!editable || !selNodeId || !pack) return;
+    pushUndo();
     const id = selNodeId;
     setPack({
       ...pack,
@@ -294,6 +361,74 @@ export default function EditorPage() {
     }
   };
 
+  // M6：导出/导入 JSON（整包替换语义）
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const exportJson = () => {
+    const body = buildBody();
+    if (!body) return;
+    const blob = new Blob([JSON.stringify(body, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${packId}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const importJson = (file: File) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const data = JSON.parse(String(reader.result)) as {
+          manifest?: unknown;
+          graph?: { nodes?: unknown[]; edges?: unknown[] };
+          questions?: unknown[];
+          diagnostic_rules?: unknown;
+          assessment?: unknown;
+        };
+        if (!data.manifest || !data.graph || !data.questions) {
+          throw new Error("JSON 缺少 manifest / graph / questions 字段");
+        }
+        const g = data.graph as { nodes: any[]; edges: any[] };
+        setPack((p) =>
+          p
+            ? {
+                ...p,
+                manifest: data.manifest as DomainPackOut["manifest"],
+                graph: g as DomainPackOut["graph"],
+                questions: data.questions as DomainPackOut["questions"],
+                diagnostic_rules: (data.diagnostic_rules ?? p.diagnostic_rules) as DomainPackOut["diagnostic_rules"],
+                assessment: (data.assessment ?? p.assessment) as DomainPackOut["assessment"],
+              }
+            : p,
+        );
+        setNodes(
+          (g.nodes || []).map((n, i) => ({
+            id: n.id,
+            type: "pack",
+            position: { x: (i % 4) * 190, y: Math.floor(i / 4) * 130 },
+            data: { name: n.name, difficulty: n.difficulty, importance: n.importance },
+          })),
+        );
+        setEdges(
+          (g.edges || []).map((e) => ({
+            id: `${e.from}->${e.to}`,
+            source: e.from,
+            target: e.to,
+            type: "smoothstep",
+            style: { stroke: "var(--border)" },
+          })),
+        );
+        setErrors([]);
+        setNotice("已导入（仅内存，未落盘）——请核对后点「保存」写入领域包");
+      } catch (e) {
+        setErrors([String((e as Error)?.message ?? e)]);
+      }
+    };
+    reader.readAsText(file);
+  };
+
   // 面板数据
   const selNode = useMemo(
     () => (selNodeId ? pack?.graph.nodes.find((n) => n.id === selNodeId) : null),
@@ -339,6 +474,53 @@ export default function EditorPage() {
         <button
           className="rounded border px-3 py-1 text-xs disabled:opacity-50"
           style={{ borderColor: "var(--border)", color: "var(--text)" }}
+          onClick={exportJson}
+          disabled={!editable}
+          title="导出当前包为 JSON（含图谱与题目）"
+        >
+          ⬇ 导出
+        </button>
+        <button
+          className="rounded border px-3 py-1 text-xs disabled:opacity-50"
+          style={{ borderColor: "var(--border)", color: "var(--text)" }}
+          onClick={() => fileRef.current?.click()}
+          disabled={!editable}
+          title="导入 JSON（整包替换，需点保存落盘）"
+        >
+          ⬆ 导入
+        </button>
+        <input
+          ref={fileRef}
+          type="file"
+          accept=".json,application/json"
+          className="hidden"
+          onChange={(e) => {
+            const f = e.target.files?.[0];
+            if (f) importJson(f);
+            e.target.value = "";
+          }}
+        />
+        <button
+          className="rounded border px-3 py-1 text-xs disabled:opacity-50"
+          style={{ borderColor: "var(--border)", color: "var(--text)" }}
+          onClick={undo}
+          disabled={!editable || past.length === 0}
+          title="撤销 (Ctrl+Z)"
+        >
+          ↶ 撤销
+        </button>
+        <button
+          className="rounded border px-3 py-1 text-xs disabled:opacity-50"
+          style={{ borderColor: "var(--border)", color: "var(--text)" }}
+          onClick={redo}
+          disabled={!editable || future.length === 0}
+          title="重做 (Ctrl+Shift+Z / Ctrl+Y)"
+        >
+          ↷ 重做
+        </button>
+        <button
+          className="rounded border px-3 py-1 text-xs disabled:opacity-50"
+          style={{ borderColor: "var(--border)", color: "var(--text)" }}
           onClick={runValidate}
           disabled={validating || !editable}
         >
@@ -371,6 +553,7 @@ export default function EditorPage() {
             edges={edges}
             onNodesChange={onNodesChange}
             onConnect={onConnect}
+            onNodeDragStop={onNodeDragStop}
             onEdgeClick={onEdgeClick}
             onNodeClick={(_, n) => setSelNodeId(n.id)}
             onPaneClick={clearSelection}
@@ -435,6 +618,7 @@ export default function EditorPage() {
               <NodeForm
                 node={selNode}
                 editable={editable}
+                onCommit={pushUndo}
                 onChange={(patch) =>
                   setPack({
                     ...pack,
@@ -454,6 +638,7 @@ export default function EditorPage() {
                 selQid={selQid}
                 nodeIds={pack.graph.nodes.map((n) => n.id)}
                 amber={amber}
+                onCommit={pushUndo}
                 onSelect={setSelQid}
                 onChange={(qs) => setPack({ ...pack, questions: qs })}
                 onEdit={(q) => setSelQid(q.id)}
@@ -471,10 +656,12 @@ export default function EditorPage() {
 function NodeForm({
   node,
   editable,
+  onCommit,
   onChange,
 }: {
   node: { id: string; name: string; difficulty: number; importance: number };
   editable: boolean;
+  onCommit?: () => void;
   onChange: (patch: Partial<typeof node>) => void;
 }) {
   const input = (v: string) =>
@@ -493,6 +680,7 @@ function NodeForm({
           value={node.name}
           disabled={!editable}
           onChange={(e) => onChange({ name: e.target.value })}
+          onBlur={onCommit}
         />
       </div>
       <div>
@@ -503,6 +691,7 @@ function NodeForm({
           value={node.difficulty}
           disabled={!editable}
           onChange={(e) => onChange({ difficulty: Number(e.target.value) })}
+          onBlur={onCommit}
         />
       </div>
       <div>
@@ -513,6 +702,7 @@ function NodeForm({
           value={node.importance}
           disabled={!editable}
           onChange={(e) => onChange({ importance: Number(e.target.value) })}
+          onBlur={onCommit}
         />
       </div>
     </div>
@@ -527,6 +717,7 @@ function QuestionPanel({
   selQid,
   nodeIds,
   amber,
+  onCommit,
   onSelect,
   onChange,
   onEdit,
@@ -536,6 +727,7 @@ function QuestionPanel({
   selQid: string | null;
   nodeIds: string[];
   amber: string;
+  onCommit: () => void;
   onSelect: (id: string | null) => void;
   onChange: (qs: PackQuestion[]) => void;
   onEdit: (q: PackQuestion) => void;
@@ -545,6 +737,7 @@ function QuestionPanel({
     ({ borderColor: "var(--border)", background: "var(--bg)", color: "var(--text)", borderRadius: 6 }) as CSSProperties;
 
   const addQ = () => {
+    onCommit();
     const used = new Set(questions.map((q) => q.id));
     let i = 1;
     while (used.has(`q${String(i).padStart(3, "0")}`)) i++;
@@ -569,6 +762,7 @@ function QuestionPanel({
 
   const delQ = () => {
     if (!sel) return;
+    onCommit();
     onChange(questions.filter((q) => q.id !== sel.id));
     onSelect(null);
   };
@@ -624,12 +818,12 @@ function QuestionPanel({
             <div className="flex-1">
               <div className="mb-1 text-xs" style={{ color: "var(--muted)" }}>id</div>
               <input className="w-full px-2 py-1 text-sm outline-none disabled:opacity-50" style={input()} value={sel.id} disabled={!editable}
-                onChange={(e) => patchQ({ id: e.target.value })} />
+                onChange={(e) => patchQ({ id: e.target.value })} onBlur={onCommit} />
             </div>
             <div className="w-24">
               <div className="mb-1 text-xs" style={{ color: "var(--muted)" }}>题型</div>
               <select className="w-full px-1 py-1 text-sm outline-none disabled:opacity-50" style={input()} value={sel.type} disabled={!editable}
-                onChange={(e) => patchQ({ type: e.target.value as PackQuestion["type"] })}>
+                onChange={(e) => patchQ({ type: e.target.value as PackQuestion["type"] })} onBlur={onCommit}>
                 <option value="choice">选择</option>
                 <option value="multi">多选</option>
                 <option value="blank">填空</option>
@@ -639,31 +833,31 @@ function QuestionPanel({
             <div className="w-24">
               <div className="mb-1 text-xs" style={{ color: "var(--muted)" }}>难度</div>
               <input type="number" min={0} max={1} step={0.05} className="w-full px-1 py-1 text-sm outline-none disabled:opacity-50" style={input()} value={sel.difficulty} disabled={!editable}
-                onChange={(e) => patchQ({ difficulty: Math.max(0, Math.min(1, Number(e.target.value))) })} />
+                onChange={(e) => patchQ({ difficulty: Math.max(0, Math.min(1, Number(e.target.value))) })} onBlur={onCommit} />
             </div>
           </div>
 
           <div>
             <div className="mb-1 text-xs" style={{ color: "var(--muted)" }}>题干（支持 $KaTeX$）</div>
             <textarea rows={3} className="w-full px-2 py-1 text-sm outline-none disabled:opacity-50" style={input()} value={sel.content} disabled={!editable}
-              onChange={(e) => patchQ({ content: e.target.value })} />
+              onChange={(e) => patchQ({ content: e.target.value })} onBlur={onCommit} />
           </div>
 
           <div>
             <div className="mb-1 text-xs" style={{ color: "var(--muted)" }}>标签（逗号分隔）</div>
             <input className="w-full px-2 py-1 text-sm outline-none disabled:opacity-50" style={input()} value={(sel.tags || []).join("，")} disabled={!editable}
-              onChange={(e) => patchQ({ tags: e.target.value.split(/[,，]/).map((s) => s.trim()).filter(Boolean) })} />
+              onChange={(e) => patchQ({ tags: e.target.value.split(/[,，]/).map((s) => s.trim()).filter(Boolean) })} onBlur={onCommit} />
           </div>
 
           {(sel.type === "choice" || sel.type === "multi") && (
-            <OptionsEditor q={sel} editable={editable} onChange={patchQ} input={input} />
+            <OptionsEditor q={sel} editable={editable} onChange={patchQ} onCommit={onCommit} input={input} />
           )}
 
           {(sel.type === "blank" || sel.type === "open") && (
             <div>
               <div className="mb-1 text-xs" style={{ color: "var(--muted)" }}>标准答案</div>
               <input className="w-full px-2 py-1 text-sm outline-none disabled:opacity-50" style={input()} value={String(sel.answer ?? "")} disabled={!editable}
-                onChange={(e) => patchQ({ answer: e.target.value })} />
+                onChange={(e) => patchQ({ answer: e.target.value })} onBlur={onCommit} />
             </div>
           )}
 
@@ -677,16 +871,17 @@ function QuestionPanel({
                     delete m[step];
                     m[e.target.value] = node;
                     patchQ({ step_node_map: m });
-                  }} />
+                  }} onBlur={onCommit} />
                 <span className="text-[10px]" style={{ color: "var(--muted)" }}>→</span>
                 <select className="flex-1 px-1 py-0.5 text-xs outline-none disabled:opacity-50" style={input()} value={node} disabled={!editable}
-                  onChange={(e) => patchQ({ step_node_map: { ...(sel.step_node_map || {}), [step]: e.target.value } })}>
+                  onChange={(e) => patchQ({ step_node_map: { ...(sel.step_node_map || {}), [step]: e.target.value } })} onBlur={onCommit}>
                   <option value="">（未映射）</option>
                   {nodeIds.map((nid) => <option key={nid} value={nid}>{nid}</option>)}
                 </select>
                 {editable && (
                   <button className="text-[10px]" style={{ color: "var(--warn)" }}
                     onClick={() => {
+                      onCommit();
                       const m = { ...(sel.step_node_map || {}) };
                       delete m[step];
                       patchQ({ step_node_map: m });
@@ -697,6 +892,7 @@ function QuestionPanel({
             {editable && (
               <button className="mt-0.5 text-[11px]" style={{ color: "var(--amber)" }}
                 onClick={() => {
+                  onCommit();
                   const i = Object.keys(sel.step_node_map || {}).length + 1;
                   patchQ({ step_node_map: { ...(sel.step_node_map || {}), [`step${i}`]: nodeIds[0] ?? "" } });
                 }}>
@@ -715,11 +911,13 @@ function QuestionPanel({
 function OptionsEditor({
   q,
   editable,
+  onCommit,
   onChange,
   input,
 }: {
   q: PackQuestion;
   editable: boolean;
+  onCommit: () => void;
   onChange: (patch: Partial<PackQuestion>) => void;
   input: () => CSSProperties;
 }) {
@@ -740,10 +938,11 @@ function OptionsEditor({
         <div key={i} className="mb-1 flex items-center gap-1.5">
           <span className="w-4 text-xs font-semibold" style={{ color: "var(--accent)" }}>{letters[i]}</span>
           <input className="flex-1 px-1.5 py-0.5 text-xs outline-none disabled:opacity-50" style={input()} value={o} disabled={!editable}
-            onChange={(e) => setOpt(i, e.target.value)} />
+            onChange={(e) => setOpt(i, e.target.value)} onBlur={onCommit} />
           {editable && (
             <button className="text-[10px]" style={{ color: "var(--warn)" }}
               onClick={() => {
+                onCommit();
                 const next = opts.filter((_, j) => j !== i);
                 onChange({ options: next.length ? next : null });
               }}>✕</button>
@@ -752,7 +951,10 @@ function OptionsEditor({
       ))}
       {editable && (
         <button className="mt-0.5 text-[11px]" style={{ color: "var(--amber)" }}
-          onClick={() => onChange({ options: [...opts, "新选项"] })}>
+          onClick={() => {
+            onCommit();
+            onChange({ options: [...opts, "新选项"] });
+          }}>
           + 选项
         </button>
       )}
@@ -760,7 +962,10 @@ function OptionsEditor({
         <div className="mb-1 text-xs" style={{ color: "var(--muted)" }}>答案</div>
         {q.type === "choice" ? (
           <select className="w-full px-1 py-1 text-sm outline-none disabled:opacity-50" style={input()} value={String(q.answer ?? "")} disabled={!editable}
-            onChange={(e) => onChange({ answer: e.target.value })}>
+            onChange={(e) => {
+              onCommit();
+              onChange({ answer: e.target.value });
+            }}>
             {letters.map((l) => <option key={l} value={l}>{l}</option>)}
           </select>
         ) : (
@@ -772,6 +977,7 @@ function OptionsEditor({
                 <label key={l} className="flex items-center gap-1 text-xs" style={{ color: "var(--text)" }}>
                   <input type="checkbox" checked={on} disabled={!editable}
                     onChange={(e) => {
+                      onCommit();
                       const next = e.target.checked ? [...ans, l] : ans.filter((a) => a !== l);
                       onChange({ answer: next });
                     }} />
