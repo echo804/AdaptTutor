@@ -207,37 +207,43 @@ export default function EditorPage() {
     setSelNodeId(null);
   };
 
+  /** 从画布状态构建待校验/保存的完整包（nodes/edges 同步画布上的最新改动）。 */
+  const buildBody = (): Record<string, unknown> | null => {
+    if (!pack) return null;
+    const byId = new Map(nodes.map((n) => [n.id, n.data]));
+    const graphNodes = pack.graph.nodes.map((n) => ({
+      ...n,
+      name: byId.get(n.id)?.name ?? n.name,
+      difficulty: byId.get(n.id)?.difficulty ?? n.difficulty,
+      importance: byId.get(n.id)?.importance ?? n.importance,
+    }));
+    return {
+      manifest: pack.manifest,
+      graph: {
+        nodes: graphNodes,
+        edges: edges.map((e) => ({ from: e.source, to: e.target, type: "prerequisite" as const })),
+      },
+      questions: pack.questions,
+      diagnostic_rules: pack.diagnostic_rules,
+      assessment: pack.assessment,
+    };
+  };
+
   const save = async () => {
     if (!pack || !packId || !editable) return;
     setSaving(true);
     setNotice("");
     setErrors([]);
     try {
-      // 结构同步：nodes 顺序/属性 → graph.nodes；edges → graph.edges
-      const byId = new Map(nodes.map((n) => [n.id, n.data]));
-      const graphNodes = pack.graph.nodes.map((n) => ({
-        ...n,
-        name: byId.get(n.id)?.name ?? n.name,
-        difficulty: byId.get(n.id)?.difficulty ?? n.difficulty,
-        importance: byId.get(n.id)?.importance ?? n.importance,
-      }));
-      const body = {
-        manifest: pack.manifest,
-        graph: {
-          nodes: graphNodes,
-          edges: edges.map((e) => ({ from: e.source, to: e.target, type: "prerequisite" as const })),
-        },
-        questions: pack.questions,
-        diagnostic_rules: pack.diagnostic_rules,
-        assessment: pack.assessment,
-      };
-      const v = await validateDomainPack(body as unknown as Record<string, unknown>);
+      const body = buildBody();
+      if (!body) return;
+      const v = await validateDomainPack(body);
       if (!v.valid) {
         setErrors(v.errors);
         setNotice("");
         return;
       }
-      await saveDomainPack(packId, body as unknown as Record<string, unknown>);
+      await saveDomainPack(packId, body);
       setNotice("已保存 ✓ 图谱与题目已写入领域包");
     } catch (e) {
       setErrors([String((e as Error)?.message ?? e)]);
@@ -251,17 +257,9 @@ export default function EditorPage() {
     setValidating(true);
     setErrors([]);
     try {
-      const body = {
-        manifest: pack.manifest,
-        graph: {
-          nodes: pack.graph.nodes,
-          edges: pack.graph.edges,
-        },
-        questions: pack.questions,
-        diagnostic_rules: pack.diagnostic_rules,
-        assessment: pack.assessment,
-      };
-      const v = await validateDomainPack(body as unknown as Record<string, unknown>);
+      const body = buildBody();
+      if (!body) return;
+      const v = await validateDomainPack(body);
       setErrors(v.errors);
       if (v.valid) setNotice("校验通过 ✓");
     } catch (e) {
