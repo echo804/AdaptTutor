@@ -181,6 +181,20 @@ async def api_send_message(
         else:
             st = t.diagnose(result.correct)
             nq = st.get("question")
+            # M4r21h：每次作答记 answer 事件（学习趋势数据源，答对答错都记）
+            await repo.add_event(
+                db,
+                user.id,
+                "answer",
+                node_id=next(iter(q.step_node_map.values()), None),
+                session_id=sid,
+                pack_id=pack_id,
+                payload={
+                    "qid": q.id,
+                    "correct": result.correct,
+                    "user_answer": body.answer,
+                },
+            )
             # M4r5：判错 → 落库错题集（复盘抽卡数据源）
             if not result.correct:
                 await repo.add_event(
@@ -278,6 +292,20 @@ async def api_send_message(
                 )
             else:
                 r = t.tutor_step(body.content, correct=j.correct)
+                # M4r21h：辅导作答也记 answer 事件（学习趋势数据源）
+                await repo.add_event(
+                    db,
+                    user.id,
+                    "answer",
+                    node_id=t.current_node,
+                    session_id=sid,
+                    pack_id=pack_id,
+                    payload={
+                        "qid": t.verify_question.id if t.verify_question else None,
+                        "correct": j.correct,
+                        "user_answer": body.content,
+                    },
+                )
                 judge_line = (
                     f"✓ 答对了！{j.feedback}"
                     if j.correct
