@@ -86,9 +86,13 @@ async def api_trend(
     db: AsyncSession = Depends(get_db),
     pack_id: str | None = None,
 ) -> dict:
-    """学习趋势（M4r3）：近 N 天每日作答事件数（learning_events，event_type='answer'，M4r8 按领域）。"""
+    """学习趋势（M4r3）：近 N 天每日作答事件数（learning_events，event_type='answer'）。
+    M4r21i：pack_id='*' 时显示该用户全领域作答（学习趋势是整体活跃度，不分领域）。"""
     _check_self(user.id, sid)
-    rows = await repo.get_trend(db, user.id, days, pack_id or _active_pack(user))
+    if pack_id == "*":
+        rows = await repo.get_trend(db, user.id, days)  # 不传 pack → 全领域
+    else:
+        rows = await repo.get_trend(db, user.id, days, pack_id or _active_pack(user))
     return {"trend": rows}
 
 

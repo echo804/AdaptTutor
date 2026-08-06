@@ -40,7 +40,7 @@ export default function DashboardPage() {
         const [m, p, t, sl] = await Promise.all([
           api<MasteryOut>(`/api/v1/students/${me.user_id}/mastery${qp}`),
           api<PathOut>(`/api/v1/students/${me.user_id}/path${qp}`),
-          api<{ trend: { date: string; count: number }[] }>(`/api/v1/students/${me.user_id}/trend${qp}`),
+          api<{ trend: { date: string; count: number }[] }>(`/api/v1/students/${me.user_id}/trend?pack_id=*`),
           api<{ sessions: { id: number; type: string; created_at: string }[] }>("/api/v1/sessions"),
         ]);
         setMastery(m.mastery);

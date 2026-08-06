@@ -42,7 +42,7 @@ export default function ReportPage() {
           api<PathOut>(`/api/v1/students/${me.user_id}/path${qp}`).catch(() => ({ path: [] })),
           api<{ nodes: StarNode[]; edges: StarEdge[] }>(`/api/v1/graph${qp}`).catch(() => ({ nodes: [], edges: [] })),
           api<{ items: WrongQ[] }>(`/api/v1/students/${me.user_id}/wrong-questions`).catch(() => ({ items: [] })),
-          api<{ trend: { date: string; count: number }[] }>(`/api/v1/students/${me.user_id}/trend${qp}`).catch(() => ({ trend: [] })),
+          api<{ trend: { date: string; count: number }[] }>(`/api/v1/students/${me.user_id}/trend?pack_id=*`).catch(() => ({ trend: [] })),
         ]);
         setMastery(m.mastery || {});
         setWeakest(m.weakest || null);
