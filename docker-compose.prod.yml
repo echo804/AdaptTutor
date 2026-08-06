@@ -65,7 +65,30 @@ services:
     depends_on:
       - api
 
+  # M6.1 监控面板：容器运维（状态/日志/重启），UI https://<服务器IP>:9443
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: adapttutor-prod-portainer
+    restart: unless-stopped
+    ports:
+      - "9443:9443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+
+  # M6.1 监控面板：可用性探活（服务心跳/宕机通知），UI http://<服务器IP>:3001
+  uptime-kuma:
+    image: louislam/uptime-kuma:1
+    container_name: adapttutor-prod-kuma
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    volumes:
+      - kuma_data:/app/data
+
 volumes:
   pgdata:
   packs:
   backups:
+  portainer_data:
+  kuma_data:
