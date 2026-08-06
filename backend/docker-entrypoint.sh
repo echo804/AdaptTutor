@@ -1,6 +1,8 @@
 #!/bin/sh
-# 后端容器入口：首次启动把镜像内置领域包同步到持久卷（不覆盖已有自建包）。
-# 之后每次启动：若卷里缺少某个内置包（如新版本新增），也一并补齐。
+# 后端容器入口：
+#   1) 首次启动把镜像内置领域包同步到持久卷（不覆盖已有自建包）
+#   2) 启动前执行数据库迁移（alembic upgrade head，幂等——全新库建表，存量库增量）
+#   3) 交给 CMD 启动 uvicorn
 set -e
 
 BUILTIN=/app/domain_packs_builtin
@@ -17,5 +19,8 @@ if [ -d "$BUILTIN" ]; then
     fi
   done
 fi
+
+echo "[entrypoint] 执行数据库迁移…"
+alembic upgrade head
 
 exec "$@"
