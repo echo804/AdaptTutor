@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.security import decode_token
 from app.auth.service import get_user_by_id
+from app.config import get_settings
 from app.persistence.db import get_session_factory
 from app.persistence.models import User
 from app.persistence import repositories as repo
@@ -45,13 +46,16 @@ async def require_ai_access(
     """AI 功能门槛（对齐 04 v0.4：强制自配 key，未配 403）。
 
     会话创建/消息等 AI 接口调用；未配任何供应商 key → 403。
+    M6.1：配置了系统级 key（LITELLM_API_KEYS）时放行——演示账号/新用户可完整体验。
     """
     has = await _user_has_key(db, user.id)
     if not has:
-        raise HTTPException(
-            status_code=403,
-            detail="未配置 LLM API key，请先在设置页配置",
-        )
+        sys_key = get_settings().litellm_api_keys.strip()
+        if not (sys_key and not sys_key.startswith(("sk-xxx", "sk-secret"))):
+            raise HTTPException(
+                status_code=403,
+                detail="未配置 LLM API key，请先在设置页配置",
+            )
     return user
 
 
