@@ -22,5 +22,18 @@ fi
 
 echo "[entrypoint] 执行数据库迁移…"
 alembic upgrade head
+# 兜底：补齐 alembic 未覆盖的模型表（如 user_domains/review_schedule 等后加表，幂等 create_all）
+echo "[entrypoint] 补齐缺失表（模型 create_all，幂等）…"
+python -c "
+import asyncio
+from app.persistence.models import Base
+from app.persistence.db import get_engine
+
+async def _create_all():
+    async with get_engine().begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
+asyncio.run(_create_all())
+"
 
 exec "$@"
