@@ -100,6 +100,7 @@ export default function EditorPage() {
   const [nodes, setNodes] = useState<Node[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
   const [selNodeId, setSelNodeId] = useState<string | null>(null);
+  const [selEdgeId, setSelEdgeId] = useState<string | null>(null);
   const [selQid, setSelQid] = useState<string | null>(null);
 
   const loaded = useRef(false);
@@ -163,6 +164,30 @@ export default function EditorPage() {
       if (eds.some((e) => e.source === conn.source && e.target === conn.target)) return eds;
       return addEdge({ ...conn, type: "smoothstep", style: { stroke: "var(--border)" } }, eds);
     });
+  };
+
+  /** 点击边选中（高亮）；再次点击空白取消。 */
+  const onEdgeClick = (_: unknown, edge: Edge) => {
+    setSelNodeId(null);
+    setSelEdgeId(edge.id);
+    setEdges((eds) =>
+      eds.map((e) => ({
+        ...e,
+        style: e.id === edge.id ? { stroke: accent, strokeWidth: 2 } : { stroke: "var(--border)" },
+      })),
+    );
+  };
+
+  /** 删除选中的边（连线撤回）。 */
+  const deleteEdge = () => {
+    if (!editable || !selEdgeId) return;
+    setEdges((eds) => eds.filter((e) => e.id !== selEdgeId));
+    setSelEdgeId(null);
+  };
+
+  const clearSelection = () => {
+    setSelNodeId(null);
+    setSelEdgeId(null);
   };
 
   const addNode = () => {
@@ -346,8 +371,10 @@ export default function EditorPage() {
             edges={edges}
             onNodesChange={onNodesChange}
             onConnect={onConnect}
+            onEdgeClick={onEdgeClick}
             onNodeClick={(_, n) => setSelNodeId(n.id)}
-            onPaneClick={() => setSelNodeId(null)}
+            onPaneClick={clearSelection}
+            deleteKeyCode={editable ? ["Backspace", "Delete"] : null}
             nodeTypes={nodeTypes}
             nodesDraggable={editable}
             nodesConnectable={editable}
@@ -381,15 +408,25 @@ export default function EditorPage() {
                 删除节点
               </button>
             )}
+            {selEdgeId && editable && (
+              <button
+                className="rounded border px-2 py-0.5 text-[11px]"
+                style={{ borderColor: "var(--warn)", color: "var(--warn)" }}
+                onClick={deleteEdge}
+              >
+                删除连线
+              </button>
+            )}
             <div className="flex-1" />
             <span className="text-[11px]" style={{ color: "var(--muted)" }}>
-              {selNode ? "节点属性" : `题目 ${pack.questions.length}`}
+              {selNode ? "节点属性" : selEdgeId ? `连线 ${selEdgeId}` : `题目 ${pack.questions.length}`}
             </span>
           </div>
 
-          {editable && !selNode && (
+          {editable && !selNode && !selEdgeId && (
             <div className="border-b px-3 py-1.5 text-[11px]" style={{ borderColor: "var(--border)", color: "var(--muted)" }}>
               连线：从节点<span style={{ color: "var(--amber)" }}>底部圆点</span>拖到另一节点<span style={{ color: "var(--accent)" }}>顶部圆点</span>，方向 = 前置依赖
+              · 撤回：<span style={{ color: "var(--warn)" }}>点击连线后按 Delete 或点「删除连线」</span>
             </div>
           )}
 
