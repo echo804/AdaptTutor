@@ -199,10 +199,16 @@ export default function ChatPage() {
     setErr(null);
     setLoading(true);
     try {
-      const userText = kind === "answer" ? (answer ?? "").trim() || "作答" : input.trim();
-      if (kind === "message" && input.trim()) setInput("");
+      const userText = kind === "answer" ? (answer ?? "").trim() || "作答" : (answer ? String(answer).trim() : input.trim());
+      if (kind === "message" && input.trim() && !answer) setInput("");
 
-      const body = kind === "answer" ? { kind, answer: (answer ?? "").trim() } : { kind, content: userText || "继续" };
+      const body =
+        kind === "answer"
+          ? { kind, answer: (answer ?? "").trim() }
+          // M4r24f：辅导会话作答也走 message——若显式传 answer（选项/填空提交），用它作为 content
+          : answer
+            ? { kind, content: String(answer).trim() }
+            : { kind, content: userText || "继续" };
 
       const r = await api<MessageReply>(`/api/v1/sessions/${sessionId}/messages`, { method: "POST", body });
 
@@ -658,7 +664,7 @@ export default function ChatPage() {
                       placeholder="输入你的答案…"
                       value={answerText}
                       onChange={(e) => setAnswerText(e.target.value)}
-                      onKeyDown={(e) => e.key === "Enter" && answerText.trim() && send("answer", answerText)}
+                      onKeyDown={(e) => e.key === "Enter" && answerText.trim() && send(sessionType === "tutor" ? "message" : "answer", answerText)}
                       disabled={loading}
                     />
                   )}
@@ -684,7 +690,11 @@ export default function ChatPage() {
                         const ans = currentQuestion.type === "choice" ? selectedChoice
                           : currentQuestion.type === "multi" ? selectedMulti.join(",")
                           : answerText;
-                        if (ans?.trim()) send("answer", ans!);
+                        if (ans?.trim()) {
+                          // M4r24f：辅导会话作答走 message（后端用 verify_question 判题）；
+                          // 诊断走 answer（用 current_question）
+                          send(sessionType === "tutor" ? "message" : "answer", ans!);
+                        }
                       }}
                       disabled={loading || !((currentQuestion.type === "choice" ? selectedChoice
                         : currentQuestion.type === "multi" ? selectedMulti.length > 0
