@@ -19,9 +19,9 @@ export function clearToken(): void {
 
 export async function api<T = any>(
   path: string,
-  options: { method?: string; body?: unknown; token?: string | null } = {},
+  options: { method?: string; body?: unknown; token?: string | null; timeoutMs?: number } = {},
 ): Promise<T> {
-  const { method = "GET", body, token } = options;
+  const { method = "GET", body, token, timeoutMs = 20000 } = options;
   const headers: Record<string, string> = {};
   const t = token !== undefined ? token : getToken();
   if (t) headers.Authorization = `Bearer ${t}`;
@@ -29,11 +29,25 @@ export async function api<T = any>(
   const isForm = typeof FormData !== "undefined" && body instanceof FormData;
   if (!isForm) headers["Content-Type"] = "application/json";
 
-  const res = await fetch(`${API_BASE}${path}`, {
-    method,
-    headers,
-    body: body !== undefined ? (isForm ? (body as FormData) : JSON.stringify(body)) : undefined,
-  });
+  // 超时控制：避免后端无响应时无限 pending（超时抛明确错误）
+  const ctrl = typeof AbortController !== "undefined" ? new AbortController() : null;
+  const timer = ctrl ? setTimeout(() => ctrl.abort(), timeoutMs) : undefined;
+
+  let res: Response;
+  try {
+    res = await fetch(`${API_BASE}${path}`, {
+      method,
+      headers,
+      body: body !== undefined ? (isForm ? (body as FormData) : JSON.stringify(body)) : undefined,
+      signal: ctrl ? ctrl.signal : undefined,
+    });
+  } catch (e) {
+    if (ctrl?.signal.aborted) throw new Error(`请求超时（${timeoutMs / 1000}s）`);
+    throw new Error("网络连接失败，请检查后端服务是否在运行");
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+
   if (!res.ok) {
     let detail = `请求失败（${res.status}）`;
     try {

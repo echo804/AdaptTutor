@@ -37,16 +37,17 @@ export default function DashboardPage() {
       try {
         const me = await api<{ user_id: number }>("/auth/me");
         const qp = `?pack_id=${activePack}`;
+        // M6：单接口容错——一个失败不拖垮整页（避免 Failed to fetch 整页空白）
         const [m, p, t, sl] = await Promise.all([
-          api<MasteryOut>(`/api/v1/students/${me.user_id}/mastery${qp}`),
-          api<PathOut>(`/api/v1/students/${me.user_id}/path${qp}`),
-          api<{ trend: { date: string; count: number }[] }>(`/api/v1/students/${me.user_id}/trend?pack_id=*`),
-          api<{ sessions: { id: number; type: string; created_at: string }[] }>("/api/v1/sessions"),
+          api<MasteryOut>(`/api/v1/students/${me.user_id}/mastery${qp}`).catch(() => null),
+          api<PathOut>(`/api/v1/students/${me.user_id}/path${qp}`).catch(() => null),
+          api<{ trend: { date: string; count: number }[] }>(`/api/v1/students/${me.user_id}/trend?pack_id=*`).catch(() => null),
+          api<{ sessions: { id: number; type: string; created_at: string }[] }>("/api/v1/sessions").catch(() => null),
         ]);
-        setMastery(m.mastery);
-        setPath(p.path);
-        setTrend(t.trend);
-        setSessions(sl.sessions || []);
+        if (m) setMastery(m.mastery);
+        if (p) setPath(p.path);
+        if (t) setTrend(t.trend);
+        if (sl) setSessions(sl.sessions || []);
       } catch (e: any) {
         setErr(e.message);
       }
