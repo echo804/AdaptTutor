@@ -12,6 +12,7 @@ CLI 演示：python -m app.cli tutor [--pack junior_math_eq_ineq] [--seed 42]
 
 from __future__ import annotations
 
+import random
 from dataclasses import dataclass, field
 
 from app.domain.loader import load_pack
@@ -243,11 +244,12 @@ class TutorOrchestrator:
             higher = [q for q in cands if q.difficulty >= base - 0.05]
             return min(higher, key=lambda q: q.difficulty) if higher else min(cands, key=lambda q: q.difficulty)
         # 同节点无其他题 → 生成变式（排除原题，参数化改数字）
+        # M4r23：seed 改为随机（此前 hash(node) 固定 → 同一知识点永远同一变式，单调）
         if cur is not None:
             try:
                 from app.engine.variant_generator import generate_variant
 
-                res = generate_variant(cur, seed=hash(node) & 0xFFFF)
+                res = generate_variant(cur, seed=random.randint(1, 10**6))
                 if res.question is not None:
                     return res.question
             except Exception:

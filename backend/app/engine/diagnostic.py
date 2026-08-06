@@ -5,6 +5,8 @@
 - 诊断终止 = 根因置信度 ≥ 阈值 或 15 题上限（对齐 02 硬指标）
 """
 
+import random
+
 from app.domain.schemas import BktParams, DiagnosticRules, Question
 
 
@@ -29,13 +31,16 @@ def select_next_question(
     questions: list[Question],
     rules: DiagnosticRules,
     recent: dict[str, int] | None = None,
+    rng: random.Random | None = None,
 ) -> Question | None:
-    """KST 简化选题：薄弱节点（掌握度最低）+ 难度匹配 + 出题轮换。
+    """KST 简化选题：薄弱节点（掌握度最低）+ 难度匹配 + 出题轮换 + 随机多样性。
 
     mastery: {node_id: 掌握概率}，未记录视为 0（未学）。
     recent: {node_id: 连续作答次数}——M4r20 出题轮换：连续作答节点降权，
     避免"同一薄弱点连出多题"；非薄弱点也轮到，覆盖更广。
-    返回候选集中 priority 最高者（薄弱度优先、难度贴近 0.6、轮换加成）。
+    M4r23：加权随机选题——priority 作为权重做轮盘赌，priority 高者更可能被选中，
+    但不是必选最高分。同一状态每次可能出不同的题，避免"选一个难度题永远不变"。
+    测试可传固定 rng 保证确定性。
     """
     if not questions:
         return None
@@ -48,7 +53,12 @@ def select_next_question(
         recency = max((recent or {}).get(n, 0) for n in q.step_node_map.values())
         return weakness * 10 - diff_penalty - recency * 2.5
 
-    return max(questions, key=priority)
+    scored = [(priority(q), q) for q in questions]
+    # 权重 = max(0.1, score - min + 1)，保证最低分也有小概率；分数差距大则分化明显
+    min_s = min(s for s, _ in scored)
+    weights = [max(0.1, s - min_s + 1.0) for s, _ in scored]
+    r = rng or random.Random()
+    return r.choices([q for _, q in scored], weights=weights, k=1)[0]
 
 
 def should_terminate(
