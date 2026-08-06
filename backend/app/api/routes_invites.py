@@ -1,0 +1,103 @@
+"""邀请码管理 API（M4r19）：每个用户可在设置页生成/查看/作废自己的邀请码。
+对齐 04：邀请制多用户平权（无角色分级）——每个用户都能邀请自己的朋友/家人。
+限制：每人同时最多持有 MAX_ACTIVE=5 个未使用邀请码；默认 7 天有效期；一次性。
+"""
+
+from __future__ import annotations
+
+from datetime import datetime, timedelta, timezone
+from secrets import token_urlsafe
+
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.api.deps import get_current_user, get_db
+from app.persistence.models import InviteCode, User
+
+router = APIRouter(prefix="/me/invite-codes", tags=["invites"])
+
+MAX_ACTIVE = 5      # 每人同时最多持有的未使用邀请码
+DEFAULT_DAYS = 7    # 默认有效期（天）
+
+
+@router.post("")
+async def create_invite(
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """生成一个邀请码。超出持有上限 → 400。"""
+    now = datetime.now(timezone.utc)
+    active = (
+        await db.execute(
+            select(InviteCode.id).where(
+                InviteCode.created_by == user.id,
+                InviteCode.used_at.is_(None),
+                InviteCode.expires_at > now,
+            )
+        )
+    ).scalars().all()
+    if len(active) >= MAX_ACTIVE:
+        raise HTTPException(
+            status_code=400,
+            detail=f"最多同时持有 {MAX_ACTIVE} 个未使用邀请码，请先作废旧的",
+        )
+
+    code = InviteCode(
+        code=token_urlsafe(8),
+        created_by=user.id,
+        created_at=now,
+        expires_at=now + timedelta(days=DEFAULT_DAYS),
+    )
+    db.add(code)
+    await db.commit()
+    await db.refresh(code)
+    return {
+        "id": code.id,
+        "code": code.code,
+        "expires_at": code.expires_at.isoformat(),
+    }
+
+
+@router.get("")
+async def list_invites(
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """列出自己生成的全部邀请码（含已用/已过期，便于管理）。"""
+    res = await db.execute(
+        select(InviteCode)
+        .where(InviteCode.created_by == user.id)
+        .order_by(InviteCode.created_at.desc())
+    )
+    items = []
+    now = datetime.now(timezone.utc)
+    for c in res.scalars().all():
+        items.append(
+            {
+                "id": c.id,
+                "code": c.code,
+                "created_at": c.created_at.isoformat(),
+                "expires_at": c.expires_at.isoformat(),
+                "used": c.used_at is not None,
+                "expired": c.used_at is None and c.expires_at < now,
+            }
+        )
+    return {"items": items}
+
+
+@router.delete("/{code_id}")
+async def revoke_invite(
+    code_id: int,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """作废自己生成的未使用邀请码（置为过期）。"""
+    code = await db.get(InviteCode, code_id)
+    if code is None or code.created_by != user.id:
+        raise HTTPException(status_code=404, detail="邀请码不存在")
+    if code.used_at is not None:
+        raise HTTPException(status_code=400, detail="已被使用的邀请码不可作废")
+    code.expires_at = datetime.now(timezone.utc) - timedelta(seconds=1)
+    await db.commit()
+    return {"ok": True}

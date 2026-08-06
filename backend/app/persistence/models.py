@@ -62,6 +62,10 @@ class InviteCode(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     code: Mapped[str] = mapped_column(String(32), unique=True, index=True)
+    # M4r19：生成者（用于「我的邀请码」列表/持有上限）；NULL = 早期 CLI 生成的旧码
+    created_by: Mapped[int | None] = mapped_column(
+        ForeignKey("users.id"), nullable=True
+    )
     used_by: Mapped[int | None] = mapped_column(
         ForeignKey("users.id"), nullable=True
     )

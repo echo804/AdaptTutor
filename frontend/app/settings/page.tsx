@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { api, BailianModel, KeyItem, SettingsOut } from "@/lib/api";
+import ConfirmDialog from "@/components/ConfirmDialog";
 
 const PROVIDERS = [
   { id: "deepseek", label: "DeepSeek（官方 API）" },
@@ -22,6 +23,10 @@ export default function SettingsPage() {
   const [modelPrefs, setModelPrefs] = useState<Record<string, string>>({});
   const [msg, setMsg] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
+  // 邀请码管理（M4r19）
+  const [invites, setInvites] = useState<{ id: number; code: string; created_at: string; expires_at: string; used: boolean; expired: boolean }[]>([]);
+  const [inviting, setInviting] = useState(false);
+  const [pendingRevoke, setPendingRevoke] = useState<number | null>(null);
 
   useEffect(() => {
     Promise.all([
@@ -87,6 +92,50 @@ export default function SettingsPage() {
   }
 
   const hasBailianKey = keys.some((k) => k.provider === "bailian");
+
+  // M4r19：邀请码管理
+  const loadInvites = useCallback(async () => {
+    try {
+      const r = await api<{ items: typeof invites }>("/me/invite-codes");
+      setInvites(r.items || []);
+    } catch { /* ignore */ }
+  }, []);
+  useEffect(() => {
+    loadInvites();
+  }, [loadInvites]);
+
+  async function createInvite() {
+    setErr(null); setMsg(null); setInviting(true);
+    try {
+      await api("/me/invite-codes", { method: "POST" });
+      setMsg("邀请码已生成，复制发给朋友即可注册");
+      await loadInvites();
+    } catch (e: any) {
+      setErr(e.message || "生成失败");
+    } finally {
+      setInviting(false);
+    }
+  }
+
+  async function revokeInvite(id: number) {
+    setErr(null); setMsg(null);
+    try {
+      await api(`/me/invite-codes/${id}`, { method: "DELETE" });
+      setMsg("已作废");
+      await loadInvites();
+    } catch (e: any) {
+      setErr(e.message || "作废失败");
+    }
+  }
+
+  async function copyInvite(code: string) {
+    try {
+      await navigator.clipboard.writeText(code);
+      setMsg(`已复制邀请码：${code}`);
+    } catch {
+      setErr("复制失败，请手动复制");
+    }
+  }
 
   return (
     <div className="mx-auto max-w-2xl p-6">
@@ -169,6 +218,75 @@ export default function SettingsPage() {
           </div>
         ))}
       </div>
+
+      {/* 邀请码管理（M4r19：每位用户可邀请朋友/家人） */}
+      <div className="mt-6 glass-card rounded-xl border p-4" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
+        <div className="mb-1 flex items-center justify-between">
+          <span className="text-sm font-medium">邀请码</span>
+          <button
+            className="rounded px-3 py-1 text-xs font-medium text-white disabled:opacity-50"
+            style={{ background: "var(--accent)" }}
+            disabled={inviting}
+            onClick={createInvite}
+          >
+            {inviting ? "生成中…" : "+ 生成邀请码"}
+          </button>
+        </div>
+        <p className="mb-3 text-xs" style={{ color: "var(--muted)" }}>
+          把邀请码发给朋友即可注册。每人最多同时持有 5 个未使用邀请码，有效期 7 天，一次性。
+        </p>
+        {invites.length === 0 ? (
+          <p className="text-xs" style={{ color: "var(--muted)" }}>还没有邀请码，点右上角生成。</p>
+        ) : (
+          <ul className="space-y-2">
+            {invites.map((it) => (
+              <li key={it.id} className="flex items-center justify-between rounded-lg border px-3 py-2" style={{ borderColor: "var(--border)" }}>
+                <div className="flex items-center gap-2">
+                  <code className="font-mono text-sm" style={{ color: "var(--text)" }}>{it.code}</code>
+                  <span className="rounded px-1.5 py-0.5 text-[10px]" style={{
+                    background: it.used ? "#7ec8a022" : it.expired ? "var(--amber-soft)" : "var(--accent-soft)",
+                    color: it.used ? "#7ec8a0" : it.expired ? "var(--amber)" : "var(--accent)",
+                  }}>
+                    {it.used ? "已使用" : it.expired ? "已作废" : "可用"}
+                  </span>
+                  <span className="text-[10px]" style={{ color: "var(--muted)" }}>
+                    至 {new Date(it.expires_at).toLocaleDateString()}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  {!it.used && !it.expired && (
+                    <>
+                      <button className="text-xs underline" style={{ color: "var(--accent)" }} onClick={() => copyInvite(it.code)}>
+                        复制
+                      </button>
+                      <button className="text-xs" style={{ color: "var(--warn)" }} onClick={() => setPendingRevoke(it.id)}>
+                        作废
+                      </button>
+                    </>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      {/* 作废确认弹窗（M4r19：站内确认，替代原生 confirm） */}
+      {pendingRevoke !== null && (
+        <ConfirmDialog
+          title="作废邀请码"
+          message="确认作废这个邀请码？作废后不可恢复。"
+          confirmText="作废"
+          cancelText="取消"
+          danger
+          onConfirm={() => {
+            const id = pendingRevoke;
+            setPendingRevoke(null);
+            revokeInvite(id);
+          }}
+          onCancel={() => setPendingRevoke(null)}
+        />
+      )}
     </div>
   );
 }
