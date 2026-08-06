@@ -49,7 +49,7 @@ async def api_path(
 ) -> PathOut:
     _check_self(user.id, sid)
     pid = pack_id or _active_pack(user)
-    t: TutorOrchestrator = _new_orchestrator(pid)
+    t: TutorOrchestrator = await _new_orchestrator(pid, db, user.id)
     mastery = await repo.get_mastery_all(db, user.id, pid)
     if not mastery:
         return PathOut(path=[])
@@ -70,7 +70,7 @@ async def api_trace(
     mastery = await repo.get_mastery_all(db, user.id, pid)
     if node_id not in mastery:
         raise HTTPException(status_code=404, detail="未知节点或尚未诊断该节点")
-    t = _new_orchestrator(pid)
+    t = await _new_orchestrator(pid, db, user.id)
     t.mastery.update(mastery)
     graph = KnowledgeGraph(t.pack.graph)
     chain = sorted(graph.ancestors(node_id))
