@@ -24,7 +24,6 @@ class GraphNode(BaseModel):
     name: str
     difficulty: float = Field(ge=0.0, le=1.0)
     importance: float = Field(ge=0.0, le=1.0)
-    error_modes: list[str] = Field(default_factory=list)
 
 
 class GraphEdge(BaseModel):
@@ -64,7 +63,6 @@ class Question(BaseModel):
     # M4r24：multi 题 answer 为正确选项字母列表（如 ["A","C"]）
     options: list[str] | None = None
     answer: str | int | list[str]
-    error_modes: list[str] = Field(default_factory=list)
     # 解题步骤 → 节点映射（错题溯源依据）
     step_node_map: dict[str, str] = Field(default_factory=dict)
 

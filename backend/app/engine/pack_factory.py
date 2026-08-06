@@ -26,10 +26,10 @@ FIXED_PREFIX = {"llm": "l", "rag": "r", "agent": "a", "tools": "t", "overview": 
 SYSTEM_PROMPT = """你是领域包内容生成器。根据给定的中文技术文档，提炼该领域的知识图谱与学习题目，只输出一个 JSON 对象（不要 markdown 代码块包裹）：
 
 {
-  "nodes": [{"id": "l01", "name": "知识点名称", "difficulty": 0.5, "importance": 0.8, "error_modes": ["常见错因"]}],
+  "nodes": [{"id": "l01", "name": "知识点名称", "difficulty": 0.5, "importance": 0.8}],
   "edges": [{"from": "l01", "to": "l02", "type": "prerequisite"}],
   "questions": [
-    {"id": "lq001", "type": "choice", "content": "题干", "difficulty": 0.5, "options": ["A. …", "B. …", "C. …", "D. …"], "answer": "B", "error_modes": ["错因"], "tags": ["来源文档.md"], "step_node_map": {"step1": "l01"}}
+    {"id": "lq001", "type": "choice", "content": "题干", "difficulty": 0.5, "options": ["A. …", "B. …", "C. …", "D. …"], "answer": "B", "tags": ["来源文档.md"], "step_node_map": {"step1": "l01"}}
   ]
 }
 
@@ -37,7 +37,7 @@ SYSTEM_PROMPT = """你是领域包内容生成器。根据给定的中文技术�
 1. 节点 id 用我提供的前缀（如 l01/l02…），name 是知识点名词短语（8-20 字），difficulty 0.3-0.75，importance 0.4-0.9。
 2. 每篇文档提炼 1-2 个节点；边只画「前置依赖」（from 是 to 的前提），只能引用本批节点。
 3. 每 2-3 个节点配 2-3 道题：覆盖 choice（4 选项，answer 为正确选项字母）/ blank（答案≤12字）/ open（答案=要点 1-3 句）。
-4. 题目必须基于文档真实内容，禁止编造；error_modes 填最常见错因；tags 填来源文档文件名。
+4. 题目必须基于文档真实内容，禁止编造；tags 填来源文档文件名。
 5. 题目 id 形如 {前缀}q001，全局唯一。"""
 
 
@@ -79,10 +79,6 @@ def extract_json(text: str) -> dict:
 
 
 def _normalize_question(q: dict, valid_nodes: set[str]) -> dict:
-    em = q.get("error_modes")
-    if isinstance(em, str):
-        em = [em]
-    q["error_modes"] = em or []
     q["options"] = q.get("options") or []
     smap = q.get("step_node_map") or {}
     smap = {k: v for k, v in smap.items() if v in valid_nodes}

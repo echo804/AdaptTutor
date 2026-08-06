@@ -200,7 +200,7 @@ export default function EditorPage() {
       ...pack,
       graph: {
         ...pack.graph,
-        nodes: [...pack.graph.nodes, { id, name: "新知识点", difficulty: 0.5, importance: 0.5, error_modes: [] }],
+        nodes: [...pack.graph.nodes, { id, name: "新知识点", difficulty: 0.5, importance: 0.5 }],
       },
     });
     setNodes((nds) => [
@@ -473,7 +473,7 @@ function NodeForm({
   editable,
   onChange,
 }: {
-  node: { id: string; name: string; difficulty: number; importance: number; error_modes: string[] };
+  node: { id: string; name: string; difficulty: number; importance: number };
   editable: boolean;
   onChange: (patch: Partial<typeof node>) => void;
 }) {
@@ -513,16 +513,6 @@ function NodeForm({
           value={node.importance}
           disabled={!editable}
           onChange={(e) => onChange({ importance: Number(e.target.value) })}
-        />
-      </div>
-      <div>
-        <div className="mb-1 text-xs" style={{ color: "var(--muted)" }}>典型错误模式（逗号分隔）</div>
-        <input
-          className="w-full px-2 py-1 text-sm outline-none disabled:opacity-50"
-          style={input("")}
-          value={(node.error_modes || []).join("，")}
-          disabled={!editable}
-          onChange={(e) => onChange({ error_modes: e.target.value.split(/[,，]/).map((s) => s.trim()).filter(Boolean) })}
         />
       </div>
     </div>
@@ -566,7 +556,6 @@ function QuestionPanel({
       difficulty: 0.5,
       options: ["选项 A", "选项 B"],
       answer: "A",
-      error_modes: [],
       step_node_map: {},
     };
     onChange([...questions, q]);
@@ -677,12 +666,6 @@ function QuestionPanel({
                 onChange={(e) => patchQ({ answer: e.target.value })} />
             </div>
           )}
-
-          <div>
-            <div className="mb-1 text-xs" style={{ color: "var(--muted)" }}>错误模式（逗号分隔）</div>
-            <input className="w-full px-2 py-1 text-sm outline-none disabled:opacity-50" style={input()} value={(sel.error_modes || []).join("，")} disabled={!editable}
-              onChange={(e) => patchQ({ error_modes: e.target.value.split(/[,，]/).map((s) => s.trim()).filter(Boolean) })} />
-          </div>
 
           <div>
             <div className="mb-1 text-xs" style={{ color: "var(--muted)" }}>步骤 → 知识点映射（错题溯源）</div>

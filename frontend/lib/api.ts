@@ -139,7 +139,6 @@ export interface PackGraphNode {
   name: string;
   difficulty: number;
   importance: number;
-  error_modes: string[];
 }
 
 export interface PackGraphEdge {
@@ -156,7 +155,6 @@ export interface PackQuestion {
   difficulty: number;
   options: string[] | null;
   answer: string | number | string[];
-  error_modes: string[];
   step_node_map: Record<string, string>;
 }
 
