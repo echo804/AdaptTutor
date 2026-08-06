@@ -10,6 +10,7 @@ import { useDomain } from "@/lib/domain";
 const NAV = [
   { href: "/chat", label: "对话学习" },
   { href: "/graph", label: "知识图谱" },
+  { href: "/report", label: "诊断报告" },
   { href: "/review", label: "错题复盘" },
   { href: "/dashboard", label: "仪表盘" },
   { href: "/market", label: "领域市场" },

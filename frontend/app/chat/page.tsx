@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { api, MessageReply, Question } from "@/lib/api";
+import { useRouter } from "next/navigation";
+import { api, KeyItem, MessageReply, Question } from "@/lib/api";
 import { useDomain } from "@/lib/domain";
 import MathText from "@/components/Math";
 import ConfirmDialog from "@/components/ConfirmDialog";
@@ -54,6 +55,9 @@ export default function ChatPage() {
   const [pendingDelete, setPendingDelete] = useState<{ ids: number[]; tip: string } | null>(null);
   // 领域学习空间（M4r8）
   const { active: activePack } = useDomain();
+  // 未配 key 置灰（M4r17：AI 入口需有效 key，未配则置灰引导去设置页）
+  const [hasKey, setHasKey] = useState<boolean | null>(null);
+  const router = useRouter();
   // 开始页动态副标题（M4r7m）
   const [overview, setOverview] = useState<{ masteryPct: number | null; today: number; lastNode: string | null }>({
     masteryPct: null,
@@ -89,6 +93,13 @@ export default function ChatPage() {
   useEffect(() => {
     loadSessions();
   }, [loadSessions, sessionId]);
+
+  // M4r17：加载 API key 状态（决定 AI 入口是否置灰）
+  useEffect(() => {
+    api<KeyItem[]>("/me/api-keys")
+      .then((keys) => setHasKey(Array.isArray(keys) && keys.length > 0))
+      .catch(() => setHasKey(false));
+  }, []);
 
   // 开始页动态副标题：掌握度 / 今日题数 / 上次学习
   useEffect(() => {
@@ -396,13 +407,38 @@ export default function ChatPage() {
                 </p>
               </div>
 
+              {/* M4r17：未配 key 提示条 */}
+              {hasKey === false && (
+                <div
+                  className="mb-4 flex items-center gap-2 rounded-xl border px-4 py-2.5 text-xs"
+                  style={{ borderColor: "var(--amber)", background: "var(--amber-soft)", color: "var(--text)" }}
+                >
+                  <span aria-hidden>🔑</span>
+                  <span>
+                    还没有配置 API key，AI 功能（诊断/辅导）暂不可用。
+                    <button
+                      className="ml-1 font-medium underline underline-offset-2"
+                      style={{ color: "var(--accent)" }}
+                      onClick={() => router.push("/settings")}
+                    >
+                      去设置页配置
+                    </button>
+                  </span>
+                </div>
+              )}
+
               {/* 双入口大卡（M4r7m） */}
               <div className="grid gap-4 md:grid-cols-2">
                 <button
                   className="group rounded-2xl border p-5 text-left transition-all duration-200 hover:-translate-y-0.5"
-                  style={{ background: "var(--surface)", borderColor: "var(--border)" }}
-                  onClick={() => startSession("diagnostic")}
-                  disabled={loading}
+                  style={{
+                    background: "var(--surface)",
+                    borderColor: "var(--border)",
+                    opacity: hasKey === false ? 0.55 : 1,
+                    cursor: hasKey === false ? "not-allowed" : "pointer",
+                  }}
+                  onClick={() => (hasKey === false ? router.push("/settings") : startSession("diagnostic"))}
+                  disabled={loading || hasKey === false}
                 >
                   <span
                     className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl"
@@ -421,21 +457,26 @@ export default function ChatPage() {
                   </span>
                   <div className="text-base font-medium" style={{ color: "var(--text)" }}>诊断测试</div>
                   <div className="mt-1 text-xs leading-relaxed" style={{ color: "var(--muted)" }}>
-                    选择题型/题量/难度，定位薄弱知识点，生成学习路径
+                    {hasKey === false ? "需先配置 API key 才能使用" : "选择题型/题量/难度，定位薄弱知识点，生成学习路径"}
                   </div>
                   <span
                     className="mt-3 inline-flex items-center gap-1 text-xs font-medium transition-transform duration-200 group-hover:translate-x-0.5"
                     style={{ color: "var(--accent)" }}
                   >
-                    开始 <span aria-hidden>→</span>
+                    {hasKey === false ? "去配置 →" : "开始 →"}
                   </span>
                 </button>
 
                 <button
                   className="group rounded-2xl border p-5 text-left transition-all duration-200 hover:-translate-y-0.5"
-                  style={{ background: "var(--surface)", borderColor: "var(--border)" }}
-                  onClick={() => startSession("tutor")}
-                  disabled={loading}
+                  style={{
+                    background: "var(--surface)",
+                    borderColor: "var(--border)",
+                    opacity: hasKey === false ? 0.55 : 1,
+                    cursor: hasKey === false ? "not-allowed" : "pointer",
+                  }}
+                  onClick={() => (hasKey === false ? router.push("/settings") : startSession("tutor"))}
+                  disabled={loading || hasKey === false}
                 >
                   <span
                     className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl"
@@ -450,13 +491,13 @@ export default function ChatPage() {
                   </span>
                   <div className="text-base font-medium" style={{ color: "var(--text)" }}>辅导练习</div>
                   <div className="mt-1 text-xs leading-relaxed" style={{ color: "var(--muted)" }}>
-                    苏格拉底式引导：只给提示，不给答案
+                    {hasKey === false ? "需先配置 API key 才能使用" : "苏格拉底式引导：只给提示，不给答案"}
                   </div>
                   <span
                     className="mt-3 inline-flex items-center gap-1 text-xs font-medium transition-transform duration-200 group-hover:translate-x-0.5"
                     style={{ color: "#b08a54" }}
                   >
-                    开始 <span aria-hidden>→</span>
+                    {hasKey === false ? "去配置 →" : "开始 →"}
                   </span>
                 </button>
               </div>
