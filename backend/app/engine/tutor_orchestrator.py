@@ -366,6 +366,8 @@ class TutorOrchestrator:
                 if self.practice_rounds >= self.max_rounds or len(self.path) <= 1:
                     # M4r7i：练习完成总结（轮数满/路径耗尽）——不再显示误导性"进入下一题"
                     weak = "、".join((self.weak_nodes or ["—"])[:3])
+                    # M4r24i：完成时清空 verify_question，前端题目卡随 done 消失（不再固定旧题）
+                    self.verify_question = None
                     return TurnResult(
                         state=self.sm.state.value,
                         message=(

@@ -437,8 +437,9 @@ async def api_session_state(
     q = t.current_question
     is_diag = s.type == "diagnostic"
     # M4r21c：done 判定按会话类型——诊断看 current_question，辅导看 verify_question
-    # （此前恒用 current_question，辅导时永远 null → done 恒 true → 前端不渲染题目卡）
+    # M4r24i：会话 status=completed（已完成）→ done 恒 true（清空题目卡）
     cur_q = q if is_diag else t.verify_question
+    done = s.status == "completed" or cur_q is None
     return {
         "session_id": sid,
         "type": s.type,
@@ -449,7 +450,7 @@ async def api_session_state(
         "qcount": t.diag_config.get("qcount") if is_diag else None,
         "answered": sum(t.answered_counts.values()) if is_diag else None,
         "verify_question": _question_to_dict(t.verify_question) if not is_diag else None,
-        "done": cur_q is None,
+        "done": done,
     }
 
 
