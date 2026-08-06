@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
+import ConfirmDialog from "@/components/ConfirmDialog";
 
 /** 我的领域（M4r8d）：用户自助导入素材 → AI 生成 → 发布/审核。
  * 含管理员审核队列（is_admin 用户可见）。
@@ -58,6 +59,10 @@ export default function DomainsPage() {
 
   // 审阅清单
   const [checklist, setChecklist] = useState<string | null>(null);
+
+  // M6.1：站内确认弹窗（替代 window.confirm）
+  const [delTarget, setDelTarget] = useState<{ id: number; name: string } | null>(null);
+  const [pubTarget, setPubTarget] = useState<number | null>(null);
 
   // 管理员审核
   const [adminItems, setAdminItems] = useState<AdminDomain[]>([]);
@@ -167,7 +172,14 @@ export default function DomainsPage() {
 
   async function publish(id: number, vis: string) {
     setErr(null);
-    if (vis === "public" && !window.confirm("公开领域需管理员审核通过后其他用户才能看到，确认提交审核？")) return;
+    if (vis === "public") {
+      setPubTarget(id);
+      return;
+    }
+    await doPublish(id);
+  }
+
+  async function doPublish(id: number) {
     try {
       const r = await api<{ status: string }>(`/api/v1/user-domains/${id}/publish`, { method: "POST" });
       setMsg(r.status === "published" ? "已发布 ✓" : "已提交审核，等待管理员通过");
@@ -178,13 +190,20 @@ export default function DomainsPage() {
   }
 
   async function remove(id: number, name0: string) {
-    if (!window.confirm(`确认删除领域「${name0}」？删除后不可恢复。`)) return;
+    setDelTarget({ id, name: name0 });
+  }
+
+  async function doRemove() {
+    if (!delTarget) return;
+    const { id } = delTarget;
     try {
       await api<{ removed: number }>(`/api/v1/user-domains/${id}`, { method: "DELETE" });
       setMsg("已删除");
       await load();
     } catch (e: any) {
       setErr(e.message);
+    } finally {
+      setDelTarget(null);
     }
   }
 
@@ -449,6 +468,36 @@ export default function DomainsPage() {
             <pre className="whitespace-pre-wrap text-xs leading-relaxed" style={{ color: "var(--text)" }}>{checklist}</pre>
           </div>
         </div>
+      )}
+
+      {/* 提交公开审核确认（M6.1：替代原生 confirm） */}
+      {pubTarget !== null && (
+        <ConfirmDialog
+          title="提交公开审核"
+          message="公开领域需管理员审核通过后其他用户才能看到，确认提交审核？"
+          confirmText="提交审核"
+          cancelText="取消"
+          danger={false}
+          onConfirm={() => {
+            const id = pubTarget;
+            setPubTarget(null);
+            void doPublish(id);
+          }}
+          onCancel={() => setPubTarget(null)}
+        />
+      )}
+
+      {/* 删除领域确认（M6.1：替代原生 confirm） */}
+      {delTarget !== null && (
+        <ConfirmDialog
+          title="删除领域"
+          message={`确认删除领域「${delTarget.name}」？删除后不可恢复。`}
+          confirmText="确认删除"
+          cancelText="取消"
+          danger
+          onConfirm={doRemove}
+          onCancel={() => setDelTarget(null)}
+        />
       )}
     </div>
   );
