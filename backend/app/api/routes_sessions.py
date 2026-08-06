@@ -200,12 +200,23 @@ async def api_send_message(
                     },
                 )
             if st.get("done"):
+                # M4r21e：先告知最后一题判题结果，再接完成总结（此前 done 分支丢了最后一题对错反馈）
+                last_judge = (
+                    f"答对了！{result.feedback}"
+                    if result.correct
+                    else (
+                        f"答错了，正确答案是：{result.correct_answer or (q.answer if hasattr(q, 'answer') else None)}。"
+                        if (result.correct_answer or (q.answer if hasattr(q, "answer") else None))
+                        else "答错了，再想想。"
+                    )
+                )
                 # M4r7j：诊断完成总结（引导下一步），不再只写"（诊断完成）"
                 if not t.weak_nodes:
                     t.build_path()  # 诊断后生成薄弱路径（供总结与仪表盘）
                 weak = "、".join((t.weak_nodes or [])[:3]) or "—"
                 answered = st.get("answered") or 0
                 reply_text = (
+                    f"{last_judge}\n\n"
                     f"🎉 诊断完成！共诊断 {answered} 题。"
                     f"薄弱知识点：{weak}。推荐学习路径已生成，"
                     "可去仪表盘查看，或开始辅导练习巩固。"
