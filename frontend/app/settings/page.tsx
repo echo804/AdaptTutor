@@ -27,6 +27,9 @@ export default function SettingsPage() {
   const [invites, setInvites] = useState<{ id: number; code: string; created_at: string; expires_at: string; used: boolean; expired: boolean }[]>([]);
   const [inviting, setInviting] = useState(false);
   const [pendingRevoke, setPendingRevoke] = useState<number | null>(null);
+  // 反馈管理（M4r22：管理员可见全部反馈）
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [adminFeedbacks, setAdminFeedbacks] = useState<{ id: number; user_id: number | null; content: string; category: string; status: string; created_at: string }[]>([]);
 
   useEffect(() => {
     Promise.all([
@@ -103,6 +106,26 @@ export default function SettingsPage() {
   useEffect(() => {
     loadInvites();
   }, [loadInvites]);
+
+  // M4r22：管理员加载全部反馈（非管理员静默）
+  useEffect(() => {
+    api<{ items: typeof adminFeedbacks }>("/admin/feedback")
+      .then((r) => {
+        setAdminFeedbacks(r.items || []);
+        setIsAdmin(true);
+      })
+      .catch(() => setIsAdmin(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  async function updateFeedbackStatus(id: number, status: string) {
+    try {
+      await api(`/admin/feedback/${id}`, { method: "PATCH", body: { status } });
+      setAdminFeedbacks((prev) => prev.map((f) => (f.id === id ? { ...f, status } : f)));
+    } catch (e: any) {
+      setErr(e.message || "更新失败");
+    }
+  }
 
   async function createInvite() {
     setErr(null); setMsg(null); setInviting(true);
@@ -270,6 +293,49 @@ export default function SettingsPage() {
           </ul>
         )}
       </div>
+
+      {/* 反馈管理（M4r22：管理员处理用户反馈） */}
+      {isAdmin && (
+        <div className="mt-6 glass-card rounded-xl border p-4" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
+          <div className="mb-1 flex items-center justify-between">
+            <span className="text-sm font-medium">用户反馈管理</span>
+            <span className="rounded px-2 py-0.5 text-[10px]" style={{ background: "var(--amber-soft)", color: "var(--amber)" }}>
+              {adminFeedbacks.filter((f) => f.status === "new").length} 条待处理
+            </span>
+          </div>
+          {adminFeedbacks.length === 0 ? (
+            <p className="text-xs" style={{ color: "var(--muted)" }}>暂无反馈。</p>
+          ) : (
+            <div className="max-h-72 space-y-2 overflow-auto">
+              {adminFeedbacks.map((f) => (
+                <div key={f.id} className="rounded-lg border px-3 py-2" style={{ borderColor: "var(--border)" }}>
+                  <div className="mb-1 flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <span className="rounded px-1.5 py-0.5 text-[10px]" style={{ background: "var(--accent-soft)", color: "var(--accent)" }}>
+                        {{ bug: "问题", suggestion: "建议", question: "疑问", other: "其他" }[f.category] || f.category}
+                      </span>
+                      <span className="text-[10px]" style={{ color: "var(--muted)" }}>
+                        #{f.id} · {new Date(f.created_at).toLocaleString()}
+                      </span>
+                    </div>
+                    <select
+                      className="rounded border px-1 py-0.5 text-[10px]"
+                      style={{ background: "var(--bg)", borderColor: "var(--border)", color: "var(--text)" }}
+                      value={f.status}
+                      onChange={(e) => updateFeedbackStatus(f.id, e.target.value)}
+                    >
+                      <option value="new">待处理</option>
+                      <option value="read">已读</option>
+                      <option value="done">已解决</option>
+                    </select>
+                  </div>
+                  <p className="text-xs leading-relaxed" style={{ color: "var(--text)" }}>{f.content}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* 作废确认弹窗（M4r19：站内确认，替代原生 confirm） */}
       {pendingRevoke !== null && (

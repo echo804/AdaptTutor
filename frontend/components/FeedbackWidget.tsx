@@ -95,8 +95,7 @@ export default function FeedbackWidget() {
           onClick={() => setOpen(false)}
         >
           <div
-            className="w-full max-w-md rounded-2xl border p-5 shadow-2xl"
-            style={{ background: "rgba(250,250,249,0.95)", borderColor: "var(--border)", backdropFilter: "blur(12px)" }}
+            className="feedback-modal w-full max-w-md rounded-2xl p-5 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mb-3 flex items-center justify-between">
