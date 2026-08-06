@@ -294,68 +294,81 @@ async def api_send_message(
             )
     else:
         # M4r7f：辅导会话作答自动判题——ELICIT（初题作答）/ VERIFY（变式验证）用户消息视为作答
-        from app.engine.evaluator import judge as judge_answer
-        from app.engine.state_machine.states import State as SMState
+        # M4r24e：诊断会话不提供"追问AI"——诊断只接受作答（kind=answer），message 直接提示
+        if s.type == "diagnostic":
+            reply = MessageReply(
+                state="diagnose",
+                message="诊断模式下请直接作答题目（选择/填空/解答），暂不支持追问。",
+                degraded=True,
+                mock=True,
+                correct=False,
+                feedback="诊断模式不支持追问",
+                judge_method="rule",
+                question=_question_to_dict(t.current_question),
+            )
+        else:
+            from app.engine.evaluator import judge as judge_answer
+            from app.engine.state_machine.states import State as SMState
 
-        if t.sm.state in (SMState.ELICIT, SMState.VERIFY) and t.verify_question and (body.content or "").strip():
-            j = judge_answer(body.content, t.verify_question)
-            if j.indeterminate and t.sm.state == SMState.VERIFY:
-                # M4r7f：VERIFY 非答案输入（"好"等）→ 温和提示重答，不推进状态机
-                reply = MessageReply(
-                    state="verify",
-                    message=j.feedback,
-                    degraded=True,
-                    mock=True,
-                    correct=False,
-                    feedback=j.feedback,
-                    judge_method="rule",
-                    question=_question_to_dict(t.verify_question),
-                )
-            elif j.indeterminate:
-                # ELICIT 非答案（说思路/闲聊）→ 正常对话流转（"先说说你的思路"）
-                r = t.tutor_step(body.content, correct=None)
+            if t.sm.state in (SMState.ELICIT, SMState.VERIFY) and t.verify_question and (body.content or "").strip():
+                j = judge_answer(body.content, t.verify_question)
+                if j.indeterminate and t.sm.state == SMState.VERIFY:
+                    # M4r7f：VERIFY 非答案输入（"好"等）→ 温和提示重答，不推进状态机
+                    reply = MessageReply(
+                        state="verify",
+                        message=j.feedback,
+                        degraded=True,
+                        mock=True,
+                        correct=False,
+                        feedback=j.feedback,
+                        judge_method="rule",
+                        question=_question_to_dict(t.verify_question),
+                    )
+                elif j.indeterminate:
+                    # ELICIT 非答案（说思路/闲聊）→ 正常对话流转（"先说说你的思路"）
+                    r = t.tutor_step(body.content, correct=None)
+                    reply = MessageReply(
+                        state=r.state, message=r.message, degraded=r.degraded, mock=r.mock,
+                        question=_question_to_dict(t.verify_question),
+                    )
+                else:
+                    r = t.tutor_step(body.content, correct=j.correct)
+                    # M4r21h：辅导作答也记 answer 事件（学习趋势数据源）
+                    await repo.add_event(
+                        db,
+                        user.id,
+                        "answer",
+                        node_id=t.current_node,
+                        session_id=sid,
+                        pack_id=pack_id,
+                        payload={
+                            "qid": t.verify_question.id if t.verify_question else None,
+                            "correct": j.correct,
+                            "user_answer": body.content,
+                        },
+                    )
+                    judge_line = (
+                        f"✓ 答对了！{j.feedback}"
+                        if j.correct
+                        else f"✗ 答错了，正确答案是：{j.correct_answer or t.verify_question.answer}。"
+                    )
+                    reply = MessageReply(
+                        state=r.state,
+                        message=f"{judge_line}\n{r.message}",
+                        degraded=r.degraded,
+                        mock=r.mock,
+                        correct=j.correct,
+                        feedback=j.feedback,
+                        judge_method=j.method,
+                        correct_answer=None if j.correct else j.correct_answer,
+                        question=_question_to_dict(t.verify_question),
+                    )
+            else:
+                r = t.tutor_step(body.content or "", correct=body.correct)
                 reply = MessageReply(
                     state=r.state, message=r.message, degraded=r.degraded, mock=r.mock,
                     question=_question_to_dict(t.verify_question),
                 )
-            else:
-                r = t.tutor_step(body.content, correct=j.correct)
-                # M4r21h：辅导作答也记 answer 事件（学习趋势数据源）
-                await repo.add_event(
-                    db,
-                    user.id,
-                    "answer",
-                    node_id=t.current_node,
-                    session_id=sid,
-                    pack_id=pack_id,
-                    payload={
-                        "qid": t.verify_question.id if t.verify_question else None,
-                        "correct": j.correct,
-                        "user_answer": body.content,
-                    },
-                )
-                judge_line = (
-                    f"✓ 答对了！{j.feedback}"
-                    if j.correct
-                    else f"✗ 答错了，正确答案是：{j.correct_answer or t.verify_question.answer}。"
-                )
-                reply = MessageReply(
-                    state=r.state,
-                    message=f"{judge_line}\n{r.message}",
-                    degraded=r.degraded,
-                    mock=r.mock,
-                    correct=j.correct,
-                    feedback=j.feedback,
-                    judge_method=j.method,
-                    correct_answer=None if j.correct else j.correct_answer,
-                    question=_question_to_dict(t.verify_question),
-                )
-        else:
-            r = t.tutor_step(body.content or "", correct=body.correct)
-            reply = MessageReply(
-                state=r.state, message=r.message, degraded=r.degraded, mock=r.mock,
-                question=_question_to_dict(t.verify_question),
-            )
 
     # 掌握度快照落库（mastery_states，供仪表盘真实数据）
     for node_id, p in t.mastery.items():

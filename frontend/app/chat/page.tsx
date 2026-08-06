@@ -703,20 +703,23 @@ export default function ChatPage() {
 
             <div className="border-t p-3" style={{ borderColor: "var(--border)" }}>
               {err && <p className="mb-2 text-xs text-red-500">{err}</p>}
-              <div className="flex gap-2">
-                <input
-                  className="flex-1 rounded-lg border px-3 py-2 text-sm outline-none"
-                  style={{ background: "var(--bg)", borderColor: "var(--border)", color: "var(--text)" }}
-                  placeholder={currentQuestion ? "追问 AI（可选）…" : "输入你的想法…"}
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && input.trim() && send("message")}
-                  disabled={loading}
-                />
-                <button className="rounded-lg px-4 py-2 text-sm text-white disabled:opacity-50" style={{ background: "var(--accent)" }} onClick={() => send("message")} disabled={loading || !input.trim()}>
-                  发送
-                </button>
-              </div>
+              {/* M4r24e：诊断会话不提供追问AI输入框（只作答）；辅导会话保留 */}
+              {sessionType !== "diagnostic" && (
+                <div className="flex gap-2">
+                  <input
+                    className="flex-1 rounded-lg border px-3 py-2 text-sm outline-none"
+                    style={{ background: "var(--bg)", borderColor: "var(--border)", color: "var(--text)" }}
+                    placeholder={currentQuestion ? "追问 AI（可选）…" : "输入你的想法…"}
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && input.trim() && send("message")}
+                    disabled={loading}
+                  />
+                  <button className="rounded-lg px-4 py-2 text-sm text-white disabled:opacity-50" style={{ background: "var(--accent)" }} onClick={() => send("message")} disabled={loading || !input.trim()}>
+                    发送
+                  </button>
+                </div>
+              )}
             </div>
           </>
         )}
