@@ -44,12 +44,7 @@ export default function ConfirmDialog({
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className="w-full max-w-sm rounded-2xl border p-6 shadow-2xl animate-fade"
-        style={{
-          background: "rgba(250,250,249,0.92)",
-          borderColor: "var(--border)",
-          backdropFilter: "blur(12px)",
-        }}
+        className="feedback-modal w-full max-w-sm rounded-2xl p-6 shadow-2xl animate-fade"
         onClick={(e) => e.stopPropagation()}
       >
         <h3 className="text-base font-semibold" style={{ color: "var(--text)" }}>
