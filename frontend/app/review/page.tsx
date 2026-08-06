@@ -104,8 +104,27 @@ export default function ReviewPage() {
   return (
     <div className="mx-auto max-w-2xl p-6">
       {/* M6 复习中心（SM-2 间隔重复） */}
-      {overview && overview.total > 0 && (
+      {overview && (
         <div className="mb-6 rounded-xl border p-4" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
+          {overview.total === 0 ? (
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-sm font-semibold" style={{ color: "var(--text)" }}>🗓 复习中心</div>
+                <div className="mt-1 text-xs" style={{ color: "var(--muted)" }}>
+                  还没有待复习的题——辅导/诊断中<b style={{ color: "var(--amber)" }}>答错的题</b>会按遗忘曲线自动排进这里，到期提醒你复习。
+                </div>
+              </div>
+              <button
+                className="rounded-lg px-4 py-1.5 text-sm text-white"
+                style={{ background: "var(--accent)" }}
+                onClick={startReview}
+                disabled={starting}
+              >
+                {starting ? "创建中…" : "去练习 →"}
+              </button>
+            </div>
+          ) : (
+            <>
           <div className="flex items-center justify-between">
             <div>
               <div className="text-sm font-semibold" style={{ color: "var(--text)" }}>🗓 复习中心</div>
@@ -144,6 +163,8 @@ export default function ReviewPage() {
             <div className="mt-2 text-[11px]" style={{ color: "var(--muted)" }}>
               接下来：{overview.upcoming.slice(0, 3).map((c) => `${c.content.slice(0, 14)}…(${c.due_in_days}天后)`).join(" · ")}
             </div>
+          )}
+            </>
           )}
         </div>
       )}
