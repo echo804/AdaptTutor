@@ -127,6 +127,18 @@ export default function SettingsPage() {
     }
   }
 
+  // M4r22c：管理员删除反馈
+  async function deleteAdminFeedback(id: number) {
+    if (!window.confirm("确认删除这条反馈？")) return;
+    try {
+      await api(`/admin/feedback/${id}`, { method: "DELETE" });
+      setAdminFeedbacks((prev) => prev.filter((f) => f.id !== id));
+      setMsg("已删除");
+    } catch (e: any) {
+      setErr(e.message || "删除失败");
+    }
+  }
+
   async function createInvite() {
     setErr(null); setMsg(null); setInviting(true);
     try {
@@ -328,6 +340,15 @@ export default function SettingsPage() {
                       <option value="read">已读</option>
                       <option value="done">已解决</option>
                     </select>
+                    {/* M4r22c：管理员删除反馈 */}
+                    <button
+                      className="shrink-0 text-[10px]"
+                      style={{ color: "var(--warn)" }}
+                      onClick={() => deleteAdminFeedback(f.id)}
+                      title="删除"
+                    >
+                      删除
+                    </button>
                   </div>
                   <p className="text-xs leading-relaxed" style={{ color: "var(--text)" }}>{f.content}</p>
                 </div>

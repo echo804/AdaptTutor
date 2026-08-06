@@ -117,3 +117,38 @@ async def update_feedback_status(
     fb.status = status
     await db.commit()
     return {"id": fb.id, "status": fb.status}
+
+
+@router.delete("/me/feedback/{fb_id}")
+async def delete_my_feedback(
+    fb_id: int,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """删除自己的反馈（M4r22c）；管理员可删任意。"""
+    fb = await db.get(Feedback, fb_id)
+    if fb is None:
+        raise HTTPException(status_code=404, detail="反馈不存在")
+    is_admin = bool((user.meta or {}).get("is_admin"))
+    if fb.user_id != user.id and not is_admin:
+        raise HTTPException(status_code=403, detail="无权删除他人反馈")
+    await db.delete(fb)
+    await db.commit()
+    return {"ok": True}
+
+
+@router.delete("/admin/feedback/{fb_id}")
+async def admin_delete_feedback(
+    fb_id: int,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """管理员删除任意反馈（M4r22c）。"""
+    if not (user.meta or {}).get("is_admin"):
+        raise HTTPException(status_code=403, detail="需要管理员权限")
+    fb = await db.get(Feedback, fb_id)
+    if fb is None:
+        raise HTTPException(status_code=404, detail="反馈不存在")
+    await db.delete(fb)
+    await db.commit()
+    return {"ok": True}

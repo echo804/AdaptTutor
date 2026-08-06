@@ -70,6 +70,20 @@ export default function FeedbackWidget() {
     }
   }
 
+  // M4r22c：删除自己的反馈
+  async function deleteFeedback(id: number) {
+    if (!window.confirm("确认删除这条反馈？")) return;
+    setErr(null);
+    setMsg(null);
+    try {
+      await api(`/me/feedback/${id}`, { method: "DELETE" });
+      setHistory((prev) => prev.filter((h) => h.id !== id));
+      setMsg("已删除");
+    } catch (e: any) {
+      setErr(e.message || "删除失败");
+    }
+  }
+
   return (
     <>
       {/* 悬浮按钮 */}
@@ -163,14 +177,23 @@ export default function FeedbackWidget() {
                 <div className="max-h-32 space-y-1.5 overflow-auto">
                   {history.slice(0, 5).map((h) => (
                     <div key={h.id} className="rounded-lg border px-3 py-1.5 text-xs" style={{ borderColor: "var(--border)" }}>
-                      <div className="flex items-center justify-between">
-                        <span style={{ color: "var(--text)" }}>{h.content.slice(0, 40)}{h.content.length > 40 ? "…" : ""}</span>
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="min-w-0 flex-1 truncate" style={{ color: "var(--text)" }}>{h.content}</span>
                         <span className="shrink-0 rounded px-1.5 py-0.5 text-[10px]" style={{
                           background: h.status === "done" ? "#7ec8a022" : h.status === "read" ? "var(--amber-soft)" : "var(--accent-soft)",
                           color: h.status === "done" ? "#7ec8a0" : h.status === "read" ? "var(--amber)" : "var(--accent)",
                         }}>
                           {{ new: "待处理", read: "已读", done: "已解决" }[h.status] || h.status}
                         </span>
+                        {/* M4r22c：删除自己的反馈 */}
+                        <button
+                          className="shrink-0 text-[10px]"
+                          style={{ color: "var(--warn)" }}
+                          onClick={() => deleteFeedback(h.id)}
+                          title="删除"
+                        >
+                          删除
+                        </button>
                       </div>
                     </div>
                   ))}
