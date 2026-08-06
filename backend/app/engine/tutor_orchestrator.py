@@ -253,7 +253,7 @@ class TutorOrchestrator:
                 message="当前配置（题型/难度）下暂无可用题目，请调整配置后再试。",
                 context=dict(self.sm.context),
             )
-        msg = f"我们来看这个知识点：{node}。先试试这题：{self.verify_question.content}"
+        msg = f"我们来看这个知识点：{node}。先试试这道题。"
         return TurnResult(state=self.sm.state.value, message=msg, context=dict(self.sm.context))
 
     def tutor_step(self, user_msg: str, correct: bool | None = None) -> TurnResult:
@@ -366,7 +366,7 @@ class TutorOrchestrator:
 
     def _verify_turn(self) -> TurnResult:
         self.verify_question = self._pick_verify()
-        msg = f"再来一道变式验证：{self.verify_question.content if self.verify_question else '同型题'}"
+        msg = "再来一道变式验证，请看下方题目。"
         return TurnResult(state=self.sm.state.value, message=msg, context=dict(self.sm.context))
 
     def _identify_turn(self) -> TurnResult:

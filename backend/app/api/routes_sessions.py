@@ -79,7 +79,8 @@ async def api_create_session(
         st = t.start_diagnosis(body.config)
         q = st.get("question")
         question = _question_to_dict(q)
-        first = f"开始诊断。第一题：{q.content}" if q else "开始诊断。"
+        # M4r21：引导语不含题目全文——题目由题目卡片（question 字段）单独展示
+        first = "开始诊断，请看第一题。" if q else "开始诊断。"
         if st.get("done"):
             raise HTTPException(status_code=400, detail="当前配置下无可用题目（题型/难度筛选后为空）")
     # 诊断首次选题后即可用
@@ -210,10 +211,12 @@ async def api_send_message(
                     "可去仪表盘查看，或开始辅导练习巩固。"
                 )
             else:
+                # M4r21：AI 气泡只含判题反馈；下一题由题目卡片（question 字段）单独展示，
+                # 不再拼接题目全文（此前"答错了…下一题：{nq.content}"导致反馈与题目混杂）
                 reply_text = (
-                    f"答对了！{result.feedback} 下一题：{nq.content}"
+                    f"答对了！{result.feedback}"
                     if result.correct
-                    else f"答错了。{result.feedback} 下一题：{nq.content}"
+                    else f"答错了。{result.feedback}"
                 )
             reply = MessageReply(
                 state="diagnose",
