@@ -211,13 +211,13 @@ async def api_send_message(
                     "可去仪表盘查看，或开始辅导练习巩固。"
                 )
             else:
-                # M4r21：AI 气泡只含判题反馈；下一题由题目卡片（question 字段）单独展示，
-                # 不再拼接题目全文（此前"答错了…下一题：{nq.content}"导致反馈与题目混杂）
-                reply_text = (
-                    f"答对了！{result.feedback}"
-                    if result.correct
-                    else f"答错了。{result.feedback}"
-                )
+                # M4r21d：AI 气泡只含简短判题反馈（避免"答错了+答案不太对"重复）；下一题由题目卡展示
+                if result.correct:
+                    reply_text = f"答对了！{result.feedback}"
+                else:
+                    # 答错：明确正确答案（M4r5 需求），不再叠重复的泛化提示语
+                    c_ans = result.correct_answer or (q.answer if hasattr(q, "answer") else None)
+                    reply_text = f"答错了，正确答案是：{c_ans}。" if c_ans else "答错了，再想想。"
             reply = MessageReply(
                 state="diagnose",
                 message=reply_text,
@@ -262,7 +262,7 @@ async def api_send_message(
                 judge_line = (
                     f"✓ 答对了！{j.feedback}"
                     if j.correct
-                    else f"✗ 答错了。{j.feedback} 正确答案：{j.correct_answer or t.verify_question.answer}"
+                    else f"✗ 答错了，正确答案是：{j.correct_answer or t.verify_question.answer}。"
                 )
                 reply = MessageReply(
                     state=r.state,

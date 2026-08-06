@@ -215,7 +215,8 @@ export default function ChatPage() {
           correctAnswer: r.correct_answer,
         });
         setBubbles((b) => [...b, { role: "user", content: userText }]);
-        setBubbles((b) => [...b, { role: "assistant", content: `${r.correct ? "✓ 答对了" : "✗ 答错了"}：${r.feedback || ""}`, state: r.state }]);
+        // M4r21d：统一用后端 r.message（精简判题反馈），避免前端再拼"✗ 答错了：{feedback}"重复文案
+        setBubbles((b) => [...b, { role: "assistant", content: r.message, state: r.state }]);
       } else {
         setJudgeResult(null);
         setBubbles((b) => [...b, { role: "user", content: userText }]);
@@ -599,27 +600,8 @@ export default function ChatPage() {
                     <span className="text-xs" style={{ color: "var(--muted)" }}>
                       当前题目（{currentQuestion.type === "choice" ? "选择" : currentQuestion.type === "blank" ? "填空" : "解答"}）
                     </span>
-                    {judgeResult && (
-                      <span className="text-xs" style={{ color: judgeResult.correct ? "var(--success)" : "var(--warn)" }}>
-                        {judgeResult.correct ? "✓ 答对了" : "✗ 答错了"}
-                        {judgeResult.method && `（${judgeResult.method === "llm" ? "AI 判题" : judgeResult.method === "choice" ? "选项比对" : "规则判定"}）`}
-                      </span>
-                    )}
                   </div>
                   <MathText text={currentQuestion.content} />
-
-                  {judgeResult && (
-                    <div className="mt-2 space-y-1 text-sm">
-                      <p style={{ color: judgeResult.correct ? "var(--success)" : "var(--warn)" }}>{judgeResult.feedback}</p>
-                      {/* M4r5：判错展示正确答案 */}
-                      {!judgeResult.correct && judgeResult.correctAnswer && (
-                        <p className="text-sm" style={{ color: "var(--text)" }}>
-                          <span style={{ color: "var(--muted)" }}>正确答案：</span>
-                          <MathText text={judgeResult.correctAnswer} />
-                        </p>
-                      )}
-                    </div>
-                  )}
 
                   {/* 选择：选项按钮组 */}
                   {currentQuestion.type === "choice" && currentQuestion.options && (
