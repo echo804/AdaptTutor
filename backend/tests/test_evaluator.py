@@ -131,3 +131,53 @@ def test_judge_open_indeterminate_on_non_answer():
     assert not r.degraded or r.degraded
     assert r.correct_answer is None  # 不给正确答案
     assert "请直接输入" in r.feedback
+
+
+# ---- 多选题（M4r24） ----
+
+def _mq(answer) -> Question:
+    return Question(
+        id="m1",
+        type="multi",
+        content="以下哪些是正确的？",
+        difficulty=0.5,
+        options=["选项1", "选项2", "选项3", "选项4"],
+        answer=answer,
+        step_node_map={"step1": "a01"},
+    )
+
+
+def test_judge_multi_exact():
+    """全选对（不多不少）→ 对。"""
+    q = _mq(["A", "C"])
+    r = judge("A,C", q)
+    assert r.correct
+
+
+def test_judge_multi_exact_compact():
+    """AC 紧凑写法 → 对。"""
+    q = _mq(["A", "C"])
+    r = judge("AC", q)
+    assert r.correct
+
+
+def test_judge_multi_missing():
+    """漏选 → 错。"""
+    q = _mq(["A", "C"])
+    r = judge("A", q)
+    assert not r.correct
+
+
+def test_judge_multi_extra():
+    """多选（选了不在正确答案里的）→ 错。"""
+    q = _mq(["A", "C"])
+    r = judge("A,C,D", q)
+    assert not r.correct
+
+
+def test_judge_multi_empty():
+    """空选 → 错。"""
+    q = _mq(["A", "C"])
+    r = judge("", q)
+    assert not r.correct
+

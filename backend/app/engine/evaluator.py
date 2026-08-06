@@ -74,6 +74,43 @@ def judge_choice(user_choice: str, question: Question) -> JudgeResult:
     )
 
 
+# ---------- 多选题（M4r24） ----------
+
+def judge_multi(user_choice: str, question: Question) -> JudgeResult:
+    """多选题：用户选多项（如 "A,C" 或 "AC"）vs 正确答案集合，全对才算对。
+
+    标准多选判法：选中的集合 == 正确集合（不多不少）。
+    """
+    # 用户选择归一化：拆分成字母集合（容忍 "A,C" / "AC" / "a c" / 中文顿号）
+    u = user_choice.strip().upper()
+    import re as _re
+
+    letters = sorted(set(_re.findall(r"[A-D]", u)))
+    # 正确答案集合（answer 可能是 list 或 "A,C" 字符串）
+    ans_raw = question.answer
+    if isinstance(ans_raw, list):
+        ans_letters = sorted({str(a).strip().upper() for a in ans_raw})
+    else:
+        ans_letters = sorted(set(_re.findall(r"[A-D]", str(ans_raw).upper())))
+    correct = letters == ans_letters
+    ans_txt = ", ".join(ans_letters)
+    # 找正确选项内容（剥掉 options 自带的 "A." 前缀，避免 "A. A. xx"）
+    import re as _re2
+
+    opt_txts = []
+    for l in ans_letters:
+        idx = ord(l) - 65
+        if 0 <= idx < len(question.options or []):
+            txt = _re2.sub(r"^[A-Z][\.．、]\s*", "", question.options[idx])
+            opt_txts.append(f"{l}. {txt}")
+    return JudgeResult(
+        correct=correct,
+        feedback=_FEEDBACK_CORRECT if correct else _FEEDBACK_WRONG,
+        method="choice",
+        correct_answer=None if correct else (f"{ans_txt}（{'；'.join(opt_txts)}）" if opt_txts else ans_txt),
+    )
+
+
 # ---------- 规则兜底（填空/解答） ----------
 
 def _extract_numbers(text: str) -> list[float]:
@@ -204,4 +241,6 @@ def judge(
     """统一入口：按题型分发判题。"""
     if question.type == "choice":
         return judge_choice(user_answer, question)
+    if question.type == "multi":
+        return judge_multi(user_answer, question)
     return judge_open(user_answer, question, gateway, ctx)

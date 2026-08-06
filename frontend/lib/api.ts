@@ -72,7 +72,7 @@ export interface SettingsOut {
 
 export interface Question {
   id: string;
-  type: "choice" | "blank" | "open";
+  type: "choice" | "blank" | "open" | "multi"; // M4r24 多选
   content: string;
   options?: string[];
   difficulty: number;

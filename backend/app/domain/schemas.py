@@ -53,16 +53,17 @@ class KnowledgeGraphSchema(BaseModel):
 
 
 class Question(BaseModel):
-    """题目（三题型分级：choice|blank|open，04 2.4）。"""
+    """题目（四题型分级：choice|blank|open|multi，M4r24 新增多选）。"""
 
     id: str
-    type: Literal["choice", "blank", "open"]
+    type: Literal["choice", "blank", "open", "multi"]
     content: str  # 题干（可含 KaTeX/LaTeX）
     tags: list[str] = Field(default_factory=list)
     difficulty: float = Field(ge=0.0, le=1.0)
-    # 选择题选项（type=choice 必填），answer 为正确选项索引或规范化答案
+    # 选择题选项（type=choice/multi 必填），answer 为正确选项索引或规范化答案
+    # M4r24：multi 题 answer 为正确选项字母列表（如 ["A","C"]）
     options: list[str] | None = None
-    answer: str | int
+    answer: str | int | list[str]
     error_modes: list[str] = Field(default_factory=list)
     # 解题步骤 → 节点映射（错题溯源依据）
     step_node_map: dict[str, str] = Field(default_factory=dict)

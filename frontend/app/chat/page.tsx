@@ -26,9 +26,9 @@ interface DiagConfig {
   difficulty: string;
 }
 
-const QTYPE_LABELS: Record<string, string> = { choice: "选择题", blank: "填空题", open: "解答题" };
+const QTYPE_LABELS: Record<string, string> = { choice: "选择题", blank: "填空题", open: "解答题", multi: "多选题" };
 
-const DEFAULT_DIAG: DiagConfig = { qtypes: ["choice", "blank", "open"], qcount: 10, difficulty: "auto" };
+const DEFAULT_DIAG: DiagConfig = { qtypes: ["choice", "blank", "open", "multi"], qcount: 10, difficulty: "auto" }; // M4r24
 
 /** 对话学习（M4r5b）：会话历史侧栏（恢复继续）+ 诊断配置面板 + AI 判题 + 正确答案展示 */
 export default function ChatPage() {
@@ -42,6 +42,7 @@ export default function ChatPage() {
   const [err, setErr] = useState<string | null>(null);
   // AI 判题
   const [selectedChoice, setSelectedChoice] = useState<string | null>(null);
+  const [selectedMulti, setSelectedMulti] = useState<string[]>([]); // M4r24 多选
   const [answerText, setAnswerText] = useState("");
   const [judgeResult, setJudgeResult] = useState<{ correct: boolean; feedback: string; method?: string; correctAnswer?: string | null } | null>(null);
   const [diagProgress, setDiagProgress] = useState<{ qcount?: number; answered?: number }>({});
@@ -153,6 +154,7 @@ export default function ChatPage() {
       setDiagProgress({ qcount: r.qcount, answered: r.answered });
       setBubbles([{ role: "assistant", content: r.first_message || "开始。", state: "elicit" }]);
       setSelectedChoice(null);
+      setSelectedMulti([]); // M4r24
       setAnswerText("");
       setJudgeResult(null);
       await loadSessions();
@@ -182,6 +184,7 @@ export default function ChatPage() {
         msgs.map((m) => ({ role: m.role as "user" | "assistant", content: m.content, state: m.state })),
       );
       setSelectedChoice(null);
+      setSelectedMulti([]); // M4r24
       setAnswerText("");
       setJudgeResult(null);
     } catch (e: any) {
@@ -223,6 +226,7 @@ export default function ChatPage() {
         setBubbles((b) => [...b, { role: "assistant", content: r.message, state: r.state }]);
       }
       setSelectedChoice(null);
+      setSelectedMulti([]); // M4r24
       setAnswerText("");
     } catch (e: any) {
       setErr(e.message || "发送失败");
@@ -598,17 +602,26 @@ export default function ChatPage() {
                 <div className="rounded-xl border p-4 animate-fade" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
                   <div className="mb-2 flex items-center justify-between">
                     <span className="text-xs" style={{ color: "var(--muted)" }}>
-                      当前题目（{currentQuestion.type === "choice" ? "选择" : currentQuestion.type === "blank" ? "填空" : "解答"}）
+                      当前题目（{currentQuestion.type === "choice" ? "选择" : currentQuestion.type === "multi" ? "多选" : currentQuestion.type === "blank" ? "填空" : "解答"}）
                     </span>
                   </div>
                   <MathText text={currentQuestion.content} />
 
-                  {/* 选择：选项按钮组 */}
-                  {currentQuestion.type === "choice" && currentQuestion.options && (
+                  {/* M4r24：多选提示 */}
+                  {currentQuestion.type === "multi" && (
+                    <p className="mt-1 text-xs" style={{ color: "var(--muted)" }}>
+                      （可多选，全部选对才算对）
+                    </p>
+                  )}
+
+                  {/* 选择：选项按钮组（choice 单选 / multi 多选） */}
+                  {(currentQuestion.type === "choice" || currentQuestion.type === "multi") && currentQuestion.options && (
                     <div className="mt-3 space-y-1.5">
                       {currentQuestion.options.map((o, i) => {
                         const letter = String.fromCharCode(65 + i);
-                        const active = selectedChoice === letter;
+                        const active = currentQuestion.type === "multi"
+                          ? selectedMulti.includes(letter)
+                          : selectedChoice === letter;
                         // M4r21：兼容 options 自带 "A." 前缀的领域包——剥离前缀，统一用 letter 圆标
                         const clean = typeof o === "string" ? o.replace(/^[A-Z][\.．、]\s*/, "") : o;
                         return (
@@ -620,7 +633,11 @@ export default function ChatPage() {
                               background: active ? "var(--accent-soft)" : "transparent",
                               color: "var(--text)",
                             }}
-                            onClick={() => setSelectedChoice(letter)}
+                            onClick={() =>
+                              currentQuestion.type === "multi"
+                                ? setSelectedMulti((prev) => prev.includes(letter) ? prev.filter((x) => x !== letter) : [...prev, letter])
+                                : setSelectedChoice(letter)
+                            }
                             disabled={loading}
                           >
                             <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-medium" style={{ background: active ? "var(--accent)" : "var(--bg)", color: active ? "#fff" : "var(--muted)" }}>
@@ -663,10 +680,15 @@ export default function ChatPage() {
                       className="rounded px-4 py-1.5 text-sm text-white disabled:opacity-50"
                       style={{ background: "var(--accent)" }}
                       onClick={() => {
-                        const ans = currentQuestion.type === "choice" ? selectedChoice : answerText;
+                        // M4r24：multi 题把多选拼成 "A,C"；choice 单选；blank/open 文本
+                        const ans = currentQuestion.type === "choice" ? selectedChoice
+                          : currentQuestion.type === "multi" ? selectedMulti.join(",")
+                          : answerText;
                         if (ans?.trim()) send("answer", ans!);
                       }}
-                      disabled={loading || !((currentQuestion.type === "choice" ? selectedChoice : answerText.trim()))}
+                      disabled={loading || !((currentQuestion.type === "choice" ? selectedChoice
+                        : currentQuestion.type === "multi" ? selectedMulti.length > 0
+                        : answerText.trim()))}
                     >
                       提交答案
                     </button>
@@ -802,3 +824,6 @@ export default function ChatPage() {
     </div>
   );
 }
+
+
+
