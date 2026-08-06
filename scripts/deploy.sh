@@ -45,7 +45,10 @@ if [ -z "$IP" ]; then
   exit 1
 fi
 export NEXT_PUBLIC_API_BASE="http://$IP:8010"
-echo "      公网 IP: $IP  →  前端 API 指向 $NEXT_PUBLIC_API_BASE"
+# 持久化到仓库根 .env（compose 自动读取：以后手动 docker compose build web 也用对地址）
+sed -i '/^NEXT_PUBLIC_API_BASE=/d' .env 2>/dev/null || true
+echo "NEXT_PUBLIC_API_BASE=http://$IP:8010" >> .env
+echo "      公网 IP: $IP  →  前端 API 指向 $NEXT_PUBLIC_API_BASE（已写入 .env 持久化）"
 
 # ---------- 4/6 配置提示 ----------
 # 生产 CORS：放行前端来源 http://IP:3000（覆盖模板空值行，已有真实 IP 则跳过）
