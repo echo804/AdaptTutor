@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { api, HintReply, KeyItem, MessageReply, Question } from "@/lib/api";
 import { useDomain } from "@/lib/domain";
 import MathText from "@/components/Math";
@@ -50,6 +50,9 @@ const DEFAULT_DIAG: DiagConfig = { qtypes: ["choice", "blank", "open", "multi"],
 
 /** 对话学习（M4r5b）：会话历史侧栏（恢复继续）+ 诊断配置面板 + AI 判题 + 正确答案展示 */
 export default function ChatPage() {
+  // M6：?sid= 直达会话（复习中心「开始复习」跳转）
+  const searchParams = useSearchParams();
+  const sidParam = searchParams.get("sid");
   const [sessionId, setSessionId] = useState<number | null>(null);
   const [sessionType, setSessionType] = useState<string | null>(null);
   // M5 抽卡：卡片栈 + 当前索引（上一张/下一张浏览，非对话流）
@@ -117,6 +120,16 @@ export default function ChatPage() {
   useEffect(() => {
     loadSessions();
   }, [loadSessions, sessionId]);
+
+  // M6：URL 带 ?sid= → 自动恢复该会话（复习中心/外部直达）
+  const autoResumed = useRef(false);
+  useEffect(() => {
+    if (autoResumed.current || !sidParam || sessionId) return;
+    const n = Number(sidParam);
+    if (!Number.isFinite(n) || n <= 0) return;
+    autoResumed.current = true;
+    resumeSession(n);
+  }, [sidParam, sessionId]);
 
   // M4r17：加载 API key 状态（决定 AI 入口是否置灰）
   useEffect(() => {

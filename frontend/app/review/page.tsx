@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { api } from "@/lib/api";
+import { useRouter } from "next/navigation";
+import { api, getReviewsOverview, type ReviewsOverview } from "@/lib/api";
 import { useDomain } from "@/lib/domain";
 import MathText from "@/components/Math";
 
@@ -19,12 +20,18 @@ interface WrongQuestion {
 
 const QTYPE_LABELS: Record<string, string> = { choice: "选择", blank: "填空", open: "解答" };
 
+const TYPE_LABEL: Record<string, string> = { choice: "选择", multi: "多选", blank: "填空", open: "解答" };
+
 export default function ReviewPage() {
+  const router = useRouter();
   const [items, setItems] = useState<WrongQuestion[]>([]);
   const [idx, setIdx] = useState(0);
   const [flipped, setFlipped] = useState(false);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
+  // M6 复习中心（SM-2 间隔重复）
+  const [overview, setOverview] = useState<ReviewsOverview | null>(null);
+  const [starting, setStarting] = useState(false);
   // 领域学习空间（M4r8）：错题集按领域隔离
   const { active: activePack } = useDomain();
 
@@ -47,6 +54,33 @@ export default function ReviewPage() {
     load();
   }, [load]);
 
+  const loadOverview = useCallback(async () => {
+    try {
+      setOverview(await getReviewsOverview());
+    } catch {
+      /* 复习中心加载失败不阻塞错题复盘 */
+    }
+  }, []);
+  useEffect(() => {
+    loadOverview();
+  }, [loadOverview]);
+
+  /** M6：开始复习 → 创建辅导会话（due 题自动优先）→ 直达会话 */
+  async function startReview() {
+    setStarting(true);
+    try {
+      const r = await api<{ session_id: number }>("/api/v1/sessions", {
+        method: "POST",
+        body: { type: "tutor", config: { qcount: 10 } },
+      });
+      router.push(`/chat?sid=${r.session_id}`);
+    } catch (e: any) {
+      setErr(e.message || "开始复习失败");
+    } finally {
+      setStarting(false);
+    }
+  }
+
   const current = items[idx] || null;
 
   async function markMastered() {
@@ -68,7 +102,52 @@ export default function ReviewPage() {
   if (err) return <div className="p-6 text-sm text-red-500">{err}</div>;
 
   return (
-    <div className="mx-auto max-w-xl p-6">
+    <div className="mx-auto max-w-2xl p-6">
+      {/* M6 复习中心（SM-2 间隔重复） */}
+      {overview && overview.total > 0 && (
+        <div className="mb-6 rounded-xl border p-4" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-sm font-semibold" style={{ color: "var(--text)" }}>🗓 复习中心</div>
+              <div className="mt-1 text-xs" style={{ color: "var(--muted)" }}>
+                按遗忘曲线调度：
+                <span style={{ color: "var(--amber)" }}>{overview.due_count} 道到期</span>
+                · {overview.scheduled_count} 道已排期 · 共 {overview.total} 道
+              </div>
+            </div>
+            <button
+              className="rounded-lg px-4 py-1.5 text-sm text-white disabled:opacity-50"
+              style={{ background: "var(--accent)" }}
+              onClick={startReview}
+              disabled={starting || overview.due_count === 0}
+            >
+              {starting ? "创建中…" : overview.due_count > 0 ? "开始复习 →" : "暂无到期"}
+            </button>
+          </div>
+
+          {overview.due.length > 0 && (
+            <div className="mt-3 max-h-44 space-y-1.5 overflow-auto">
+              {overview.due.slice(0, 8).map((c) => (
+                <div key={c.qid} className="flex items-center gap-2 rounded border px-2.5 py-1.5 text-xs" style={{ borderColor: "var(--border)" }}>
+                  <span className="shrink-0 rounded px-1 py-0.5 text-[10px]" style={{ background: "var(--amber-soft)", color: "var(--amber)" }}>
+                    {TYPE_LABEL[c.type] || c.type}
+                  </span>
+                  <span className="truncate" style={{ color: "var(--text)" }}>{c.content}</span>
+                  <span className="ml-auto shrink-0" style={{ color: "var(--muted)" }}>
+                    {c.repetitions > 0 ? `第 ${c.repetitions} 次 · ` : ""}到期
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+          {overview.upcoming.length > 0 && (
+            <div className="mt-2 text-[11px]" style={{ color: "var(--muted)" }}>
+              接下来：{overview.upcoming.slice(0, 3).map((c) => `${c.content.slice(0, 14)}…(${c.due_in_days}天后)`).join(" · ")}
+            </div>
+          )}
+        </div>
+      )}
+
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-lg font-semibold">复盘错题集 · 抽卡</h1>
         <div className="text-xs" style={{ color: "var(--muted)" }}>

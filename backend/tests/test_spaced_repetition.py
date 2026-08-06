@@ -46,7 +46,8 @@ async def test_review_schedule_roundtrip():
         u = (await db.execute(select(User).where(User.username == "ye"))).scalar_one()
         await db.execute(
             delete(ReviewSchedule).where(
-                ReviewSchedule.user_id == u.id, ReviewSchedule.qid == "smoke_sched"
+                ReviewSchedule.user_id == u.id,
+                ReviewSchedule.qid.in_(["smoke_sched", "smoke_never_wrong", "ov_due", "ov_future"]),
             )
         )
         await db.commit()
@@ -103,3 +104,62 @@ def test_next_question_due_override_unknown_qid_falls_back():
     node, q = t._next_question()
     assert q is not None
     assert t.is_review is False
+
+
+@pytest.mark.asyncio
+async def test_reviews_overview_api():
+    """GET /reviews/overview：统计 + due/upcoming 列表 + 题目内容。"""
+    from datetime import timedelta
+
+    from app.main import app
+    from httpx import ASGITransport, AsyncClient
+
+    from app.auth.security import create_token
+
+    factory = get_session_factory()
+    async with factory() as db:
+        u = (await db.execute(select(User).where(User.username == "ye"))).scalar_one()
+        await db.execute(
+            delete(ReviewSchedule).where(
+                ReviewSchedule.user_id == u.id,
+                ReviewSchedule.qid.in_(["ov_due", "ov_future", "smoke_sched", "smoke_never_wrong"]),
+            )
+        )
+        await db.commit()
+        # 到期 + 未来各一条
+        await upsert_review(db, u.id, "college_english", "ov_due", correct=False)  # due 立即
+        future = ReviewSchedule(
+            user_id=u.id, pack_id="college_english", qid="ov_future",
+            due_at=datetime.now(timezone.utc) + timedelta(days=5),
+            interval_days=5, ease=2.5, repetitions=1, last_result=True,
+            updated_at=datetime.now(timezone.utc),
+        )
+        db.add(future)
+        await db.commit()
+        token = create_token(u.id, u.username)
+
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as c:
+        r = await c.get(
+            "/api/v1/reviews/overview",
+            headers={"Authorization": f"Bearer {token}"},
+        )
+        assert r.status_code == 200, r.text
+        data = r.json()
+        assert data["pack_id"] == "college_english"
+        # 表可能含用户其他真实调度记录 → 断言包含我们插入的两条即可
+        assert data["due_count"] >= 1 and data["scheduled_count"] >= 1
+        assert data["total"] >= 2
+        assert any(c["qid"] == "ov_due" for c in data["due"])
+        assert any(c["qid"] == "ov_future" for c in data["upcoming"])
+        future = next(c for c in data["upcoming"] if c["qid"] == "ov_future")
+        assert 4 <= future["due_in_days"] <= 5  # 天数截断：插入时刻的 now+5 天，请求稍晚可能 4
+
+    async with factory() as db:
+        await db.execute(
+            delete(ReviewSchedule).where(
+                ReviewSchedule.user_id == u.id,
+                ReviewSchedule.qid.in_(["ov_due", "ov_future"]),
+            )
+        )
+        await db.commit()

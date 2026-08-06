@@ -186,3 +186,31 @@ export function saveDomainPack(
 ): Promise<{ ok: boolean; pack_id: string; questions: number; nodes: number }> {
   return api(`/api/v1/domains/${packId}`, { method: "PUT", body });
 }
+
+// ---- M6 复习中心（SM-2 间隔重复） ----
+
+export interface ReviewCard {
+  qid: string;
+  content: string;
+  type: string;
+  options: string[] | null;
+  answer: string | null;
+  node_id: string | null;
+  interval_days: number;
+  repetitions: number;
+  due_at: string;
+  due_in_days: number;
+}
+
+export interface ReviewsOverview {
+  pack_id: string;
+  due_count: number;
+  scheduled_count: number;
+  total: number;
+  due: ReviewCard[];
+  upcoming: ReviewCard[];
+}
+
+export function getReviewsOverview(): Promise<ReviewsOverview> {
+  return api("/api/v1/reviews/overview");
+}

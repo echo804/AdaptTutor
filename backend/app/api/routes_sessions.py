@@ -579,3 +579,65 @@ async def api_session_messages(
         for m in msgs
     ]
 
+
+@router.get("/reviews/overview")
+async def api_reviews_overview(
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """复习中心概览（M6 SM-2）：到期/已排期统计 + 列表（含题目内容）。"""
+    from datetime import datetime, timezone
+
+    from sqlalchemy import select
+
+    from app.domain.loader import load_pack
+    from app.persistence.models import ReviewSchedule
+
+    pack_id = _active_pack(user)
+    rows = (
+        (
+            await db.execute(
+                select(ReviewSchedule)
+                .where(
+                    ReviewSchedule.user_id == user.id,
+                    ReviewSchedule.pack_id == pack_id,
+                )
+                .order_by(ReviewSchedule.due_at)
+            )
+        )
+        .scalars()
+        .all()
+    )
+    now = datetime.now(timezone.utc)
+    due = [r for r in rows if r.due_at <= now]
+    upcoming = [r for r in rows if r.due_at > now]
+
+    try:
+        qmap = {q.id: q for q in load_pack(pack_id).questions}
+    except Exception:
+        qmap = {}
+
+    def card(r: ReviewSchedule) -> dict:
+        q = qmap.get(r.qid)
+        return {
+            "qid": r.qid,
+            "content": q.content if q else "",
+            "type": q.type if q else "choice",
+            "options": q.options if q else None,
+            "answer": str(q.answer) if q else None,
+            "node_id": next(iter((q.step_node_map or {}).values()), None) if q else None,
+            "interval_days": r.interval_days,
+            "repetitions": r.repetitions,
+            "due_at": r.due_at.isoformat(),
+            "due_in_days": 0 if r.due_at <= now else (r.due_at - now).days,
+        }
+
+    return {
+        "pack_id": pack_id,
+        "due_count": len(due),
+        "scheduled_count": len(upcoming),
+        "total": len(rows),
+        "due": [card(r) for r in due[:20]],
+        "upcoming": [card(r) for r in upcoming[:20]],
+    }
+
