@@ -166,7 +166,19 @@ export default function SettingsPage() {
 
   async function copyInvite(code: string) {
     try {
-      await navigator.clipboard.writeText(code);
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(code);
+      } else {
+        // M6.1：非 HTTPS（http://IP）下 navigator.clipboard 不可用 → execCommand fallback
+        const ta = document.createElement("textarea");
+        ta.value = code;
+        ta.style.position = "fixed";
+        ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+      }
       setMsg(`已复制邀请码：${code}`);
     } catch {
       setErr("复制失败，请手动复制");
