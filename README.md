@@ -20,9 +20,23 @@
 
 **学习闭环：诊断 → 路径规划 → 引导辅导 → 错题溯源 → 遗忘调度复习**
 
+**🔗 线上实例：http://47.76.40.70:3000**（邀请码注册）
+
 </div>
 
 ---
+
+## 📸 页面展示
+
+> 截图来自线上实例（墨蓝/琥珀双主题，暗色模式）
+
+| 知识图谱 | 引导式辅导（抽卡） | 仪表盘 |
+|---|---|---|
+| ![知识图谱](docs/screenshots/01-knowledge-graph.png) | ![引导式辅导](docs/screenshots/02-chat.png) | ![仪表盘](docs/screenshots/03-dashboard.png) |
+
+| 领域市场 | 错题复习中心 | 我的领域（AI 生成/编辑器） |
+|---|---|---|
+| ![领域市场](docs/screenshots/04-market.png) | ![错题复习中心](docs/screenshots/05-review.png) | ![我的领域](docs/screenshots/06-domains.png) |
 
 ## ✨ 它是什么
 
@@ -88,17 +102,28 @@ stateDiagram-v2
 | 后端 | **FastAPI · SQLAlchemy(async) · Alembic** | 单机无分布式诉求，后台任务队列即可承载 |
 | 存储 | **PostgreSQL JSONB** | 章节级图谱无需图数据库，JSONB 存图 + 应用层图算法 |
 | 模型 | **litellm 多模型路由** | 一次接入 DeepSeek / OpenAI / 通义……按任务分层路由，降级可控 |
-| 部署 | **Docker Compose** | `docker compose up` 一条命令起全套 |
+| 部署 | **Docker Compose 一键部署** | `./scripts/deploy.sh` 一条命令：装 Docker → 密钥 → 构建 → 起栈 → 健康检查；含 Portainer/Uptime Kuma 监控面板 |
 
 > 关键取舍：弃 Neo4j（JVM 常驻 3-5GB）、弃 Qdrant（数百题规模标签过滤足矣）、弃 Celery+Redis（无分布式诉求）、弃 LangGraph（自研状态机更可控）。详见 [docs/01-技术栈选型对比.md](docs/01-技术栈选型对比.md)。
 
 ## 🚀 快速开始
 
+### 生产部署（云服务器，一条命令）
+
+```bash
+git clone https://github.com/echo804/AdaptTutor.git && cd AdaptTutor
+./scripts/deploy.sh <服务器IP>     # 自动完成：装 Docker → 密钥 → 构建 → 起五服务 → 健康检查
+```
+
+部署后访问：前端 `http://<IP>:3000` · 后端 `http://<IP>:8010/healthz` · 监控面板 `:3001`(Uptime Kuma) / `:9443`(Portainer)。详见 [部署指南](docs/部署.md)。
+
+### 本地开发
+
 ```bash
 # 1. 克隆
 git clone https://github.com/echo804/AdaptTutor.git && cd AdaptTutor
 
-# 2. 一键启动（Docker Compose：Postgres + API + Web）
+# 2. 一键启动开发栈（Docker Compose：Postgres + API + Web）
 docker compose -f docker-compose.local.yml up -d
 
 # 3. 打开浏览器
@@ -117,7 +142,8 @@ docker compose -f docker-compose.local.yml up -d
 |---|---|---|
 | `llm_app_dev` | LLM 应用开发工程课（RAG / Agent / 微调 / 推理） | 171 题 · 四档难度 |
 | `junior_math_eq_ineq` | 初中数学·方程与不等式 | 多题型 · 参数化变式 |
-| `ud153_*` | 用户上传领域示例（AI 生成 → 审阅 → 入库全流程） | 自定义 |
+| `college_english` | 大学英语·四六级→考研（词汇 / 翻译） | 236 题 · 难度分档 |
+| `ud*` | 用户上传领域示例（AI 生成 → 审阅 → 入库全流程） | 自定义 |
 
 > **想学什么就接入什么**：一个 `knowledge_graph.json` + 一个 `questions.json` + 诊断规则，就是一个新学科。支持 AI 批量生成后人工审阅。
 
@@ -162,6 +188,7 @@ flowchart TB
 | [03-项目架构](docs/03-项目架构.md) | 系统架构 · 引擎与领域包边界 · API 设计 |
 | [04-需求决策记录](docs/04-需求决策记录.md) | 登录/题型/降级/产品形态等全部决策 |
 | [05-UI设计规范](docs/05-UI设计规范.md) | 「思考的房间」· 配色/字体/动效/情感化细节 |
+| [部署指南](docs/部署.md) | 服务器部署 · 密钥 · 备份恢复 · 监控面板 · 迁移 |
 | [ADR-001~006](docs/) | 状态机选型 · 图谱存储 · 模型分层路由 · 评估层 · 回滚策略 · 领域包接口 |
 
 ## 🎨 设计哲学
