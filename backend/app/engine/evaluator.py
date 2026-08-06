@@ -144,6 +144,9 @@ def judge_by_rule(user_text: str, question: Question) -> JudgeResult | None:
         na, nu = norm(ans), norm(user)
         if na in nu or (len(nu) >= 2 and nu in na):
             return JudgeResult(correct=True, feedback=_FEEDBACK_CORRECT, method="rule")
+        # M6：长答案（讲解/翻译类开放题）规则不可靠——不武断判错，交给 LLM 语义等价判断
+        if len(ans) > 20:
+            return None
         return JudgeResult(
             correct=False, feedback=_FEEDBACK_WRONG, method="rule", correct_answer=ans
         )

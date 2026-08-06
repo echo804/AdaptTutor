@@ -108,6 +108,17 @@ def test_rule_numeric_reverse():
     assert not judge_by_rule("3", q).correct
 
 
+def test_rule_long_answer_delegates_to_llm():
+    """长答案（讲解/翻译类开放题）规则不可靠：未命中时不武断判错，返回 None 交给 LLM。"""
+    q = _q("k4", "open", "请解释什么是悬垂分词？", "悬垂分词是指分词的逻辑主语与主句主语不一致，是一种常见的语法错误。")
+    # 语义等价的不同表述 → 规则无法确认 → None（LLM 判定）
+    assert judge_by_rule("分词的逻辑主语和主句主语对不上，就是悬垂分词", q) is None
+    # 完全无关的回答 → 同样 None（不武断判错）
+    assert judge_by_rule("不知道", q) is None
+    # 标准答案完整出现 → 仍直接判对
+    assert judge_by_rule("悬垂分词是指分词的逻辑主语与主句主语不一致，是一种常见的语法错误。", q).correct
+
+
 def test_rule_cannot_judge_returns_none():
     q = _q("u1", "open", "思路？", "x")  # 单字符答案无法规则判定
     assert judge_by_rule("任意思路", q) is None
