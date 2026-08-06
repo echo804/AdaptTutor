@@ -92,6 +92,13 @@ export interface MessageReply {
   correct_answer: string | null;
   qcount: number | null;
   answered: number | null;
+  context?: Record<string, unknown> | null;
+}
+
+export interface HintReply {
+  hint: string;
+  degraded: boolean;
+  mock: boolean;
 }
 
 export interface SessionCreated {

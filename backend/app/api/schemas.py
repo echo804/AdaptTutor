@@ -95,6 +95,15 @@ class MessageReply(BaseModel):
     correct_answer: str | None = None # 判错时标准答案（M4r5 需求 1d）
     qcount: int | None = None         # M4r5：诊断总题数
     answered: int | None = None       # M4r5：当前已答数
+    context: dict | None = None       # 状态机上下文快照（hint_level 等，卡片流渲染用）
+
+
+class HintReply(BaseModel):
+    """灯泡求助响应（M5 抽卡：弹窗内 AI 简短讲解/提示）。"""
+
+    hint: str
+    degraded: bool = False
+    mock: bool = False
 
 
 class SessionDetail(BaseModel):

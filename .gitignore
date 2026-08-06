@@ -33,3 +33,6 @@ backups/
 
 # 一键启停脚本日志/pid
 logs/
+
+# 临时打包缓存
+.tmp_packs/

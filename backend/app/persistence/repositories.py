@@ -205,6 +205,18 @@ async def list_events_by_student(
     return list(res.scalars().all())
 
 
+async def list_events_by_session(
+    db: AsyncSession, session_id: int, event_type: str | None = None
+) -> list[LearningEvent]:
+    """某会话的事件列表（M5 历史卡重建数据源），按时间正序（作答先后）。"""
+    stmt = select(LearningEvent).where(LearningEvent.session_id == session_id)
+    if event_type:
+        stmt = stmt.where(LearningEvent.event_type == event_type)
+    stmt = stmt.order_by(LearningEvent.ts.asc())
+    res = await db.execute(stmt)
+    return list(res.scalars().all())
+
+
 async def get_trend(
     db: AsyncSession, student_id: int, days: int = 14, pack_id: str | None = None
 ) -> list[dict]:

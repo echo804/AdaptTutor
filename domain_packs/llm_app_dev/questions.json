@@ -42,7 +42,7 @@
   "id": "lq003",
   "type": "open",
   "content": "为什么 Beam Search 在 LLM 时代逐渐被弃用？请简要说明原因。",
-  "difficulty": 0.6,
+  "difficulty": 0.7,
   "options": [],
   "answer": "因为 Beam Search 优化的是整体概率最高的序列，但 LLM 任务没有单一最优答案，且容易导致重复和乏味内容。此外，它与现代推理优化不兼容。",
   "error_modes": [
@@ -81,7 +81,7 @@
   "id": "lq005",
   "type": "choice",
   "content": "以下哪种策略能自适应截断长尾概率？",
-  "difficulty": 0.6,
+  "difficulty": 0.66,
   "options": [
    "A. Greedy Decoding",
    "B. Temperature 采样",
@@ -120,7 +120,7 @@
   "id": "lq007",
   "type": "choice",
   "content": "SGLang 的 RadixAttention 主要解决什么问题？",
-  "difficulty": 0.6,
+  "difficulty": 0.66,
   "options": [
    "A. 显存碎片",
    "B. 批量调度低效",
@@ -164,7 +164,7 @@
   "id": "lq009",
   "type": "open",
   "content": "DPO 和 PPO 在对齐训练中的主要区别是什么？请简要说明。",
-  "difficulty": 0.65,
+  "difficulty": 0.7,
   "options": [],
   "answer": "DPO 不需要单独训练奖励模型，直接利用偏好数据进行监督学习；而 PPO 需要先训练奖励模型再进行强化学习。",
   "error_modes": [
@@ -202,7 +202,7 @@
  {
   "id": "lq011",
   "type": "choice",
-  "content": "以下哪项不是主流学术 Benchmark 的主要考查维度？$\\mathrm{A.} \\text{代码能力} \\quad \\mathrm{B.} \\text{数学推理} \\quad \\mathrm{C.} \\text{情感分析} \\quad \\mathrm{D.} \\text{对话理解}$",
+  "content": "以下哪项不是主流学术 Benchmark 的主要考查维度？",
   "difficulty": 0.5,
   "options": [
    "A. 代码能力",
@@ -258,7 +258,7 @@
  {
   "id": "lq014",
   "type": "choice",
-  "content": "以下哪种方法可以有效缓解 LLM 的幻觉问题？$\\mathrm{A.} \\text{提高 Temperature 值} \\quad \\mathrm{B.} \\text{使用 RAG 技术} \\quad \\mathrm{C.} \\text{增加训练数据量} \\quad \\mathrm{D.} \\text{减少模型参数量}$",
+  "content": "以下哪种方法可以有效缓解 LLM 的幻觉问题？",
   "difficulty": 0.55,
   "options": [
    "A. 提高 Temperature 值",
@@ -298,7 +298,7 @@
   "id": "lq016",
   "type": "open",
   "content": "请说明 SFT 和 DPO 在微调目标上的区别。",
-  "difficulty": 0.65,
+  "difficulty": 0.7,
   "options": [],
   "answer": "SFT 训练模型按指令回答，DPO 训练模型学习偏好对齐。",
   "error_modes": [
@@ -314,7 +314,7 @@
  {
   "id": "lq017",
   "type": "choice",
-  "content": "KV Cache 的主要作用是？$\\text{A. 提高模型参数量} \\quad \\text{B. 降低推理延迟} \\quad \\text{C. 增加模型训练数据} \\quad \\text{D. 提升模型输出质量}$",
+  "content": "KV Cache 的主要作用是？",
   "difficulty": 0.5,
   "options": [
    "A. 提高模型参数量",
@@ -370,7 +370,7 @@
  {
   "id": "lq020",
   "type": "choice",
-  "content": "LoRA 微调的主要优势是？$\\text{A. 显存占用高} \\quad \\text{B. 训练速度慢} \\quad \\text{C. 推理零开销} \\quad \\text{D. 灾难性遗忘严重}$",
+  "content": "LoRA 微调的主要优势是？",
   "difficulty": 0.6,
   "options": [
    "A. 显存占用高",
@@ -410,7 +410,7 @@
   "id": "lq022",
   "type": "open",
   "content": "为什么 Prompt Caching 要求前缀固定内容在前、动态内容在后？",
-  "difficulty": 0.6,
+  "difficulty": 0.7,
   "options": [],
   "answer": "因为只有前缀完全相同才能命中缓存，否则会失效。",
   "error_modes": [
@@ -505,7 +505,7 @@
   "id": "lq027",
   "type": "choice",
   "content": "MoE 模型的激活参数与总参数的关系是？",
-  "difficulty": 0.6,
+  "difficulty": 0.66,
   "options": [
    "A. 激活参数大于总参数",
    "B. 激活参数等于总参数",
@@ -543,7 +543,7 @@
  {
   "id": "lq029",
   "type": "choice",
-  "content": "位置编码的核心作用是解决 Self-Attention 的什么问题？$\\text{A.} \\text{计算效率低}$ $\\text{B.} \\text{无法处理长序列}$ $\\text{C.} \\text{位置盲}$$\\text{D.} \\text{参数过多}$",
+  "content": "位置编码的核心作用是解决 Self-Attention 的什么问题？",
   "difficulty": 0.5,
   "options": [
    "A. 计算效率低",
@@ -599,8 +599,8 @@
  {
   "id": "lq032",
   "type": "choice",
-  "content": "DPO 和 RLHF 的关键区别在于：$\\text{A.} \\text{是否使用奖励模型}$ $\\text{B.} \\text{是否需要参考模型}$ $\\text{C.} \\text{是否依赖人类反馈}$ $\\text{D.} \\text{是否进行强化学习}$",
-  "difficulty": 0.6,
+  "content": "DPO 和 RLHF 的关键区别在于：",
+  "difficulty": 0.7,
   "options": [
    "A. 是否使用奖励模型",
    "B. 是否需要参考模型",
@@ -654,8 +654,8 @@
  },
  {
   "id": "lq035",
-  "type": "choice",
-  "content": "量化的核心目标是将模型参数从高精度浮点数映射到低精度整数，其主要收益包括：$A. 显存占用降低$、$B. 推理速度提升$、$C. 模型体积减小$、$D. 精度损失增加$",
+  "type": "multi",
+  "content": "量化的核心目标是将模型参数从高精度浮点数映射到低精度整数，其主要收益包括：",
   "difficulty": 0.5,
   "options": [
    "A. 显存占用降低",
@@ -677,7 +677,7 @@
  {
   "id": "lq036",
   "type": "blank",
-  "content": "根据 Scaling Law，模型的损失值随模型规模、训练数据量和训练算力按__幂律__下降。",
+  "content": "根据 Scaling Law，模型的损失值随模型规模、训练数据量和训练算力按____下降。",
   "difficulty": 0.6,
   "options": [],
   "answer": "幂律",
@@ -710,8 +710,8 @@
  },
  {
   "id": "lq038",
-  "type": "choice",
-  "content": "以下哪些是 GPTQ 的特点？$A. 支持极端低位量化$、$B. 量化耗时短$、$C. 不依赖模型结构$、$D. 误差补偿机制$",
+  "type": "multi",
+  "content": "以下哪些是 GPTQ 的特点？",
   "difficulty": 0.5,
   "options": [
    "A. 支持极端低位量化",
@@ -732,8 +732,8 @@
  },
  {
   "id": "lq039",
-  "type": "choice",
-  "content": "关于 Scaling Law 的描述，哪一项是正确的？$A. 模型规模越大，损失值一定越小$、$B. 损失值随模型规模、数据量、算力按幂律下降$、$C. 模型规模没有上限$、$D. 数据量越多效果越好$",
+  "type": "multi",
+  "content": "关于 Scaling Law 的描述，以下哪些是正确的？",
   "difficulty": 0.6,
   "options": [
    "A. 模型规模越大，损失值一定越小",
@@ -755,7 +755,7 @@
  {
   "id": "lq040",
   "type": "blank",
-  "content": "在 Llama 3 中，参数与数据的配比达到__1:1875__，远超 Chinchilla 推荐的 1:20。",
+  "content": "在 Llama 3 中，参数与数据的配比达到____，远超 Chinchilla 推荐的 1:20。",
   "difficulty": 0.6,
   "options": [],
   "answer": "1:1875",
@@ -772,7 +772,7 @@
  {
   "id": "lq041",
   "type": "choice",
-  "content": "关于 Top-P 和 Top-K 的区别，哪一项是正确的？$A. Top-P 是固定截断$、$B. Top-K 是自适应截断$、$C. Top-P 根据概率分布自动调整候选池大小$、$D. Top-K 更适合开放性任务$",
+  "content": "关于 Top-P 和 Top-K 的区别，哪一项是正确的？",
   "difficulty": 0.5,
   "options": [
    "A. Top-P 是固定截断",
@@ -810,8 +810,8 @@
  },
  {
   "id": "lq043",
-  "type": "choice",
-  "content": "以下哪些是涌现能力的特点？$A. 随着模型规模增加而突变出现$、$B. 与数据量无关$、$C. 在 50B-100B 参数时出现$、$D. 只出现在大模型中$",
+  "type": "multi",
+  "content": "以下哪些是涌现能力的特点？",
   "difficulty": 0.5,
   "options": [
    "A. 随着模型规模增加而突变出现",
@@ -833,7 +833,7 @@
  {
   "id": "lq044",
   "type": "choice",
-  "content": "Tokenizer 的主要作用是？$A. 将文本转换为数字 ID 序列$ $B. 生成代码$ $C. 计算损失函数$ $D. 优化模型参数$",
+  "content": "Tokenizer 的主要作用是？",
   "difficulty": 0.5,
   "options": [
    "A. 将文本转换为数字 ID 序列",
@@ -855,7 +855,7 @@
  {
   "id": "lq045",
   "type": "choice",
-  "content": "以下哪种分词方式能有效处理新词问题？$A. 字符级分词$ $B. 词级分词$ $C. 子词分词$ $D. 无分词$",
+  "content": "以下哪种分词方式能有效处理新词问题？",
   "difficulty": 0.55,
   "options": [
    "A. 字符级分词",
@@ -911,7 +911,7 @@
  {
   "id": "lq048",
   "type": "choice",
-  "content": "以下哪项不是 Transformer 的组成部分？$A. Multi-Head Attention$ $B. 位置编码$ $C. LSTM$ $D. 前馈网络$",
+  "content": "以下哪项不是 Transformer 的组成部分？",
   "difficulty": 0.55,
   "options": [
    "A. Multi-Head Attention",
@@ -990,7 +990,7 @@
   "id": "lq052",
   "type": "open",
   "content": "简述预训练 + SFT + 对齐三阶段的作用。",
-  "difficulty": 0.6,
+  "difficulty": 0.7,
   "options": [],
   "answer": "预训练学习通用语言表示；SFT 微调适应特定任务；对齐确保输出符合人类价值观。",
   "error_modes": [
@@ -1146,7 +1146,7 @@
   "id": "rq003",
   "type": "open",
   "content": "RAG 解决了 LLM 的哪些核心问题？请简要说明。",
-  "difficulty": 0.6,
+  "difficulty": 0.7,
   "answer": "知识时效性、私有知识覆盖不足、幻觉问题。RAG 通过外部知识库实时检索，避免模型依赖固定参数知识，提升答案准确性与可溯源性。",
   "error_modes": [
    "r01_e1"
@@ -1218,7 +1218,7 @@
  {
   "id": "rq007",
   "type": "choice",
-  "content": "在 RAG 系统中，文档不能直接存入向量库的原因不包括以下哪项？$\\text{A.} $ 向量模型输入长度限制$\\text{B.} $ 检索精度要求$\\text{C.} $ 文档内容过长导致信息被平均化$\\text{D.} $ 向量无法表示文本内容",
+  "content": "在 RAG 系统中，文档不能直接存入向量库的原因不包括以下哪项？",
   "difficulty": 0.5,
   "options": [
    "A. ",
@@ -1257,8 +1257,8 @@
  {
   "id": "rq009",
   "type": "choice",
-  "content": "以下哪种文档切割策略最适合有明确标题结构的 Markdown 文件？$\\text{A.} $ 固定大小切割$\\text{B.} $ 语义边界切割$\\text{C.} $ 标题层级切割$\\text{D.} $ 父子切割",
-  "difficulty": 0.6,
+  "content": "以下哪种文档切割策略最适合有明确标题结构的 Markdown 文件？",
+  "difficulty": 0.66,
   "options": [
    "A. ",
    "B. ",
@@ -1280,7 +1280,7 @@
   "id": "rq010",
   "type": "open",
   "content": "请简述 Embedding 模型的核心特性。",
-  "difficulty": 0.6,
+  "difficulty": 0.66,
   "options": [],
   "answer": "Embedding 模型的核心特性是将语义相近的文本映射为数学空间中距离相近的向量。",
   "error_modes": [
@@ -1296,7 +1296,7 @@
  {
   "id": "rq011",
   "type": "choice",
-  "content": "在选择 Embedding 模型时，以下哪个因素不是主要考量？$\\text{A.} $ 中文支持$\\text{B.} $ 向量维度$\\text{C.} $ 最大输入长度$\\text{D.} $ 模型训练数据量",
+  "content": "在选择 Embedding 模型时，以下哪个因素不是主要考量？",
   "difficulty": 0.5,
   "options": [
    "A. ",
@@ -1397,7 +1397,7 @@
   "id": "rq016",
   "type": "open",
   "content": "请简述 HNSW 索引的工作原理。",
-  "difficulty": 0.65,
+  "difficulty": 0.7,
   "options": [],
   "answer": "HNSW 是一种分层图结构，通过多层导航快速定位最近邻，从顶层稀疏图开始逐步细化到底层，提高检索效率。",
   "error_modes": [
@@ -1414,7 +1414,7 @@
   "id": "rq017",
   "type": "choice",
   "content": "Milvus 的 Segment 合并机制可能导致什么问题？",
-  "difficulty": 0.6,
+  "difficulty": 0.66,
   "options": [
    "A. 查询延迟增加",
    "B. 数据丢失",
@@ -1452,7 +1452,7 @@
  {
   "id": "rq019",
   "type": "choice",
-  "content": "RAG 在线流程的第六步是？$\\text{A.} $ Prompt 拼装 $\\text{B.} $ 大模型生成 + 溯源 $\\text{C.} $ Query 预处理 $\\text{D.} $ 向量检索",
+  "content": "RAG 在线流程的第六步是？",
   "difficulty": 0.5,
   "options": [
    "A. Prompt 拼装",
@@ -1508,7 +1508,7 @@
  {
   "id": "rq022",
   "type": "choice",
-  "content": "在 RAG 中，使用 Embedding 模型时，必须满足什么条件？$\\text{A.} $ 与离线建库时使用相同的模型 $\\text{B.} $ 使用任意 Embedding 模型 $\\text{C.} $ 使用更高级的模型 $\\text{D.} $ 使用更小的模型",
+  "content": "在 RAG 中，使用 Embedding 模型时，必须满足什么条件？",
   "difficulty": 0.5,
   "options": [
    "A. 与离线建库时使用相同的模型",
@@ -1530,7 +1530,7 @@
  {
   "id": "rq023",
   "type": "choice",
-  "content": "以下哪种方法用于解决用户问题与文档表述风格差异的问题？$\\text{A.} $ 直接改写 $\\text{B.} $ HyDE $\\text{C.} $ Step-back Prompting $\\text{D.} $ 多 Query 扩展",
+  "content": "以下哪种方法用于解决用户问题与文档表述风格差异的问题？",
   "difficulty": 0.55,
   "options": [
    "A. 直接改写",
@@ -1569,7 +1569,7 @@
  {
   "id": "rq025",
   "type": "choice",
-  "content": "多路召回的核心目的是什么？$\\text{A. 提高检索速度} \\quad \\text{B. 提升召回质量} \\quad \\text{C. 降低模型复杂度} \\quad \\text{D. 减少数据存储量}$",
+  "content": "多路召回的核心目的是什么？",
   "difficulty": 0.5,
   "options": [
    "A. 提高检索速度",
@@ -1625,7 +1625,7 @@
  {
   "id": "rq028",
   "type": "choice",
-  "content": "以下哪种方法用于解决用户提问与文档表述角度不一致的问题？$\\text{A. 多 Query 扩展} \\quad \\text{B. BM25 关键词检索} \\quad \\text{C. 向量检索} \\quad \\text{D. Rerank}$",
+  "content": "以下哪种方法用于解决用户提问与文档表述角度不一致的问题？",
   "difficulty": 0.5,
   "options": [
    "A. 多 Query 扩展",
@@ -1647,8 +1647,8 @@
  {
   "id": "rq029",
   "type": "choice",
-  "content": "多粒度分层索引的主要优势是：$\\text{A. 提高检索速度} \\quad \\text{B. 适应不同问题类型} \\quad \\text{C. 降低存储成本} \\quad \\text{D. 简化模型结构}$",
-  "difficulty": 0.6,
+  "content": "多粒度分层索引的主要优势是：",
+  "difficulty": 0.66,
   "options": [
    "A. 提高检索速度",
    "B. 适应不同问题类型",
@@ -1686,7 +1686,7 @@
  {
   "id": "rq031",
   "type": "choice",
-  "content": "当业务问题涉及多个实体之间的关联推理时，应该采用什么技术来增强？$\\text{A.} $ 向量检索 $\\text{B.} $ 图数据库 $\\text{C.} $ 混合模型 $\\text{D.} $ 纯文本匹配",
+  "content": "当业务问题涉及多个实体之间的关联推理时，应该采用什么技术来增强？",
   "difficulty": 0.5,
   "options": [
    "A. 向量检索",
@@ -1726,7 +1726,7 @@
   "id": "rq033",
   "type": "open",
   "content": "请简述如何通过Prompt约束减少RAG系统中的幻觉。",
-  "difficulty": 0.6,
+  "difficulty": 0.7,
   "options": [],
   "answer": "在Prompt中明确要求只能使用提供的资料回答，不得引入外部知识，且对无法回答的问题应直接说明不知道。",
   "error_modes": [
@@ -1742,7 +1742,7 @@
  {
   "id": "rq034",
   "type": "choice",
-  "content": "以下哪项是评估RAG系统生成层的核心指标？$\\text{A.} $ Hit@K $\\text{B.} $ MRR $\\text{C.} $ Faithfulness $\\text{D.} $ Context Recall",
+  "content": "以下哪项是评估RAG系统生成层的核心指标？",
   "difficulty": 0.5,
   "options": [
    "A. Hit@K",
@@ -1782,7 +1782,7 @@
   "id": "rq036",
   "type": "open",
   "content": "为什么说线上指标（如用户点踩率）是RAG系统最终的衡量标准？",
-  "difficulty": 0.6,
+  "difficulty": 0.7,
   "options": [],
   "answer": "因为离线指标不能完全反映真实用户满意度，线上指标能直接体现用户的实际反馈和系统表现。",
   "error_modes": [
@@ -1798,7 +1798,7 @@
  {
   "id": "rq037",
   "type": "choice",
-  "content": "在 RAG 系统中，当文档内容发生变化时，正确的知识库更新策略是？$\\text{A.} \\text{直接更新对应 chunk 的内容}$ $\\text{B.} \\text{先删除旧 chunk，再重新切割入库}$ $\\text{C.} \\text{仅修改变化的 chunk}$ $\\text{D.} \\text{不处理，等待下一次轮询}$",
+  "content": "在 RAG 系统中，当文档内容发生变化时，正确的知识库更新策略是？",
   "difficulty": 0.5,
   "options": [
    "A. 直接更新对应 chunk 的内容",
@@ -1838,7 +1838,7 @@
   "id": "rq039",
   "type": "open",
   "content": "为什么不能对 RAG 知识库中的 chunk 做局部更新？请简要说明原因。",
-  "difficulty": 0.6,
+  "difficulty": 0.7,
   "options": [],
   "answer": "因为文档内容变化会导致 chunk 切割边界改变，无法准确匹配旧 chunk 和新 chunk，导致数据不一致。",
   "error_modes": [
@@ -1854,8 +1854,8 @@
  {
   "id": "rq040",
   "type": "choice",
-  "content": "以下哪种工具适合处理复杂排版的 PDF 文档？$\\text{A.} \\text{pypdf}$ $\\text{B.} \\text{pdfplumber}$ $\\text{C.} \\text{unstructured}$ $\\text{D.} \\text{以上都是}$",
-  "difficulty": 0.6,
+  "content": "以下哪种工具适合处理复杂排版的 PDF 文档？",
+  "difficulty": 0.66,
   "options": [
    "A. pypdf",
    "B. pdfplumber",
@@ -1972,7 +1972,7 @@
   "id": "aq004",
   "type": "choice",
   "content": "工具调用的关键作用是什么？",
-  "difficulty": 0.6,
+  "difficulty": 0.66,
   "options": [
    "A. 提高模型推理能力",
    "B. 让 Agent 能真正执行任务",
@@ -2049,7 +2049,7 @@
  {
   "id": "aq008",
   "type": "choice",
-  "content": "在 Agent 和 Workflow 的对比中，哪一项是 Agent 的核心特点？$\\text{A.} $ 流程固定，每一步由开发者决定；$\\text{B.} $ LLM 自主决定下一步操作；$\\text{C.} $ 所有步骤都依赖外部工具；$\\text{D.} $ 无法处理未预见的情况。",
+  "content": "在 Agent 和 Workflow 的对比中，哪一项是 Agent 的核心特点？",
   "difficulty": 0.5,
   "options": [
    "A. 流程固定，每一步由开发者决定",
@@ -2105,7 +2105,7 @@
  {
   "id": "aq011",
   "type": "choice",
-  "content": "Reflection 机制的主要作用是什么？$\\text{A.} $ 提高任务执行效率；$\\text{B.} $ 增加系统灵活性；$\\text{C.} $ 提升输出质量；$\\text{D.} $ 减少 token 消耗。",
+  "content": "Reflection 机制的主要作用是什么？",
   "difficulty": 0.5,
   "options": [
    "A. 提高任务执行效率",
@@ -2201,7 +2201,7 @@
   "id": "aq016",
   "type": "open",
   "content": "动态拆分和静态拆分的主要区别是什么？",
-  "difficulty": 0.6,
+  "difficulty": 0.7,
   "options": [],
   "answer": "静态拆分是提前设计好任务流程，而动态拆分是由LLM根据目标规划步骤。",
   "error_modes": [
@@ -2257,7 +2257,7 @@
   "id": "aq019",
   "type": "open",
   "content": "实体记忆的主要特点是什么？",
-  "difficulty": 0.6,
+  "difficulty": 0.66,
   "options": [],
   "answer": "结构化提取关键事实，信息密度高，查询快。",
   "error_modes": [
@@ -2273,7 +2273,7 @@
  {
   "id": "aq020",
   "type": "choice",
-  "content": "多智能体系统的核心优势不包括以下哪项？$\\mathrm{A.} $ 提高任务处理效率 $\\mathrm{B.} $ 降低 context window 压力 $\\mathrm{C.} $ 实现完全去中心化协作 $\\mathrm{D.} $ 提升专业分工能力",
+  "content": "多智能体系统的核心优势不包括以下哪项？",
   "difficulty": 0.5,
   "options": [
    "A. 提高任务处理效率",
@@ -2313,7 +2313,7 @@
   "id": "aq022",
   "type": "open",
   "content": "请简述为什么在实际工程中，大多数 Multi-Agent 系统采用中心化方案而非去中心化方案。",
-  "difficulty": 0.6,
+  "difficulty": 0.7,
   "options": [],
   "answer": "中心化方案具有清晰的调度逻辑和责任归属，便于调试和问题排查，而去中心化方案容易出现任务分配无协调、执行顺序无保证等问题。",
   "error_modes": [
@@ -2329,7 +2329,7 @@
  {
   "id": "aq023",
   "type": "choice",
-  "content": "以下哪种记忆压缩方法会丢失细节信息？$\\mathrm{A.} $ 摘要压缩 $\\mathrm{B.} $ 滑动窗口 $\\mathrm{C.} $ 重要性过滤 $\\mathrm{D.} $ 结构化抽取",
+  "content": "以下哪种记忆压缩方法会丢失细节信息？",
   "difficulty": 0.5,
   "options": [
    "A. 摘要压缩",
@@ -2369,7 +2369,7 @@
   "id": "aq025",
   "type": "open",
   "content": "请说明主动压缩（Proactive Compression）的主要应用场景及优势。",
-  "difficulty": 0.6,
+  "difficulty": 0.66,
   "options": [],
   "answer": "主动压缩适用于工具调用频繁的场景，能提前压缩中间结果，避免 context 超限，提升整体效率。",
   "error_modes": [
@@ -2385,7 +2385,7 @@
  {
   "id": "aq026",
   "type": "choice",
-  "content": "以下哪项不是 Agent 框架的主要痛点？$\\text{A.} $ 抽象层过多导致调试困难$\\text{B.} $ 版本升级频繁且破坏性变更$\\text{C.} $ 手写代码更易优化性能$\\text{D.} $ 框架通用设计与业务需求偏差",
+  "content": "以下哪项不是 Agent 框架的主要痛点？",
   "difficulty": 0.5,
   "options": [
    "A. 抽象层过多导致调试困难",
@@ -2424,8 +2424,8 @@
  {
   "id": "aq028",
   "type": "choice",
-  "content": "以下哪种规划方式能解决 CoT 走错方向的问题？$\\text{A.} $ CoT$\\text{B.} $ ToT$\\text{C.} $ GoT$\\text{D.} $ Plan-and-Execute",
-  "difficulty": 0.6,
+  "content": "以下哪种规划方式能解决 CoT 走错方向的问题？",
+  "difficulty": 0.66,
   "options": [
    "A. CoT",
    "B. ToT",
@@ -2447,7 +2447,7 @@
   "id": "aq029",
   "type": "open",
   "content": "反思机制的核心流程是什么？请简要说明。",
-  "difficulty": 0.6,
+  "difficulty": 0.7,
   "options": [],
   "answer": "生成 -> 评估 -> 改进",
   "error_modes": [
@@ -2463,7 +2463,7 @@
  {
   "id": "aq030",
   "type": "choice",
-  "content": "以下哪种场景不适合使用反思机制？$\\text{A.} $ 生成最终报告$\\text{B.} $ 简单问答$\\text{C.} $ 复杂推理任务$\\text{D.} $ 重要决策分析",
+  "content": "以下哪种场景不适合使用反思机制？",
   "difficulty": 0.5,
   "options": [
    "A. 生成最终报告",
@@ -2525,7 +2525,7 @@
   "id": "aq033",
   "type": "choice",
   "content": "在多 Agent 系统中，以下哪种情况更适合使用共享状态？",
-  "difficulty": 0.6,
+  "difficulty": 0.66,
   "options": [
    "A. Agent 之间依赖关系强且需要直接传递结果",
    "B. Agent 之间高度解耦且不需要知道彼此存在",
@@ -2564,7 +2564,7 @@
   "id": "aq035",
   "type": "open",
   "content": "动态路由相比静态路由有哪些优缺点？",
-  "difficulty": 0.6,
+  "difficulty": 0.7,
   "answer": "优点：灵活，能处理未预设路径；缺点：增加延迟和成本，LLM 可能出错",
   "error_modes": [
    "a19_e1"
@@ -2642,7 +2642,7 @@
   "id": "tq003",
   "type": "open",
   "content": "SFT 阶段的主要目标是什么？",
-  "difficulty": 0.6,
+  "difficulty": 0.66,
   "options": [],
   "answer": "让模型学会识别工具定义、判断是否需要调用工具，并输出结构化的 JSON 请求。",
   "error_modes": [
@@ -2658,7 +2658,7 @@
  {
   "id": "tq004",
   "type": "choice",
-  "content": "RLHF 的主要作用是帮助模型建立 $边界感$。",
+  "content": "RLHF 的主要作用是帮助模型建立什么？",
   "difficulty": 0.6,
   "options": [
    "A. 执行能力",
@@ -2698,7 +2698,7 @@
   "id": "tq006",
   "type": "open",
   "content": "为什么 SFT 阶段后模型可能过度调用工具？",
-  "difficulty": 0.6,
+  "difficulty": 0.7,
   "options": [],
   "answer": "因为 SFT 训练数据中大部分样本是需要调用工具的场景，模型可能形成‘遇到问题就调工具’的惯性。",
   "error_modes": [
@@ -2714,7 +2714,7 @@
  {
   "id": "tq007",
   "type": "choice",
-  "content": "MCP 的核心目标是解决什么问题？$\\text{A.} \\text{模型输出格式标准化}$ $\\text{B.} \\text{工具接入碎片化}$ $\\text{C.} \\text{模型训练效率}$ $\\text{D.} \\text{数据存储结构}$",
+  "content": "MCP 的核心目标是解决什么问题？",
   "difficulty": 0.5,
   "options": [
    "A. 模型输出格式标准化",
@@ -2770,7 +2770,7 @@
  {
   "id": "tq010",
   "type": "choice",
-  "content": "MCP 的 Server 负责什么功能？$\\text{A.} \\text{提供只读数据}$ $\\text{B.} \\text{执行有副作用的操作}$ $\\text{C.} \\text{管理多个 Client 连接}$ $\\text{D.} \\text{定义提示词模板}$",
+  "content": "MCP 的 Server 负责什么功能？",
   "difficulty": 0.5,
   "options": [
    "A. 提供只读数据",
@@ -2826,7 +2826,7 @@
  {
   "id": "tq013",
   "type": "choice",
-  "content": "以下哪种场景更适合使用 Function Calling？$\\text{A.} $ 工具需要跨项目复用 $\\text{B.} $ 工具只为单一应用服务 $\\text{C.} $ 工具数量较多且需统一管理 $\\text{D.} $ 需要精细控制执行逻辑",
+  "content": "以下哪种场景更适合使用 Function Calling？",
   "difficulty": 0.5,
   "options": [
    "A. 工具需要跨项目复用",
@@ -2848,7 +2848,7 @@
  {
   "id": "tq014",
   "type": "choice",
-  "content": "MCP Server 的主要优势是？$\\text{A.} $ 简单直接，无需额外配置 $\\text{B.} $ 工具生命周期与应用解耦 $\\text{C.} $ 适合快速原型开发 $\\text{D.} $ 部署环境限制更小",
+  "content": "MCP Server 的主要优势是？",
   "difficulty": 0.55,
   "options": [
    "A. 简单直接，无需额外配置",
@@ -2888,7 +2888,7 @@
   "id": "tq016",
   "type": "open",
   "content": "为什么推理模型不能支持工具调用？请简述核心原因。",
-  "difficulty": 0.65,
+  "difficulty": 0.7,
   "answer": "推理模型的思考链是一次性连续生成的，不能中途打断。而工具调用需要暂停等待外部执行，导致推理过程断开。",
   "error_modes": [
    "t09_e1"
@@ -2904,7 +2904,7 @@
  {
   "id": "tq017",
   "type": "choice",
-  "content": "Skill 与普通 prompt 的最大区别是？$\\text{A.} $ 可以打包脚本和模板 $\\text{B.} $ 能被 Agent 自动发现和加载 $\\text{C.} $ 包含参考文档 $\\text{D.} $ 支持多语言",
+  "content": "Skill 与普通 prompt 的最大区别是？",
   "difficulty": 0.5,
   "options": [
    "A. 可以打包脚本和模板",
@@ -2943,7 +2943,7 @@
  {
   "id": "tq019",
   "type": "choice",
-  "content": "MCP 的主要作用是解决 Agent 的什么问题？$\\text{A.} \\text{如何与用户交互} \\quad \\text{B.} \\text{如何获取外部能力} \\quad \\text{C.} \\text{如何生成文本} \\quad \\text{D.} \\text{如何执行复杂任务}$",
+  "content": "MCP 的主要作用是解决 Agent 的什么问题？",
   "difficulty": 0.5,
   "options": [
    "A. 如何与用户交互",
@@ -2965,7 +2965,7 @@
  {
   "id": "tq020",
   "type": "choice",
-  "content": "Skill 的核心作用是解决 Agent 的什么问题？$\\text{A.} \\text{如何调用工具} \\quad \\text{B.} \\text{如何执行流程} \\quad \\text{C.} \\text{如何访问数据库} \\quad \\text{D.} \\text{如何处理上下文}$",
+  "content": "Skill 的核心作用是解决 Agent 的什么问题？",
   "difficulty": 0.55,
   "options": [
    "A. 如何调用工具",
@@ -3021,8 +3021,8 @@
  {
   "id": "tq023",
   "type": "choice",
-  "content": "以下哪项是 MCP 和 Skill 的关系？$\\text{A.} \\text{MCP 提供工具，Skill 定义流程} \\quad \\text{B.} \\text{MCP 是 Skill 的子集} \\quad \\text{C.} \\text{Skill 提供工具，MCP 定义流程} \\quad \\text{D.} \\text{两者互不相关}$",
-  "difficulty": 0.6,
+  "content": "以下哪项是 MCP 和 Skill 的关系？",
+  "difficulty": 0.66,
   "options": [
    "A. MCP 提供工具，Skill 定义流程",
    "B. MCP 是 Skill 的子集",
@@ -3061,7 +3061,7 @@
  {
   "id": "tq025",
   "type": "choice",
-  "content": "以下哪项不是 LLM 网关的核心功能？$\\text{A.} $ 多模型统一接口$\\text{B.} $ API Key 集中管理$\\text{C.} $ 用户身份验证$\\text{D.} $ 成本追踪",
+  "content": "以下哪项不是 LLM 网关的核心功能？",
   "difficulty": 0.5,
   "options": [
    "A. 多模型统一接口",
@@ -3101,7 +3101,7 @@
   "id": "tq027",
   "type": "open",
   "content": "简述语义缓存的工作原理及适用场景。",
-  "difficulty": 0.6,
+  "difficulty": 0.7,
   "answer": "语义缓存将用户问题向量化后在向量数据库中搜索相似问题，若匹配则直接返回历史答案，避免调用 LLM。适用于高频重复问答场景，如客服机器人。",
   "error_modes": [
    "t15_e1"
@@ -3117,7 +3117,7 @@
  {
   "id": "tq028",
   "type": "choice",
-  "content": "以下哪种情况适合使用语义缓存？$\\text{A.} $ 实时股票查询$\\text{B.} $ 产品 FAQ 问答$\\text{C.} $ 个性化推荐$\\text{D.} $ 每日天气预报",
+  "content": "以下哪种情况适合使用语义缓存？",
   "difficulty": 0.5,
   "options": [
    "A. 实时股票查询",
@@ -3157,7 +3157,7 @@
   "id": "tq030",
   "type": "open",
   "content": "说明 LLM 网关如何提升系统可靠性。",
-  "difficulty": 0.6,
+  "difficulty": 0.7,
   "answer": "网关支持负载均衡和故障转移，当主模型失败时自动切换到备用模型，确保业务无感知。",
   "error_modes": [
    "t15_e1"
@@ -3196,7 +3196,7 @@
   "id": "oq002",
   "type": "choice",
   "content": "ReAct、Plan-and-Execute、Reflection 三种 Agent 设计范式的共同点是什么？",
-  "difficulty": 0.6,
+  "difficulty": 0.66,
   "options": [
    "A. 都依赖外部工具调用",
    "B. 都强调自主规划能力",
@@ -3233,7 +3233,7 @@
   "id": "oq004",
   "type": "open",
   "content": "请简述为什么有时候需要手搓 Agent 而不是直接使用成熟框架？",
-  "difficulty": 0.6,
+  "difficulty": 0.7,
   "answer": "可以更灵活地定制功能，适应特定业务需求，避免框架限制",
   "tags": [
    "overview_index.md"

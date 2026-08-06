@@ -108,7 +108,7 @@ function Start-All {
   if ($pid8010) {
     Write-Warn2 "后端已在运行 (pid $pid8010)，跳过"
   } else {
-    $p = Start-Process -FilePath $VenvPy -ArgumentList "-m", "uvicorn", "app.main:app", "--host", "127.0.0.1", "--port", "8010" -WorkingDirectory (Join-Path $Root "backend") -RedirectStandardOutput (Join-Path $LogDir "backend.log") -RedirectStandardError (Join-Path $LogDir "backend.err.log") -WindowStyle Hidden -PassThru
+    $p = Start-Process -FilePath $VenvPy -ArgumentList "-m", "uvicorn", "app.main:app", "--host", "127.0.0.1", "--port", "8010", "--reload" -WorkingDirectory (Join-Path $Root "backend") -RedirectStandardOutput (Join-Path $LogDir "backend.log") -RedirectStandardError (Join-Path $LogDir "backend.err.log") -WindowStyle Hidden -PassThru
     $p.Id | Out-File $BackPid -Encoding ascii
     Start-Sleep -Seconds 4
     if (Get-PortPid 8010) { Write-Ok "后端已启动 (pid $($p.Id))，日志: logs\backend.log" }

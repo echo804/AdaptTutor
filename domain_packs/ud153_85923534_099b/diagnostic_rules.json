@@ -1,0 +1,13 @@
+{
+  "initial_strategy": "weakest_node",
+  "termination": {
+    "confidence_threshold": 0.8,
+    "max_questions": 15
+  },
+  "bkt": {
+    "p_l0": 0.3,
+    "p_t": 0.05,
+    "p_g": 0.2,
+    "p_s": 0.1
+  }
+}

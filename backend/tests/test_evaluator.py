@@ -93,6 +93,21 @@ def test_rule_keyword_match():
     assert not judge_by_rule("合并同类项", q).correct
 
 
+def test_rule_keyword_semantic_subset():
+    """语义等价：学生答案只是标准答案的关键子集（省去铺垫）→ 判对（M5 语义判题）。"""
+    q = _q("k2", "blank", "这一步的依据？", "根据等式性质，两边同时除以不为零的数")
+    assert judge_by_rule("两边同时除以不为零的数", q).correct
+    # 过短残片（单字）不判对，避免误判
+    assert not judge_by_rule("的", q).correct
+
+
+def test_rule_numeric_reverse():
+    """数字答案：标准答案含数字、学生只答关键数字 → 数字比较判对（"x=2" vs "2"）。"""
+    q = _q("k3", "blank", "解方程得？", "x = 2")
+    assert judge_by_rule("2", q).correct
+    assert not judge_by_rule("3", q).correct
+
+
 def test_rule_cannot_judge_returns_none():
     q = _q("u1", "open", "思路？", "x")  # 单字符答案无法规则判定
     assert judge_by_rule("任意思路", q) is None

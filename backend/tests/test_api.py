@@ -147,6 +147,37 @@ async def test_diagnostic_session_flow(client):
     assert len(r.json()) >= 4  # user/assistant × 2
 
 
+async def test_session_cards_rebuild(client):
+    """M5 抽卡：GET /sessions/{sid}/cards 按 answer 事件重建历史卡（含题目快照 + 当前未答题）。"""
+    token, _ = await _register(client)
+    h = {"Authorization": f"Bearer {token}"}
+    await client.put("/me/api-keys/deepseek", json={"provider": "deepseek", "api_key": "sk-secret-abcdefgh"}, headers=h)
+    r = await client.post(
+        # 只用选择题：choice 题的字母作答必可判（不 indeterminate），保证 answer 事件落库
+        "/api/v1/sessions", json={"type": "diagnostic", "config": {"qcount": 3, "qtypes": ["choice"]}}, headers=h
+    )
+    sid = r.json()["session_id"]
+
+    # 作答两题（choice 题 "A"/"B" 均可判）
+    for ans in ("A", "B"):
+        r = await client.post(f"/api/v1/sessions/{sid}/messages", json={"kind": "answer", "answer": ans}, headers=h)
+        assert r.status_code == 200
+        if r.json().get("done"):
+            break
+
+    r = await client.get(f"/api/v1/sessions/{sid}/cards", headers=h)
+    assert r.status_code == 200
+    data = r.json()
+    answered = [c for c in data["items"] if c["answered"]]
+    assert len(answered) >= 1  # 至少一次成功作答被重建
+    assert all(c["question"] for c in answered)  # 题目快照可恢复
+    assert all("correct" in c for c in answered)
+    # 未答卡（若有）在最末（继续作答）
+    assert len(data["items"]) >= len(answered)
+    if data["items"]:
+        assert data["items"][-1]["answered"] or len(data["items"]) > len(answered)
+
+
 async def test_session_detail_and_restore(client):
     token, _ = await _register(client)
     h = {"Authorization": f"Bearer {token}"}

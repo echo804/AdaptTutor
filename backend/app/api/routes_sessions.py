@@ -15,6 +15,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.deps import get_current_user, get_db, require_ai_access
 from app.api.routes_domains import _active_pack
 from app.api.schemas import (
+    HintReply,
     MessageOut,
     MessageReply,
     MessageSendRequest,
@@ -221,6 +222,16 @@ async def api_send_message(
                     "qid": q.id,
                     "correct": result.correct,
                     "user_answer": body.answer,
+                    # M5：题目快照（历史卡重建数据源，变式题 id 不在领域包也可恢复内容）
+                    "question": {
+                        "id": q.id,
+                        "type": q.type,
+                        "content": q.content,
+                        "options": q.options,
+                        "answer": q.answer,
+                        "difficulty": q.difficulty,
+                        "step_node_map": q.step_node_map,
+                    },
                 },
             )
             # M4r5：判错 → 落库错题集（复盘抽卡数据源）
@@ -325,6 +336,7 @@ async def api_send_message(
                         feedback=hint,
                         judge_method="rule",
                         question=_question_to_dict(t.verify_question),
+                        context=dict(t.sm.context),
                     )
                 elif j.indeterminate:
                     # ELICIT 非答案（说思路/闲聊）→ 正常对话流转（"先说说你的思路"）
@@ -332,6 +344,7 @@ async def api_send_message(
                     reply = MessageReply(
                         state=r.state, message=r.message, degraded=r.degraded, mock=r.mock,
                         question=_question_to_dict(t.verify_question),
+                        context=r.context,
                     )
                 else:
                     r = t.tutor_step(body.content, correct=j.correct)
@@ -347,6 +360,20 @@ async def api_send_message(
                             "qid": t.verify_question.id if t.verify_question else None,
                             "correct": j.correct,
                             "user_answer": body.content,
+                            # M5：题目快照（历史卡重建数据源，变式题 id 不在领域包也可恢复内容）
+                            "question": (
+                                {
+                                    "id": t.verify_question.id,
+                                    "type": t.verify_question.type,
+                                    "content": t.verify_question.content,
+                                    "options": t.verify_question.options,
+                                    "answer": t.verify_question.answer,
+                                    "difficulty": t.verify_question.difficulty,
+                                    "step_node_map": t.verify_question.step_node_map,
+                                }
+                                if t.verify_question
+                                else None
+                            ),
                         },
                     )
                     judge_line = (
@@ -364,12 +391,14 @@ async def api_send_message(
                         judge_method=j.method,
                         correct_answer=None if j.correct else j.correct_answer,
                         question=_question_to_dict(t.verify_question),
+                        context=r.context,
                     )
             else:
                 r = t.tutor_step(body.content or "", correct=body.correct)
                 reply = MessageReply(
                     state=r.state, message=r.message, degraded=r.degraded, mock=r.mock,
                     question=_question_to_dict(t.verify_question),
+                    context=r.context,
                 )
 
     # 掌握度快照落库（mastery_states，供仪表盘真实数据）
@@ -452,6 +481,71 @@ async def api_session_state(
         "verify_question": _question_to_dict(t.verify_question) if not is_diag else None,
         "done": done,
     }
+
+
+@router.get("/sessions/{sid}/cards")
+async def api_session_cards(
+    sid: int,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """会话卡片历史（M5 抽卡恢复）：按 answer 事件重建已答卡（按 qid 去重、最新作答为准）+ 当前未答题。"""
+    s = await _own_session(db, sid, user.id)
+    t = await _new_orchestrator((s.context or {}).get("pack_id"), db, user.id)
+    t.restore_state(s.context or {})
+    events = await repo.list_events_by_session(db, sid, "answer")
+    by_id: dict[str, Question] = {q.id: q for q in t.pack.questions}
+    latest: dict[str, dict] = {}
+    for ev in events:
+        p = ev.payload or {}
+        qid = p.get("qid")
+        if not qid:
+            continue
+        q: Question | None = None
+        snap = p.get("question")
+        if isinstance(snap, dict):
+            try:
+                q = Question(**snap)
+            except Exception:
+                q = None
+        if q is None:
+            q = by_id.get(qid)
+        latest[qid] = {
+            "qid": qid,
+            "question": _question_to_dict(q),
+            "user_answer": p.get("user_answer"),
+            "correct": bool(p.get("correct")),
+            "state": "diagnose" if s.type == "diagnostic" else "done",
+            "answered": True,
+        }
+    # 当前未答题（会话未完成时追加为最后一张，供继续作答）
+    is_diag = s.type == "diagnostic"
+    cur_q = t.current_question if is_diag else t.verify_question
+    done = s.status == "completed" or cur_q is None
+    items = [latest[k] for k in latest]
+    if cur_q is not None and not done:
+        items.append(
+            {
+                "qid": cur_q.id,
+                "question": _question_to_dict(cur_q),
+                "state": t.sm.state.value if t.sm.state else ("diagnose" if is_diag else "elicit"),
+                "answered": False,
+            }
+        )
+    return {"items": items, "done": done}
+
+
+@router.post("/sessions/{sid}/hint", response_model=HintReply)
+async def api_session_hint(
+    sid: int,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> HintReply:
+    """灯泡求助（M5 抽卡）：对当前题生成简短易懂的讲解/提示，弹窗即时展示，不落库。"""
+    s = await _own_session(db, sid, user.id)
+    t = await _new_orchestrator((s.context or {}).get("pack_id"), db, user.id)
+    t.restore_state(s.context or {})
+    return HintReply(hint=t.explain_question())
 
 
 @router.get("/sessions/{sid}/messages", response_model=list[MessageOut])

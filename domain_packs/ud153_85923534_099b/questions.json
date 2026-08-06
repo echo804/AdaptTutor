@@ -1,0 +1,58 @@
+[
+  {
+    "id": "p1q001",
+    "type": "choice",
+    "content": "Git 是什么类型的版本控制工具？",
+    "difficulty": 0.4,
+    "options": [
+      "A. 集中式",
+      "B. 分布式",
+      "C. 本地式",
+      "D. 网络式"
+    ],
+    "answer": "B",
+    "error_modes": [
+      "误认为是集中式版本控制工具"
+    ],
+    "tags": [
+      "01_粘贴文本.md"
+    ],
+    "step_node_map": {
+      "step1": "p101"
+    }
+  },
+  {
+    "id": "p1q002",
+    "type": "blank",
+    "content": "Git 提交操作的核心作用是将工作区的变更______。",
+    "difficulty": 0.5,
+    "options": [],
+    "answer": "固化成历史节点",
+    "error_modes": [
+      "填写不完整或错误术语"
+    ],
+    "tags": [
+      "01_粘贴文本.md"
+    ],
+    "step_node_map": {
+      "step1": "p102"
+    }
+  },
+  {
+    "id": "p1q003",
+    "type": "open",
+    "content": "简述 Git 分支的主要作用。",
+    "difficulty": 0.5,
+    "options": [],
+    "answer": "分支是独立的开发线，可在分支上自由修改而不影响主线，开发完成后合并回主干。",
+    "error_modes": [
+      "未说明分支独立性或合并机制"
+    ],
+    "tags": [
+      "01_粘贴文本.md"
+    ],
+    "step_node_map": {
+      "step1": "p101"
+    }
+  }
+]

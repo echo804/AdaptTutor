@@ -137,10 +137,12 @@ def judge_by_rule(user_text: str, question: Question) -> JudgeResult | None:
             correct_answer=None if matched else ans,
         )
 
-    # 2. 关键词匹配（答案文本出现在学生回答中，忽略空白）
+    # 2. 关键词匹配（双向包含，忽略空白）——标准答案完整出现在学生回答中，
+    #    或学生回答是标准答案的语义子集（省去铺垫只答关键结论，且不是过短的残片）→ 语义等价判对
     if len(ans) >= 2:
         norm = lambda s: re.sub(r"\s+", "", s)  # noqa: E731
-        if norm(ans) in norm(user):
+        na, nu = norm(ans), norm(user)
+        if na in nu or (len(nu) >= 2 and nu in na):
             return JudgeResult(correct=True, feedback=_FEEDBACK_CORRECT, method="rule")
         return JudgeResult(
             correct=False, feedback=_FEEDBACK_WRONG, method="rule", correct_answer=ans
@@ -151,7 +153,9 @@ def judge_by_rule(user_text: str, question: Question) -> JudgeResult | None:
 
 # ---------- LLM 判题（填空/解答） ----------
 
-_JUDGE_PROMPT = """你是数学辅导判题器。根据题目、标准答案与学生答案，判断学生答案是否正确，给一句不超过 30 字的引导式反馈；若学生答错，在 correct_answer 中给出标准答案（简洁，含选项字母或数值/结论）。
+_JUDGE_PROMPT = """你是数学辅导判题器。根据题目、标准答案与学生答案，判断学生答案是否正确。
+
+判断标准是【语义等价】：只要学生答案表达的意思与标准答案一致就算正确——允许不同表述、符号、语序、等价变形（如"x=2"与"2"、"两边同时除以3"与"除以3"、省略铺垫只答关键结论），不必逐字相同；只有意思不同或缺失关键结论时才判错。给一句不超过 30 字的引导式反馈；若学生答错，在 correct_answer 中给出标准答案（简洁，含选项字母或数值/结论）。
 
 题目：{content}
 标准答案：{answer}

@@ -71,6 +71,10 @@ class TutorOrchestrator:
         self.tutor_pool: list = list(self.pack.questions)
         self.max_rounds: int = 1
         self.practice_rounds: int = 0
+        self._used_nodes: set[str] = set()  # M5：本会话已巩固的知识点（循环选题不重复；恢复会话兜底初始化）
+        self.review_queue: list[str] = []  # M5：错题复习队列（qid，去重；复习答对移除）
+        self.review_tries: dict[str, int] = {}  # M5：错题复习次数（≥2 次未答对 → 移出队列防无限反复）
+        self.is_review: bool = False  # M5：当前题是否为错题复习题
         self.current_node: str | None = None  # M4r7i：当前辅导知识点（变式题匹配依据）
         self._ease_verify: bool = False  # M4r20 T3：挫败后变式降档标记
 
@@ -87,18 +91,24 @@ class TutorOrchestrator:
         base_pool = [q for q in self.pack.questions if q.type in qtypes]
         qcount_target = int(self.diag_config.get("qcount", 10))
         if diff != "auto":
-            # M4r21g：难度过滤后若题库不足 qcount，自动放宽难度（easy→medium→hard）凑够，
-            # 避免"选了 15 题实际只出 3 题就结束"
+            # M4r21g/M5：难度过滤后若题库不足 qcount，自动放宽难度凑够——双向放宽（hard 不足并入 medium，easy 不足并入 medium/hard），
+            # 避免"选了 15 题实际只出 1 题"（此前只向更高难度放宽，hard 已是最顶无法凑够）
             levels = ["easy", "medium", "hard"]
             lo_hi = {"easy": (0, 0.34), "medium": (0.34, 0.66), "hard": (0.66, 1.01)}
             pool = [q for q in base_pool if lo_hi[diff][0] <= q.difficulty < lo_hi[diff][1]]
-            start_idx = levels.index(diff)
-            for lv in levels[start_idx + 1 :]:
-                if len(pool) >= qcount_target:
-                    break
-                pool.extend(q for q in base_pool if lo_hi[lv][0] <= q.difficulty < lo_hi[lv][1])
-            # 记录实际放宽后的难度范围（供结束语提示）
-            self.diag_config["_actual_difficulty"] = diff if len(pool) >= qcount_target else "easy→hard"
+            if len(pool) < qcount_target:
+                expanded = list(pool)
+                for lv in levels:
+                    if len(expanded) >= qcount_target:
+                        break
+                    if lv == diff:
+                        continue
+                    expanded.extend(q for q in base_pool if lo_hi[lv][0] <= q.difficulty < lo_hi[lv][1])
+                pool = expanded
+                # 记录实际放宽后的难度范围（供结束语提示）
+                self.diag_config["_actual_difficulty"] = diff if len(pool) >= qcount_target else f"{diff}→放宽"
+            else:
+                self.diag_config["_actual_difficulty"] = diff
         else:
             pool = list(base_pool)
         self.pool = pool
@@ -189,15 +199,34 @@ class TutorOrchestrator:
         # 辅导题库过滤（变式题来源）
         qtypes = self.diag_config.get("qtypes") or ["choice", "blank", "open"]
         diff = self.diag_config.get("difficulty", "auto")
-        pool = [q for q in self.pack.questions if q.type in qtypes]
+        base_pool = [q for q in self.pack.questions if q.type in qtypes]
         if diff != "auto":
-            lo, hi = {"easy": (0, 0.34), "medium": (0.34, 0.66), "hard": (0.66, 1.01)}[diff]
-            pool = [q for q in pool if lo <= q.difficulty < hi]
+            levels = ["easy", "medium", "hard"]
+            lo_hi = {"easy": (0, 0.34), "medium": (0.34, 0.66), "hard": (0.66, 1.01)}
+            pool = [q for q in base_pool if lo_hi[diff][0] <= q.difficulty < lo_hi[diff][1]]
+            # M5：所选难度题量不足（如 hard 档全库仅 1 题）→ 双向放宽（并入相邻难度）凑够 max_rounds，
+            # 避免"选了 15 道题实际只出 1 道"
+            if len(pool) < self.max_rounds:
+                expanded = list(pool)
+                for lv in levels:
+                    if len(expanded) >= self.max_rounds:
+                        break
+                    if lv == diff:
+                        continue
+                    expanded.extend(q for q in base_pool if lo_hi[lv][0] <= q.difficulty < lo_hi[lv][1])
+                pool = expanded
+                self.diag_config["_actual_difficulty"] = diff if len(pool) >= self.max_rounds else f"{diff}→放宽"
+        else:
+            pool = list(base_pool)
         self.tutor_pool = pool
         # 练习轮数：仅在 config 显式提供 qcount 时生效（诊断默认 10 不串扰辅导）
         qc = config.get("qcount") if config else None
         self.max_rounds = max(1, int(qc)) if qc is not None else 1
         self.practice_rounds = 0
+        self._used_nodes: set[str] = set()  # M5：本会话已巩固的知识点（循环选题不重复）
+        self.review_queue = []  # M5：错题复习队列（去重；复习答对移除）
+        self.review_tries = {}  # M5：错题复习次数（≥2 次未答对 → 移出队列防无限反复）
+        self.is_review = False  # M5：当前题是否为错题复习题
         self.sm.reset()
         if not self.path:
             self.build_path()
@@ -209,11 +238,16 @@ class TutorOrchestrator:
         exclude_id: 排除某题（变式验证避免重复原题，T2）。
         """
         path = self.path or []
-        candidates = list(path) + [n for n in self.graph.node_ids if n not in path]
+        all_cands = list(path) + [n for n in self.graph.node_ids if n not in path]
+        # M5：优先选未巩固过的知识点（题量 > 路径长度时从全图补足且不重复）；全部练过才允许重复
+        candidates = [n for n in all_cands if n not in self._used_nodes] or all_cands
         for n in candidates:
+            # M5：错题已在复习队列中，不作为新题重复出（由复习机制随机间隔插入）
             qs = [
                 q for q in self.tutor_pool
-                if n in q.step_node_map.values() and q.id != exclude_id
+                if n in q.step_node_map.values()
+                and q.id != exclude_id
+                and q.id not in self.review_queue
             ]
             if not qs:
                 continue
@@ -247,16 +281,36 @@ class TutorOrchestrator:
             return min(higher, key=lambda q: q.difficulty) if higher else min(cands, key=lambda q: q.difficulty)
         # 同节点无其他题 → 生成变式（排除原题，参数化改数字）
         # M4r23：seed 改为随机（此前 hash(node) 固定 → 同一知识点永远同一变式，单调）
+        # M5：生成后校验内容/答案与原题是否完全相同（如题干无数字可偏移的文本题）→
+        #     完全相同视为"无真变式"返回 None，由错题复习机制替代（避免"变式=原题"）
         if cur is not None:
             try:
                 from app.engine.variant_generator import generate_variant
 
                 res = generate_variant(cur, seed=random.randint(1, 10**6))
-                if res.question is not None:
+                if res.question is not None and not self._is_same_question(res.question, cur):
                     return res.question
             except Exception:
                 pass
         return None
+
+    @staticmethod
+    def _is_same_question(a, b) -> bool:
+        """变式真伪判定：归一化（去空白/`$`）后题干与答案完全相同 → 视为同一题（无真变式）。"""
+        import re as _re
+
+        norm = lambda s: _re.sub(r"[\s$]", "", str(s))  # noqa: E731
+        return norm(a.content) == norm(b.content) and norm(a.answer) == norm(b.answer)
+
+    def _record_wrong(self, qid: str | None) -> None:
+        """M5：记录错题（去重）——后续随机间隔复习。"""
+        if qid and qid not in self.review_queue:
+            self.review_queue.append(qid)
+
+    def _clear_review(self, qid: str | None) -> None:
+        """M5：复习答对 → 移出错题队列。"""
+        if qid and qid in self.review_queue:
+            self.review_queue.remove(qid)
 
     def _tutor_start_round(self) -> TurnResult:
         """启动一轮辅导：从路径中顺延选择首个有可用题的节点（M4r7i）。"""
@@ -271,7 +325,10 @@ class TutorOrchestrator:
                 context=dict(self.sm.context),
             )
         msg = f"我们来看这个知识点：{node}。先试试这道题。"
-        return TurnResult(state=self.sm.state.value, message=msg, context=dict(self.sm.context))
+        ctx = dict(self.sm.context)
+        ctx["is_review"] = False  # M5：首次出题为新题
+        ctx["progress"] = {"practice": self.practice_rounds, "total": self.max_rounds, "review_left": len(self.review_queue)}
+        return TurnResult(state=self.sm.state.value, message=msg, context=ctx)
 
     def tutor_step(self, user_msg: str, correct: bool | None = None) -> TurnResult:
         """处理学生一条回复，推进状态机并产出引导。
@@ -285,6 +342,18 @@ class TutorOrchestrator:
             self.sm.context["consecutive_wrong"] += 1
 
         # 挫败感检测（任一作答态）
+        # M5：错题复习——判错记入复习队列（去重）；复习题答对移出；复习题 2 次未答对移出（交复盘，防无限反复）
+        if correct is False and self.verify_question is not None:
+            qid = self.verify_question.id
+            self._record_wrong(qid)
+            if self.is_review:
+                tries = self.review_tries.get(qid, 0) + 1
+                self.review_tries[qid] = tries
+                if tries >= 2:
+                    self._clear_review(qid)
+        elif correct is True and self.is_review and self.verify_question is not None:
+            self._clear_review(self.verify_question.id)
+
         if correct is False and state in (State.ELICIT, State.IDENTIFY, State.HINT, State.VERIFY):
             fa = assess_frustration(self.sm.context, user_msg)
             if fa.action == "switch_explain":
@@ -300,8 +369,17 @@ class TutorOrchestrator:
         # 状态转移
         if state == State.ELICIT:
             if correct is True:
-                self.sm.step(Event.ANSWER_CORRECT)
-                return self._verify_turn()
+                # M5：先判定是否有真变式——有则进变式验证；无（同节点无题且参数化无效）则直接通过本题
+                vq = self._pick_verify()
+                if vq is not None:
+                    self.sm.step(Event.ANSWER_CORRECT)
+                    self.verify_question = vq
+                    return TurnResult(
+                        state=self.sm.state.value,
+                        message="再来一道变式验证，请看下方题目。",
+                        context=dict(self.sm.context),
+                    )
+                return self._finish_question(True)
             self.sm.step(Event.LOCATED)
             # M4r24c：ELICIT 求助（"我不会/讲讲"）→ 针对性提示，替代固定"先说说你的思路"
             targeted = self._gen_targeted_hint(0)
@@ -337,51 +415,13 @@ class TutorOrchestrator:
                     message=targeted or "先想想刚答错的这步，依据是什么？",
                     context=dict(self.sm.context),
                 )
-            # 状态机保证：HINT 态只能经 HINT_GIVEN 离开（提示给出 → 变式验证）
+            # M5：引导结束（不再进变式验证，答错题已记入复习队列）→ 进入下一题
             self.sm.step(Event.HINT_GIVEN)
-            return self._verify_turn()
+            return self._finish_question(False)
         if state == State.VERIFY:
             if correct is True:
                 self.sm.step(Event.VERIFY_PASS)
-                if self.sm.state == State.DONE and self.practice_rounds + 1 < self.max_rounds and len(self.path) > 1:
-                    # M4r7h：练习轮数未满且路径有后续 → 进入下一知识点（顺延选有题的节点）
-                    self.practice_rounds += 1
-                    self.path = self.path[1:]
-                    self.sm.reset()
-                    node, q = self._pick_node_question()
-                    self.current_node = node
-                    self.verify_question = q
-                    if self.verify_question is None:
-                        return TurnResult(
-                            state=self.sm.state.value,
-                            message="当前配置下剩余知识点暂无可用题目，本轮练习到此结束。",
-                            context=dict(self.sm.context),
-                        )
-                    return TurnResult(
-                        state=self.sm.state.value,
-                        message=f"很好，这一步掌握了！进入下一个知识点：{node}。先试试这道题。",
-                        context=dict(self.sm.context),
-                    )
-                self.practice_rounds += 1
-                if self.practice_rounds >= self.max_rounds or len(self.path) <= 1:
-                    # M4r7i：练习完成总结（轮数满/路径耗尽）——不再显示误导性"进入下一题"
-                    weak = "、".join((self.weak_nodes or ["—"])[:3])
-                    # M4r24i：完成时清空 verify_question，前端题目卡随 done 消失（不再固定旧题）
-                    self.verify_question = None
-                    return TurnResult(
-                        state=self.sm.state.value,
-                        message=(
-                            f"🎉 本轮练习完成！巩固了 {self.practice_rounds} 个知识点。"
-                            f"当前薄弱点是：{weak}。"
-                            "可以去仪表盘查看路径，或开始新的会话继续巩固。"
-                        ),
-                        context=dict(self.sm.context),
-                    )
-                return TurnResult(
-                    state=self.sm.state.value,
-                    message="很好，这一步掌握了！我们进入下一题。",
-                    context=dict(self.sm.context),
-                )
+                return self._finish_question(True)
             self.sm.step(Event.VERIFY_FAIL)
             return self._identify_turn()
         # DONE
@@ -447,6 +487,105 @@ class TutorOrchestrator:
         self.verify_question = self._pick_verify()
         msg = "再来一道变式验证，请看下方题目。"
         return TurnResult(state=self.sm.state.value, message=msg, context=dict(self.sm.context))
+
+    def _finish_question(self, passed: bool) -> TurnResult:
+        """M5：本题结束统一出口——passed=True（答对巩固完成）记已巩固节点；passed=False（答错引导完）不记。
+        复习题不占题量额度；新题占额度；满额 → 完成总结（提示剩余错题）。"""
+        if not self.is_review:
+            if passed and self.current_node:
+                self._used_nodes.add(self.current_node)
+            self.practice_rounds += 1
+        if self.practice_rounds >= self.max_rounds:
+            weak = "、".join((self.weak_nodes or ["—"])[:3])
+            self.verify_question = None
+            left = f"还有 {len(self.review_queue)} 道错题未巩固，可开启新会话复习。" if self.review_queue else ""
+            return TurnResult(
+                state=State.DONE.value,
+                message=(
+                    f"🎉 本轮练习完成！巩固了 {self.practice_rounds} 个知识点。"
+                    f"当前薄弱点是：{weak}。{left}"
+                ),
+                context=dict(self.sm.context),
+            )
+        node, q = self._next_question()
+        self.current_node = node
+        self.verify_question = q
+        if q is None:
+            return TurnResult(
+                state=State.DONE.value,
+                message="当前配置下暂无更多题目，本轮练习到此结束。",
+                context=dict(self.sm.context),
+            )
+        # M5：进入下一题前重置状态机（此前 VERIFY 分支的 sm.reset() 被吸收进统一出口，遗漏会卡死在 DONE 态）
+        self.sm.reset()
+        ctx = dict(self.sm.context)
+        ctx["is_review"] = self.is_review  # M5：复习题标记（前端显示"复习"徽标）
+        ctx["progress"] = {"practice": self.practice_rounds, "total": self.max_rounds, "review_left": len(self.review_queue)}
+        msg = "这是之前答错的题，再试一次。" if self.is_review else f"很好，这一步掌握了！进入下一个知识点：{node}。先试试这道题。"
+        return TurnResult(
+            state=State.ELICIT.value,
+            message=msg,
+            context=ctx,
+        )
+
+    def _next_question(self) -> tuple[str | None, Question | None]:
+        """M5：下一题——错题复习（随机命中、不与刚做完的题相邻）或新知识点题。"""
+        if self.review_queue and random.random() < 0.25:
+            cur_id = self.verify_question.id if self.verify_question else None
+            cands = [qid for qid in self.review_queue if qid != cur_id]
+            if cands:
+                qid = random.choice(cands)
+                q = next((x for x in self.pack.questions if x.id == qid), None)
+                if q is not None:
+                    self.is_review = True
+                    return next(iter(q.step_node_map.values()), None), q
+        self.is_review = False
+        return self._pick_node_question()
+
+    def explain_question(self) -> str:
+        """灯泡求助（M5 抽卡）：对当前题生成简短易懂的讲解/提示，不直接给最终答案。
+
+        HINT 态复用状态机提示（逐层递进）；其余状态生成 2-3 句讲解思路。
+        无 key / LLM 失败时回退模板。
+        """
+        q = self.verify_question or self.current_question
+        if q is None:
+            return "当前没有题目，先开始作答吧。"
+        node = self.current_node or next(iter(q.step_node_map.values()), None)
+        # HINT 态：灯泡内容 = 状态机提示（层级递进）
+        if self.sm.state == State.HINT:
+            level = min(self.sm.context.get("hint_level", 0), len(_HINTS) - 1)
+            targeted = self._gen_targeted_hint(level)
+            return targeted or _HINTS[level]
+        # 其余状态：简短讲解思路
+        import re as _re
+
+        brief = _re.sub(r"[_\\{}${}]", "", q.content)[:80]
+        try:
+            prompt = (
+                "你是苏格拉底式辅导老师。学生点了求助灯泡，请用 2-3 句简短、易懂的话讲清楚这道题的【思考思路】，"
+                "帮 TA 找到入手点，但不要直接给出最终答案或完整步骤。\n"
+                f"题目：{brief}\n"
+                f"涉及知识点：{node}\n"
+                "只输出 2-3 句话，不要标题，不要多余解释。"
+            )
+            resp = self.gateway.generate(
+                "tutor",
+                prompt,
+                ctx={"max_tokens": 150, "temperature": 0.7, "user_api_key": self.user_api_key},
+            )
+            if not getattr(resp, "mock", False) and getattr(resp, "level", 0) < 1:
+                text = (resp.text or "").strip()
+                if 8 <= len(text) <= 300:
+                    return text
+        except Exception:
+            pass
+        if node:
+            return (
+                f"这道题围绕「{node}」：先回忆这个知识点的关键概念，"
+                "再看题目给了什么条件、要求什么，从这两个角度找入手点。"
+            )
+        return "先读题，标出已知条件和要求，再想它考的是哪个知识点、对应什么方法。"
 
     def _identify_turn(self) -> TurnResult:
         self.sm.step(Event.CLASSIFIED, error_category="operation")
