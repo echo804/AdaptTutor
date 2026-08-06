@@ -35,6 +35,18 @@
       "name": "中文短句与英文从句合并方法",
       "difficulty": 0.6,
       "importance": 0.8
+    },
+    {
+      "id": "p403",
+      "name": "四级核心词汇",
+      "difficulty": 0.5,
+      "importance": 0.8
+    },
+    {
+      "id": "p404",
+      "name": "考研进阶词汇",
+      "difficulty": 0.65,
+      "importance": 0.75
     }
   ],
   "edges": [
@@ -61,6 +73,16 @@
     {
       "from": "p601",
       "to": "p602",
+      "type": "prerequisite"
+    },
+    {
+      "from": "p401",
+      "to": "p403",
+      "type": "prerequisite"
+    },
+    {
+      "from": "p403",
+      "to": "p404",
       "type": "prerequisite"
     }
   ]

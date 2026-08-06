@@ -797,5 +797,3540 @@
     "step_node_map": {
       "step1": "p602"
     }
+  },
+  {
+    "id": "vq035",
+    "type": "choice",
+    "content": "单词 'ability' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 划分",
+      "B. 权威",
+      "C. 能力",
+      "D. 容纳；适应"
+    ],
+    "answer": "C",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq036",
+    "type": "choice",
+    "content": "单词 'accept' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 接受",
+      "B. 计算",
+      "C. 模糊的",
+      "D. 传达"
+    ],
+    "answer": "A",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq037",
+    "type": "choice",
+    "content": "单词 'achieve' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 交流",
+      "B. 实现",
+      "C. 引用",
+      "D. 容量；能力"
+    ],
+    "answer": "B",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq038",
+    "type": "choice",
+    "content": "单词 'advance' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 前进；推进",
+      "B. 原因；导致",
+      "C. 描述",
+      "D. 合同；收缩"
+    ],
+    "answer": "A",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq039",
+    "type": "choice",
+    "content": "单词 'advantage' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 传达",
+      "B. 权威",
+      "C. 优势",
+      "D. 传统的"
+    ],
+    "answer": "C",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq040",
+    "type": "choice",
+    "content": "单词 'affect' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 方向",
+      "B. 重要的",
+      "C. 当代的",
+      "D. 影响"
+    ],
+    "answer": "D",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq041",
+    "type": "choice",
+    "content": "单词 'afford' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 负担得起",
+      "B. 主张",
+      "C. 贡献",
+      "D. 工业"
+    ],
+    "answer": "A",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq042",
+    "type": "choice",
+    "content": "单词 'allow' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 包含",
+      "B. 允许",
+      "C. 污染",
+      "D. 明显的"
+    ],
+    "answer": "B",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq043",
+    "type": "choice",
+    "content": "单词 'appear' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 循环",
+      "B. 冲突",
+      "C. 事实",
+      "D. 出现"
+    ],
+    "answer": "D",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq044",
+    "type": "choice",
+    "content": "单词 'approach' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 商品",
+      "B. 方法；接近",
+      "C. 传达",
+      "D. 替代的"
+    ],
+    "answer": "B",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq045",
+    "type": "choice",
+    "content": "单词 'argue' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 忘记",
+      "B. 完成",
+      "C. 争论",
+      "D. 传统的"
+    ],
+    "answer": "C",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq046",
+    "type": "choice",
+    "content": "单词 'attach' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 想象",
+      "B. 崩溃",
+      "C. 附上",
+      "D. 适应"
+    ],
+    "answer": "C",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq047",
+    "type": "choice",
+    "content": "单词 'avoid' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 划分",
+      "B. 鼓励",
+      "C. 适应",
+      "D. 避免"
+    ],
+    "answer": "D",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq048",
+    "type": "choice",
+    "content": "单词 'behavior' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 鄙视",
+      "B. 行为",
+      "C. 竞争",
+      "D. 当代的"
+    ],
+    "answer": "B",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq049",
+    "type": "choice",
+    "content": "单词 'benefit' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 冲突",
+      "B. 转换",
+      "C. 相关",
+      "D. 利益；受益"
+    ],
+    "answer": "D",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq050",
+    "type": "choice",
+    "content": "单词 'calculate' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 指定",
+      "B. 概念",
+      "C. 计算",
+      "D. 发生"
+    ],
+    "answer": "C",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq051",
+    "type": "choice",
+    "content": "单词 'cause' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 故意的",
+      "B. 传统的",
+      "C. 原因；导致",
+      "D. 崩溃"
+    ],
+    "answer": "C",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq052",
+    "type": "choice",
+    "content": "单词 'challenge' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 影响",
+      "B. 鄙视",
+      "C. 充足的",
+      "D. 挑战"
+    ],
+    "answer": "D",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq053",
+    "type": "choice",
+    "content": "单词 'communicate' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 确认",
+      "B. 减少",
+      "C. 交流",
+      "D. 货币"
+    ],
+    "answer": "C",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq054",
+    "type": "choice",
+    "content": "单词 'compare' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 权威",
+      "B. 差异",
+      "C. 形式；形成",
+      "D. 比较"
+    ],
+    "answer": "D",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq055",
+    "type": "choice",
+    "content": "单词 'compete' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 竞争",
+      "B. 崩溃",
+      "C. 鼓励",
+      "D. 可获得的"
+    ],
+    "answer": "A",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq056",
+    "type": "choice",
+    "content": "单词 'complete' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 污染",
+      "B. 历史",
+      "C. 完成",
+      "D. 候选人"
+    ],
+    "answer": "C",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq057",
+    "type": "choice",
+    "content": "单词 'concern' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 关心；涉及",
+      "B. 完成",
+      "C. 跟随",
+      "D. 划分"
+    ],
+    "answer": "A",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq058",
+    "type": "choice",
+    "content": "单词 'condition' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 跟随",
+      "B. 密集的",
+      "C. 前进；推进",
+      "D. 条件；状况"
+    ],
+    "answer": "D",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq059",
+    "type": "choice",
+    "content": "单词 'consider' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 一般的",
+      "B. 接受",
+      "C. 考虑",
+      "D. 人类"
+    ],
+    "answer": "C",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq060",
+    "type": "choice",
+    "content": "单词 'contain' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 包含",
+      "B. 货币",
+      "C. 加速",
+      "D. 合同；收缩"
+    ],
+    "answer": "A",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq061",
+    "type": "choice",
+    "content": "单词 'continue' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 商品",
+      "B. 归因于",
+      "C. 主张",
+      "D. 继续"
+    ],
+    "answer": "D",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq062",
+    "type": "choice",
+    "content": "单词 'create' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 具体的",
+      "B. 推断",
+      "C. 继续",
+      "D. 创造"
+    ],
+    "answer": "D",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq063",
+    "type": "choice",
+    "content": "单词 'culture' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 澄清",
+      "B. 文化",
+      "C. 挑战",
+      "D. 失败"
+    ],
+    "answer": "B",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq064",
+    "type": "choice",
+    "content": "单词 'decide' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 行为",
+      "B. 决定",
+      "C. 继续",
+      "D. 对应"
+    ],
+    "answer": "B",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq065",
+    "type": "choice",
+    "content": "单词 'decrease' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 包含",
+      "B. 模糊的",
+      "C. 减少",
+      "D. 构建"
+    ],
+    "answer": "C",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq066",
+    "type": "choice",
+    "content": "单词 'demand' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 课程",
+      "B. 需求；要求",
+      "C. 吸引力；上诉",
+      "D. 划分"
+    ],
+    "answer": "B",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq067",
+    "type": "choice",
+    "content": "单词 'describe' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 概念",
+      "B. 决定",
+      "C. 需求；要求",
+      "D. 描述"
+    ],
+    "answer": "D",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq068",
+    "type": "choice",
+    "content": "单词 'develop' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 完成",
+      "B. 发展",
+      "C. 具体的",
+      "D. 放弃"
+    ],
+    "answer": "B",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq069",
+    "type": "choice",
+    "content": "单词 'difference' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 努力",
+      "B. 得出结论",
+      "C. 差异",
+      "D. 一般的"
+    ],
+    "answer": "C",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq070",
+    "type": "choice",
+    "content": "单词 'direction' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 消耗",
+      "B. 距离",
+      "C. 方向",
+      "D. 负担得起"
+    ],
+    "answer": "C",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq071",
+    "type": "choice",
+    "content": "单词 'discover' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 模糊的",
+      "B. 未来",
+      "C. 发现",
+      "D. 保护；节约"
+    ],
+    "answer": "C",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq072",
+    "type": "choice",
+    "content": "单词 'discuss' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 咨询",
+      "B. 约束",
+      "C. 讨论",
+      "D. 遵守"
+    ],
+    "answer": "C",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq073",
+    "type": "choice",
+    "content": "单词 'distance' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 经验；经历",
+      "B. 货币",
+      "C. 外国的",
+      "D. 距离"
+    ],
+    "answer": "D",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq074",
+    "type": "choice",
+    "content": "单词 'divide' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 保护；节约",
+      "B. 表达",
+      "C. 划分",
+      "D. 确认"
+    ],
+    "answer": "C",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq075",
+    "type": "choice",
+    "content": "单词 'education' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 教育",
+      "B. 历史",
+      "C. 允许",
+      "D. 集中"
+    ],
+    "answer": "A",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq076",
+    "type": "choice",
+    "content": "单词 'effect' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 调整",
+      "B. 模糊的",
+      "C. 效果",
+      "D. 崩溃"
+    ],
+    "answer": "C",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq077",
+    "type": "choice",
+    "content": "单词 'effort' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 努力",
+      "B. 集中",
+      "C. 焦点；专注",
+      "D. 解释"
+    ],
+    "answer": "A",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq078",
+    "type": "choice",
+    "content": "单词 'encourage' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 决定性的",
+      "B. 货币",
+      "C. 能力",
+      "D. 鼓励"
+    ],
+    "answer": "D",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq079",
+    "type": "choice",
+    "content": "单词 'energy' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 源自",
+      "B. 能量",
+      "C. 完成",
+      "D. 定义"
+    ],
+    "answer": "B",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq080",
+    "type": "choice",
+    "content": "单词 'environment' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 环境",
+      "B. 尤其",
+      "C. 得出结论",
+      "D. 引用"
+    ],
+    "answer": "A",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq081",
+    "type": "choice",
+    "content": "单词 'especially' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 尤其",
+      "B. 完成",
+      "C. 全面的",
+      "D. 可获得的"
+    ],
+    "answer": "A",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq082",
+    "type": "choice",
+    "content": "单词 'example' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 距离",
+      "B. 允许",
+      "C. 协调",
+      "D. 例子"
+    ],
+    "answer": "D",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq083",
+    "type": "choice",
+    "content": "单词 'exist' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 相关",
+      "B. 存在",
+      "C. 货币",
+      "D. 概念"
+    ],
+    "answer": "B",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq084",
+    "type": "choice",
+    "content": "单词 'expect' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 前进；推进",
+      "B. 期望",
+      "C. 证明；演示",
+      "D. 影响"
+    ],
+    "answer": "B",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq085",
+    "type": "choice",
+    "content": "单词 'experience' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 熟悉的",
+      "B. 经验；经历",
+      "C. 期望",
+      "D. 引用"
+    ],
+    "answer": "B",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq086",
+    "type": "choice",
+    "content": "单词 'explain' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 重要的",
+      "B. 解释",
+      "C. 遵守",
+      "D. 外国的"
+    ],
+    "answer": "B",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq087",
+    "type": "choice",
+    "content": "单词 'express' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 发展",
+      "B. 计算",
+      "C. 提倡",
+      "D. 表达"
+    ],
+    "answer": "D",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq088",
+    "type": "choice",
+    "content": "单词 'fact' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 事实",
+      "B. 遵守",
+      "C. 约束",
+      "D. 发展"
+    ],
+    "answer": "A",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq089",
+    "type": "choice",
+    "content": "单词 'fail' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 尤其",
+      "B. 培养",
+      "C. 失败",
+      "D. 澄清"
+    ],
+    "answer": "C",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq090",
+    "type": "choice",
+    "content": "单词 'familiar' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 概念",
+      "B. 熟悉的",
+      "C. 循环",
+      "D. 发现"
+    ],
+    "answer": "B",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq091",
+    "type": "choice",
+    "content": "单词 'famous' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 保护；节约",
+      "B. 构成",
+      "C. 积累",
+      "D. 著名的"
+    ],
+    "answer": "D",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq092",
+    "type": "choice",
+    "content": "单词 'figure' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 健康",
+      "B. 存在",
+      "C. 数字；人物",
+      "D. 形式；形成"
+    ],
+    "answer": "C",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq093",
+    "type": "choice",
+    "content": "单词 'finally' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 原因；导致",
+      "B. 主张",
+      "C. 允许",
+      "D. 最后"
+    ],
+    "answer": "D",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq094",
+    "type": "choice",
+    "content": "单词 'focus' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 承诺；犯（错）",
+      "B. 健康",
+      "C. 共识",
+      "D. 焦点；专注"
+    ],
+    "answer": "D",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq095",
+    "type": "choice",
+    "content": "单词 'follow' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 主张",
+      "B. 相当大的",
+      "C. 跟随",
+      "D. 未来"
+    ],
+    "answer": "C",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq096",
+    "type": "choice",
+    "content": "单词 'force' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 归因于",
+      "B. 候选人",
+      "C. 需求；要求",
+      "D. 力量；强迫"
+    ],
+    "answer": "D",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq097",
+    "type": "choice",
+    "content": "单词 'foreign' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 停止",
+      "B. 力量；强迫",
+      "C. 外国的",
+      "D. 鄙视"
+    ],
+    "answer": "C",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq098",
+    "type": "choice",
+    "content": "单词 'forget' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 忘记",
+      "B. 划分",
+      "C. 需求；要求",
+      "D. 定义"
+    ],
+    "answer": "A",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq099",
+    "type": "choice",
+    "content": "单词 'form' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 形式；形成",
+      "B. 著名的",
+      "C. 隐藏",
+      "D. 方向"
+    ],
+    "answer": "A",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq100",
+    "type": "choice",
+    "content": "单词 'forward' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 效果",
+      "B. 向前",
+      "C. 数字；人物",
+      "D. 指定"
+    ],
+    "answer": "B",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq101",
+    "type": "choice",
+    "content": "单词 'free' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 获得",
+      "B. 障碍",
+      "C. 后果",
+      "D. 自由的；免费的"
+    ],
+    "answer": "D",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq102",
+    "type": "choice",
+    "content": "单词 'future' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 未来",
+      "B. 模糊的",
+      "C. 条件；状况",
+      "D. 加速"
+    ],
+    "answer": "A",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq103",
+    "type": "choice",
+    "content": "单词 'general' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 澄清",
+      "B. 优势",
+      "C. 一般的",
+      "D. 断言"
+    ],
+    "answer": "C",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq104",
+    "type": "choice",
+    "content": "单词 'grow' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 成长",
+      "B. 文化",
+      "C. 后果",
+      "D. 原因；导致"
+    ],
+    "answer": "A",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq105",
+    "type": "choice",
+    "content": "单词 'happen' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 争论",
+      "B. 未来",
+      "C. 发生",
+      "D. 成长"
+    ],
+    "answer": "C",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq106",
+    "type": "choice",
+    "content": "单词 'health' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 自由的；免费的",
+      "B. 决定；测定",
+      "C. 类别",
+      "D. 健康"
+    ],
+    "answer": "D",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq107",
+    "type": "choice",
+    "content": "单词 'history' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 关心；涉及",
+      "B. 历史",
+      "C. 健康",
+      "D. 积累"
+    ],
+    "answer": "B",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq108",
+    "type": "choice",
+    "content": "单词 'human' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 交流",
+      "B. 人类",
+      "C. 一般的",
+      "D. 类别"
+    ],
+    "answer": "B",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq109",
+    "type": "choice",
+    "content": "单词 'imagine' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 培养",
+      "B. 想象",
+      "C. 自由的；免费的",
+      "D. 完成"
+    ],
+    "answer": "B",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq110",
+    "type": "choice",
+    "content": "单词 'important' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 需求；要求",
+      "B. 商品",
+      "C. 重要的",
+      "D. 实现"
+    ],
+    "answer": "C",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq111",
+    "type": "choice",
+    "content": "单词 'improve' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 决定性的",
+      "B. 改进",
+      "C. 发展",
+      "D. 一般的"
+    ],
+    "answer": "B",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq112",
+    "type": "choice",
+    "content": "单词 'include' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 效果",
+      "B. 未来",
+      "C. 包括",
+      "D. 文化"
+    ],
+    "answer": "C",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq113",
+    "type": "choice",
+    "content": "单词 'increase' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 放弃",
+      "B. 工业",
+      "C. 增加",
+      "D. 下降；拒绝"
+    ],
+    "answer": "C",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq114",
+    "type": "choice",
+    "content": "单词 'industry' 的意思是什么？",
+    "difficulty": 0.5,
+    "options": [
+      "A. 工业",
+      "B. 遵守",
+      "C. 恶化",
+      "D. 环境"
+    ],
+    "answer": "A",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p403"
+    }
+  },
+  {
+    "id": "vq115",
+    "type": "choice",
+    "content": "单词 'abandon' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 方法；接近",
+      "B. 放弃",
+      "C. 前进；推进",
+      "D. 形式；形成"
+    ],
+    "answer": "B",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq116",
+    "type": "choice",
+    "content": "单词 'abundant' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 外国的",
+      "B. 概念",
+      "C. 后果",
+      "D. 丰富的"
+    ],
+    "answer": "D",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq117",
+    "type": "choice",
+    "content": "单词 'accelerate' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 密集的",
+      "B. 确认",
+      "C. 消耗",
+      "D. 加速"
+    ],
+    "answer": "D",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq118",
+    "type": "choice",
+    "content": "单词 'accommodate' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 容纳；适应",
+      "B. 熟悉的",
+      "C. 适应",
+      "D. 最后"
+    ],
+    "answer": "A",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq119",
+    "type": "choice",
+    "content": "单词 'accumulate' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 积累",
+      "B. 行为",
+      "C. 障碍",
+      "D. 充足的"
+    ],
+    "answer": "A",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq120",
+    "type": "choice",
+    "content": "单词 'accurate' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 准确的",
+      "B. 环境；情况",
+      "C. 下降；拒绝",
+      "D. 向前"
+    ],
+    "answer": "A",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq121",
+    "type": "choice",
+    "content": "单词 'acknowledge' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 任意的",
+      "B. 指定",
+      "C. 承认",
+      "D. 面对"
+    ],
+    "answer": "C",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq122",
+    "type": "choice",
+    "content": "单词 'acquire' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 补偿",
+      "B. 获得",
+      "C. 重要的",
+      "D. 附上"
+    ],
+    "answer": "B",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq123",
+    "type": "choice",
+    "content": "单词 'adapt' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 崩溃",
+      "B. 适应",
+      "C. 能力",
+      "D. 未来"
+    ],
+    "answer": "B",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq124",
+    "type": "choice",
+    "content": "单词 'adequate' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 工业",
+      "B. 外国的",
+      "C. 充足的",
+      "D. 出现"
+    ],
+    "answer": "C",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq125",
+    "type": "choice",
+    "content": "单词 'adjust' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 调整",
+      "B. 任意的",
+      "C. 准确的",
+      "D. 能力"
+    ],
+    "answer": "A",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq126",
+    "type": "choice",
+    "content": "单词 'advocate' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 提倡",
+      "B. 遵守",
+      "C. 解释",
+      "D. 表示"
+    ],
+    "answer": "A",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq127",
+    "type": "choice",
+    "content": "单词 'allocate' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 关心；涉及",
+      "B. 条件；状况",
+      "C. 分配",
+      "D. 未来"
+    ],
+    "answer": "C",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq128",
+    "type": "choice",
+    "content": "单词 'alternative' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 影响",
+      "B. 归因于",
+      "C. 替代的",
+      "D. 改进"
+    ],
+    "answer": "C",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq129",
+    "type": "choice",
+    "content": "单词 'ambiguous' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 完成",
+      "B. 模糊的",
+      "C. 构成",
+      "D. 传达"
+    ],
+    "answer": "B",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq130",
+    "type": "choice",
+    "content": "单词 'anticipate' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 确认",
+      "B. 容纳；适应",
+      "C. 预期",
+      "D. 距离"
+    ],
+    "answer": "C",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq131",
+    "type": "choice",
+    "content": "单词 'apparent' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 后果",
+      "B. 附上",
+      "C. 下降；拒绝",
+      "D. 明显的"
+    ],
+    "answer": "D",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq132",
+    "type": "choice",
+    "content": "单词 'appeal' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 面对",
+      "B. 吸引力；上诉",
+      "C. 反驳",
+      "D. 一致的"
+    ],
+    "answer": "B",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq133",
+    "type": "choice",
+    "content": "单词 'arbitrary' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 完成",
+      "B. 任意的",
+      "C. 争论",
+      "D. 允许"
+    ],
+    "answer": "B",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq134",
+    "type": "choice",
+    "content": "单词 'assert' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 明显的",
+      "B. 断言",
+      "C. 承诺；犯（错）",
+      "D. 继续"
+    ],
+    "answer": "B",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq135",
+    "type": "choice",
+    "content": "单词 'assume' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 外国的",
+      "B. 下降；拒绝",
+      "C. 约束",
+      "D. 假设"
+    ],
+    "answer": "D",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq136",
+    "type": "choice",
+    "content": "单词 'attribute' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 挑战",
+      "B. 归因于",
+      "C. 遵守",
+      "D. 商品"
+    ],
+    "answer": "B",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq137",
+    "type": "choice",
+    "content": "单词 'authority' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 形式；形成",
+      "B. 权威",
+      "C. 概念",
+      "D. 比较"
+    ],
+    "answer": "B",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq138",
+    "type": "choice",
+    "content": "单词 'available' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 补偿",
+      "B. 焦点；专注",
+      "C. 证明；演示",
+      "D. 可获得的"
+    ],
+    "answer": "D",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq139",
+    "type": "choice",
+    "content": "单词 'barrier' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 障碍",
+      "B. 附上",
+      "C. 得出结论",
+      "D. 人类"
+    ],
+    "answer": "A",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq140",
+    "type": "choice",
+    "content": "单词 'boost' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 向前",
+      "B. 积累",
+      "C. 提升",
+      "D. 证明；演示"
+    ],
+    "answer": "C",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq141",
+    "type": "choice",
+    "content": "单词 'budget' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 计算",
+      "B. 前进；推进",
+      "C. 具体的",
+      "D. 预算"
+    ],
+    "answer": "D",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq142",
+    "type": "choice",
+    "content": "单词 'candidate' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 熟悉的",
+      "B. 恶化",
+      "C. 候选人",
+      "D. 限制"
+    ],
+    "answer": "C",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq143",
+    "type": "choice",
+    "content": "单词 'capacity' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 减少",
+      "B. 全面的",
+      "C. 容量；能力",
+      "D. 隐藏"
+    ],
+    "answer": "C",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq144",
+    "type": "choice",
+    "content": "单词 'category' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 想象",
+      "B. 优势",
+      "C. 概念",
+      "D. 类别"
+    ],
+    "answer": "D",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq145",
+    "type": "choice",
+    "content": "单词 'cease' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 停止",
+      "B. 事实",
+      "C. 一般的",
+      "D. 断言"
+    ],
+    "answer": "A",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq146",
+    "type": "choice",
+    "content": "单词 'circumstance' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 环境；情况",
+      "B. 一致的",
+      "C. 发现",
+      "D. 未来"
+    ],
+    "answer": "A",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq147",
+    "type": "choice",
+    "content": "单词 'cite' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 文化",
+      "B. 焦点；专注",
+      "C. 替代的",
+      "D. 引用"
+    ],
+    "answer": "D",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq148",
+    "type": "choice",
+    "content": "单词 'clarify' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 负担得起",
+      "B. 教育",
+      "C. 能力",
+      "D. 澄清"
+    ],
+    "answer": "D",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq149",
+    "type": "choice",
+    "content": "单词 'coherent' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 可获得的",
+      "B. 发现",
+      "C. 包括",
+      "D. 连贯的"
+    ],
+    "answer": "D",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq150",
+    "type": "choice",
+    "content": "单词 'collapse' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 崩溃",
+      "B. 积累",
+      "C. 减少",
+      "D. 放弃"
+    ],
+    "answer": "A",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq151",
+    "type": "choice",
+    "content": "单词 'commit' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 承诺；犯（错）",
+      "B. 减少",
+      "C. 经验；经历",
+      "D. 归因于"
+    ],
+    "answer": "A",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq152",
+    "type": "choice",
+    "content": "单词 'commodity' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 原因；导致",
+      "B. 形式；形成",
+      "C. 预期",
+      "D. 商品"
+    ],
+    "answer": "D",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq153",
+    "type": "choice",
+    "content": "单词 'compensate' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 发生",
+      "B. 补偿",
+      "C. 类别",
+      "D. 分配"
+    ],
+    "answer": "B",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq154",
+    "type": "choice",
+    "content": "单词 'comprehensive' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 人类",
+      "B. 全面的",
+      "C. 行为",
+      "D. 源自"
+    ],
+    "answer": "B",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq155",
+    "type": "choice",
+    "content": "单词 'conceal' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 环境；情况",
+      "B. 放弃",
+      "C. 隐藏",
+      "D. 共识"
+    ],
+    "answer": "C",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq156",
+    "type": "choice",
+    "content": "单词 'concentrate' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 集中",
+      "B. 允许",
+      "C. 权威",
+      "D. 奉献"
+    ],
+    "answer": "A",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq157",
+    "type": "choice",
+    "content": "单词 'concept' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 避免",
+      "B. 概念",
+      "C. 崩溃",
+      "D. 提升"
+    ],
+    "answer": "B",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq158",
+    "type": "choice",
+    "content": "单词 'conclude' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 污染",
+      "B. 得出结论",
+      "C. 实施",
+      "D. 避免"
+    ],
+    "answer": "B",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq159",
+    "type": "choice",
+    "content": "单词 'concrete' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 预算",
+      "B. 具体的",
+      "C. 获得",
+      "D. 历史"
+    ],
+    "answer": "B",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq160",
+    "type": "choice",
+    "content": "单词 'conduct' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 可获得的",
+      "B. 实施",
+      "C. 表示",
+      "D. 力量；强迫"
+    ],
+    "answer": "B",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq161",
+    "type": "choice",
+    "content": "单词 'confine' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 限制",
+      "B. 定义",
+      "C. 减少",
+      "D. 努力"
+    ],
+    "answer": "A",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq162",
+    "type": "choice",
+    "content": "单词 'confirm' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 遵守",
+      "B. 污染",
+      "C. 确认",
+      "D. 冲突"
+    ],
+    "answer": "C",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq163",
+    "type": "choice",
+    "content": "单词 'conflict' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 冲突",
+      "B. 方向",
+      "C. 崩溃",
+      "D. 类别"
+    ],
+    "answer": "A",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq164",
+    "type": "choice",
+    "content": "单词 'conform' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 当代的",
+      "B. 遵守",
+      "C. 获得",
+      "D. 能量"
+    ],
+    "answer": "B",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq165",
+    "type": "choice",
+    "content": "单词 'confront' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 反驳",
+      "B. 面对",
+      "C. 模糊的",
+      "D. 自由的；免费的"
+    ],
+    "answer": "B",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq166",
+    "type": "choice",
+    "content": "单词 'consensus' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 任意的",
+      "B. 一致的",
+      "C. 共识",
+      "D. 提升"
+    ],
+    "answer": "C",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq167",
+    "type": "choice",
+    "content": "单词 'consequence' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 承认",
+      "B. 计算",
+      "C. 后果",
+      "D. 确认"
+    ],
+    "answer": "C",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq168",
+    "type": "choice",
+    "content": "单词 'conserve' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 构成",
+      "B. 保护；节约",
+      "C. 描述",
+      "D. 冲突"
+    ],
+    "answer": "B",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq169",
+    "type": "choice",
+    "content": "单词 'considerable' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 忘记",
+      "B. 权威",
+      "C. 任意的",
+      "D. 相当大的"
+    ],
+    "answer": "D",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq170",
+    "type": "choice",
+    "content": "单词 'consistent' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 影响",
+      "B. 描述",
+      "C. 出现",
+      "D. 一致的"
+    ],
+    "answer": "D",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq171",
+    "type": "choice",
+    "content": "单词 'constitute' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 构成",
+      "B. 能力",
+      "C. 实施",
+      "D. 合作"
+    ],
+    "answer": "A",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq172",
+    "type": "choice",
+    "content": "单词 'constrain' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 约束",
+      "B. 创造",
+      "C. 连贯的",
+      "D. 忘记"
+    ],
+    "answer": "A",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq173",
+    "type": "choice",
+    "content": "单词 'construct' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 创造",
+      "B. 故意的",
+      "C. 保护；节约",
+      "D. 构建"
+    ],
+    "answer": "D",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq174",
+    "type": "choice",
+    "content": "单词 'consult' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 咨询",
+      "B. 描述",
+      "C. 焦点；专注",
+      "D. 能力"
+    ],
+    "answer": "A",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq175",
+    "type": "choice",
+    "content": "单词 'consume' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 下降；拒绝",
+      "B. 描述",
+      "C. 形式；形成",
+      "D. 消耗"
+    ],
+    "answer": "D",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq176",
+    "type": "choice",
+    "content": "单词 'contaminate' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 包含",
+      "B. 改进",
+      "C. 污染",
+      "D. 交流"
+    ],
+    "answer": "C",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq177",
+    "type": "choice",
+    "content": "单词 'contemplate' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 深思",
+      "B. 对应",
+      "C. 能力",
+      "D. 数字；人物"
+    ],
+    "answer": "A",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq178",
+    "type": "choice",
+    "content": "单词 'contemporary' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 放弃",
+      "B. 商品",
+      "C. 当代的",
+      "D. 健康"
+    ],
+    "answer": "C",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq179",
+    "type": "choice",
+    "content": "单词 'contend' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 消耗",
+      "B. 忘记",
+      "C. 允许",
+      "D. 主张"
+    ],
+    "answer": "D",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq180",
+    "type": "choice",
+    "content": "单词 'contract' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 利益；受益",
+      "B. 影响",
+      "C. 期望",
+      "D. 合同；收缩"
+    ],
+    "answer": "D",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq181",
+    "type": "choice",
+    "content": "单词 'contradict' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 最后",
+      "B. 竞争",
+      "C. 向前",
+      "D. 反驳"
+    ],
+    "answer": "D",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq182",
+    "type": "choice",
+    "content": "单词 'contribute' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 限制",
+      "B. 承认",
+      "C. 出现",
+      "D. 贡献"
+    ],
+    "answer": "D",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq183",
+    "type": "choice",
+    "content": "单词 'conventional' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 想象",
+      "B. 接受",
+      "C. 传统的",
+      "D. 经验；经历"
+    ],
+    "answer": "C",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq184",
+    "type": "choice",
+    "content": "单词 'convert' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 期望",
+      "B. 解释",
+      "C. 转换",
+      "D. 工业"
+    ],
+    "answer": "C",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq185",
+    "type": "choice",
+    "content": "单词 'convey' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 重要的",
+      "B. 未来",
+      "C. 创造",
+      "D. 传达"
+    ],
+    "answer": "D",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq186",
+    "type": "choice",
+    "content": "单词 'cooperate' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 具体的",
+      "B. 合作",
+      "C. 预算",
+      "D. 数字；人物"
+    ],
+    "answer": "B",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq187",
+    "type": "choice",
+    "content": "单词 'coordinate' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 行为",
+      "B. 协调",
+      "C. 失败",
+      "D. 假设"
+    ],
+    "answer": "B",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq188",
+    "type": "choice",
+    "content": "单词 'correlate' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 预算",
+      "B. 计算",
+      "C. 相关",
+      "D. 行为"
+    ],
+    "answer": "C",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq189",
+    "type": "choice",
+    "content": "单词 'correspond' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 竞争",
+      "B. 放弃",
+      "C. 对应",
+      "D. 文化"
+    ],
+    "answer": "C",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq190",
+    "type": "choice",
+    "content": "单词 'credible' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 相当大的",
+      "B. 表示",
+      "C. 例子",
+      "D. 可信的"
+    ],
+    "answer": "D",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq191",
+    "type": "choice",
+    "content": "单词 'cultivate' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 培养",
+      "B. 指定",
+      "C. 明显的",
+      "D. 预期"
+    ],
+    "answer": "A",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq192",
+    "type": "choice",
+    "content": "单词 'currency' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 货币",
+      "B. 能力",
+      "C. 创造",
+      "D. 竞争"
+    ],
+    "answer": "A",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq193",
+    "type": "choice",
+    "content": "单词 'curriculum' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 候选人",
+      "B. 当代的",
+      "C. 课程",
+      "D. 需求；要求"
+    ],
+    "answer": "C",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq194",
+    "type": "choice",
+    "content": "单词 'cycle' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 循环",
+      "B. 停止",
+      "C. 关心；涉及",
+      "D. 工业"
+    ],
+    "answer": "A",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq195",
+    "type": "choice",
+    "content": "单词 'decisive' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 构建",
+      "B. 预期",
+      "C. 经验；经历",
+      "D. 决定性的"
+    ],
+    "answer": "D",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq196",
+    "type": "choice",
+    "content": "单词 'decline' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 允许",
+      "B. 集中",
+      "C. 替代的",
+      "D. 下降；拒绝"
+    ],
+    "answer": "D",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq197",
+    "type": "choice",
+    "content": "单词 'dedicate' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 明显的",
+      "B. 出现",
+      "C. 争论",
+      "D. 奉献"
+    ],
+    "answer": "D",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq198",
+    "type": "choice",
+    "content": "单词 'deduce' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 向前",
+      "B. 推断",
+      "C. 期望",
+      "D. 原因；导致"
+    ],
+    "answer": "B",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq199",
+    "type": "choice",
+    "content": "单词 'deficiency' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 准确的",
+      "B. 货币",
+      "C. 缺乏",
+      "D. 附上"
+    ],
+    "answer": "C",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq200",
+    "type": "choice",
+    "content": "单词 'define' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 改进",
+      "B. 能力",
+      "C. 定义",
+      "D. 发生"
+    ],
+    "answer": "C",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq201",
+    "type": "choice",
+    "content": "单词 'deliberate' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 创造",
+      "B. 全面的",
+      "C. 集中",
+      "D. 故意的"
+    ],
+    "answer": "D",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq202",
+    "type": "choice",
+    "content": "单词 'demonstrate' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 确认",
+      "B. 证明；演示",
+      "C. 限制",
+      "D. 发展"
+    ],
+    "answer": "B",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq203",
+    "type": "choice",
+    "content": "单词 'denote' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 距离",
+      "B. 表示",
+      "C. 可信的",
+      "D. 跟随"
+    ],
+    "answer": "B",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq204",
+    "type": "choice",
+    "content": "单词 'dense' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 竞争",
+      "B. 分配",
+      "C. 密集的",
+      "D. 协调"
+    ],
+    "answer": "C",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq205",
+    "type": "choice",
+    "content": "单词 'derive' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 源自",
+      "B. 原因；导致",
+      "C. 障碍",
+      "D. 忘记"
+    ],
+    "answer": "A",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq206",
+    "type": "choice",
+    "content": "单词 'designate' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 继续",
+      "B. 指定",
+      "C. 类别",
+      "D. 效果"
+    ],
+    "answer": "B",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq207",
+    "type": "choice",
+    "content": "单词 'despise' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 事实",
+      "B. 考虑",
+      "C. 候选人",
+      "D. 鄙视"
+    ],
+    "answer": "D",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq208",
+    "type": "choice",
+    "content": "单词 'deteriorate' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 差异",
+      "B. 能量",
+      "C. 焦点；专注",
+      "D. 恶化"
+    ],
+    "answer": "D",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "vq209",
+    "type": "choice",
+    "content": "单词 'determine' 的意思是什么？",
+    "difficulty": 0.65,
+    "options": [
+      "A. 约束",
+      "B. 决定；测定",
+      "C. 源自",
+      "D. 需求；要求"
+    ],
+    "answer": "B",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p404"
+    }
+  },
+  {
+    "id": "tq011",
+    "type": "open",
+    "content": "汉译英：'我们学校有很多学生。'",
+    "difficulty": 0.4,
+    "options": [],
+    "answer": "There are many students in our school.",
+    "tags": [
+      "translation"
+    ],
+    "step_node_map": {
+      "step1": "p601"
+    }
+  },
+  {
+    "id": "tq012",
+    "type": "open",
+    "content": "汉译英：'他每天早晨六点起床。'",
+    "difficulty": 0.45,
+    "options": [],
+    "answer": "He gets up at six every morning.",
+    "tags": [
+      "translation"
+    ],
+    "step_node_map": {
+      "step1": "p601"
+    }
+  },
+  {
+    "id": "tq013",
+    "type": "open",
+    "content": "汉译英：'这本书是我朋友送的。'",
+    "difficulty": 0.5,
+    "options": [],
+    "answer": "My friend gave me this book.",
+    "tags": [
+      "translation"
+    ],
+    "step_node_map": {
+      "step1": "p601"
+    }
+  },
+  {
+    "id": "tq014",
+    "type": "open",
+    "content": "汉译英：'她喜欢在晚上散步。'",
+    "difficulty": 0.5,
+    "options": [],
+    "answer": "She likes taking a walk in the evening.",
+    "tags": [
+      "translation"
+    ],
+    "step_node_map": {
+      "step1": "p601"
+    }
+  },
+  {
+    "id": "tq015",
+    "type": "open",
+    "content": "汉译英：'那个正在画画的孩子是我的弟弟。'",
+    "difficulty": 0.6,
+    "options": [],
+    "answer": "The child who is drawing is my younger brother.",
+    "tags": [
+      "translation"
+    ],
+    "step_node_map": {
+      "step1": "p602"
+    }
+  },
+  {
+    "id": "tq016",
+    "type": "open",
+    "content": "汉译英：'尽管天气不好，我们还是去了公园。'",
+    "difficulty": 0.6,
+    "options": [],
+    "answer": "Although the weather was bad, we still went to the park.",
+    "tags": [
+      "translation"
+    ],
+    "step_node_map": {
+      "step1": "p602"
+    }
+  },
+  {
+    "id": "tq017",
+    "type": "open",
+    "content": "汉译英：'这座桥是去年建成的。'",
+    "difficulty": 0.6,
+    "options": [],
+    "answer": "The bridge was built last year.",
+    "tags": [
+      "translation"
+    ],
+    "step_node_map": {
+      "step1": "p602"
+    }
+  },
+  {
+    "id": "tq018",
+    "type": "open",
+    "content": "汉译英：'他问了我一个很难回答的问题。'",
+    "difficulty": 0.6,
+    "options": [],
+    "answer": "He asked me a question that was hard to answer.",
+    "tags": [
+      "translation"
+    ],
+    "step_node_map": {
+      "step1": "p602"
+    }
+  },
+  {
+    "id": "tq019",
+    "type": "open",
+    "content": "汉译英：'人们普遍认为，阅读能开阔视野。'",
+    "difficulty": 0.65,
+    "options": [],
+    "answer": "It is widely believed that reading broadens one's horizons.",
+    "tags": [
+      "translation"
+    ],
+    "step_node_map": {
+      "step1": "p602"
+    }
+  },
+  {
+    "id": "tq020",
+    "type": "open",
+    "content": "汉译英：'随着互联网的普及，信息传播的速度大大加快。'",
+    "difficulty": 0.7,
+    "options": [],
+    "answer": "With the popularity of the Internet, the speed of information dissemination has greatly accelerated.",
+    "tags": [
+      "translation"
+    ],
+    "step_node_map": {
+      "step1": "p602"
+    }
+  },
+  {
+    "id": "tq021",
+    "type": "open",
+    "content": "汉译英：'无论遇到什么困难，我们都应该坚持下去。'",
+    "difficulty": 0.7,
+    "options": [],
+    "answer": "No matter what difficulties we encounter, we should persevere.",
+    "tags": [
+      "translation"
+    ],
+    "step_node_map": {
+      "step1": "p602"
+    }
+  },
+  {
+    "id": "tq022",
+    "type": "open",
+    "content": "汉译英：'保护环境，人人有责。'",
+    "difficulty": 0.7,
+    "options": [],
+    "answer": "Protecting the environment is everyone's responsibility.",
+    "tags": [
+      "translation"
+    ],
+    "step_node_map": {
+      "step1": "p602"
+    }
+  },
+  {
+    "id": "tq023",
+    "type": "open",
+    "content": "英译汉：'Practice makes perfect.'",
+    "difficulty": 0.5,
+    "options": [],
+    "answer": "熟能生巧。",
+    "tags": [
+      "translation"
+    ],
+    "step_node_map": {
+      "step1": "p601"
+    }
+  },
+  {
+    "id": "tq024",
+    "type": "open",
+    "content": "英译汉：'Where there is a will, there is a way.'",
+    "difficulty": 0.55,
+    "options": [],
+    "answer": "有志者事竟成。",
+    "tags": [
+      "translation"
+    ],
+    "step_node_map": {
+      "step1": "p601"
+    }
+  },
+  {
+    "id": "tq025",
+    "type": "open",
+    "content": "英译汉：'The more you read, the more you learn.'",
+    "difficulty": 0.55,
+    "options": [],
+    "answer": "你读得越多，学到的就越多。",
+    "tags": [
+      "translation"
+    ],
+    "step_node_map": {
+      "step1": "p602"
+    }
   }
 ]
