@@ -172,3 +172,31 @@ def test_ease_flag_roundtrips_in_snapshot():
     t2 = _tutor()
     t2.restore_state(st)
     assert t2._ease_verify is True
+
+
+def test_variant_question_roundtrips_in_snapshot():
+    """M4r21c：变式题（动态生成、不在题库）随快照保存/恢复。
+
+    变式题 id 带 "v" 前缀，题库中不存在——restore 需用快照的 verify_question_data 重建。
+    """
+    t = _tutor()
+    # 模拟一个变式题（id 带 v，不在 pack.questions）
+    from app.domain.schemas import Question
+
+    base = t.pack.questions[0]
+    variant = Question(
+        id=f"{base.id}v99999",
+        type=base.type,
+        content=f"变式：{base.content}",
+        difficulty=base.difficulty,
+        options=base.options,
+        answer=base.answer,
+        step_node_map=base.step_node_map,
+    )
+    t.verify_question = variant
+    st = t.save_state()
+    t2 = _tutor()
+    t2.restore_state(st)
+    assert t2.verify_question is not None
+    assert t2.verify_question.id == f"{base.id}v99999"
+    assert t2.verify_question.content.startswith("变式")

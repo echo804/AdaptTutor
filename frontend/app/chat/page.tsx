@@ -168,13 +168,15 @@ export default function ChatPage() {
     setErr(null);
     setLoading(true);
     try {
-      const st = await api<{ session_id: number; type: string; state: string; question: Question | null; qcount?: number; answered?: number; done: boolean }>(`/api/v1/sessions/${id}/state`);
+      const st = await api<{ session_id: number; type: string; state: string; question: Question | null; verify_question?: Question | null; qcount?: number; answered?: number; done: boolean }>(`/api/v1/sessions/${id}/state`);
       const msgs = await api<{ id: number; role: string; content: string; state?: string }[]>(`/api/v1/sessions/${id}/messages`).catch(() => []);
       setSessionId(id);
       setActiveSessionId(id);
       setSessionType(st.type);
       setState(st.state);
-      setCurrentQuestion(st.question && !st.done ? st.question : null);
+      // M4r21c：辅导会话的当前题在 verify_question 字段（question 仅诊断用），两者都兼容
+      const curQ = st.type === "tutor" ? (st.verify_question ?? st.question) : st.question;
+      setCurrentQuestion(curQ && !st.done ? curQ : null);
       setDiagProgress({ qcount: st.qcount, answered: st.answered });
       setBubbles(
         msgs.map((m) => ({ role: m.role as "user" | "assistant", content: m.content, state: m.state })),

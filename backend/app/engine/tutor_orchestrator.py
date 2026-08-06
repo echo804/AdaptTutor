@@ -320,7 +320,7 @@ class TutorOrchestrator:
                         )
                     return TurnResult(
                         state=self.sm.state.value,
-                        message=f"很好，这一步掌握了！进入下一个知识点：{node}。先试试这题：{self.verify_question.content}",
+                        message=f"很好，这一步掌握了！进入下一个知识点：{node}。先试试这道题。",
                         context=dict(self.sm.context),
                     )
                 self.practice_rounds += 1
@@ -396,6 +396,20 @@ class TutorOrchestrator:
             "verify_question_id": self.verify_question.id
             if self.verify_question
             else None,
+            # M4r21c：变式题不在题库，恢复需完整内容（否则 restore 后变式题丢失）
+            "verify_question_data": (
+                {
+                    "id": self.verify_question.id,
+                    "type": self.verify_question.type,
+                    "content": self.verify_question.content,
+                    "options": self.verify_question.options,
+                    "answer": self.verify_question.answer,
+                    "difficulty": self.verify_question.difficulty,
+                    "step_node_map": self.verify_question.step_node_map,
+                }
+                if self.verify_question
+                else None
+            ),
             "practice_rounds": self.practice_rounds,
             "max_rounds": self.max_rounds,
             "current_node": self.current_node,
@@ -432,6 +446,15 @@ class TutorOrchestrator:
             self.verify_question = next(
                 (q for q in self.pack.questions if q.id == vqid), None
             )
+            # M4r21c：变式题不在题库（动态生成）→ 用快照保存的完整内容重建
+            if self.verify_question is None and state.get("verify_question_data"):
+                from app.domain.schemas import Question  # 局部导入（避免循环依赖）
+
+                d = state["verify_question_data"]
+                try:
+                    self.verify_question = Question(**d)
+                except Exception:
+                    self.verify_question = None
         # M4r7h：恢复辅导题库与练习轮数
         self.max_rounds = int(state.get("max_rounds", self.max_rounds))
         self.practice_rounds = int(state.get("practice_rounds", 0))
