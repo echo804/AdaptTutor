@@ -178,6 +178,13 @@ async def api_send_message(
     t.restore_state(state)
     pack_id = state.get("pack_id") or "junior_math_eq_ineq"
 
+    # M6：SM-2 到期复习题注入（跨会话遗忘调度，仅辅导会话）——下次选题优先出复习题
+    if s.type == "tutor":
+        from app.persistence.repositories import count_due_reviews, get_due_reviews
+
+        t.due_override = [x.qid for x in await get_due_reviews(db, user.id, pack_id)]
+        t.due_count = await count_due_reviews(db, user.id, pack_id)
+
     trace_id = f"{sid}-{uuid.uuid4().hex[:8]}"
     await repo.add_message(
         db,
@@ -210,6 +217,8 @@ async def api_send_message(
         else:
             st = t.diagnose(result.correct)
             nq = st.get("question")
+            # M6：诊断答错 → 入 SM-2 复习调度（跨会话遗忘调度）
+            await repo.upsert_review(db, user.id, pack_id, q.id, correct=result.correct)
             # M4r21h：每次作答记 answer 事件（学习趋势数据源，答对答错都记）
             await repo.add_event(
                 db,
@@ -348,6 +357,9 @@ async def api_send_message(
                     )
                 else:
                     r = t.tutor_step(body.content, correct=j.correct)
+                    # M6：辅导作答 → 写入 SM-2 复习调度（答错立即可复习，答对排期）
+                    if t.verify_question is not None:
+                        await repo.upsert_review(db, user.id, pack_id, t.verify_question.id, correct=j.correct)
                     # M4r21h：辅导作答也记 answer 事件（学习趋势数据源）
                     await repo.add_event(
                         db,

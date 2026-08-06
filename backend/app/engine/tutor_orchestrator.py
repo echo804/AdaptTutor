@@ -74,6 +74,8 @@ class TutorOrchestrator:
         self._used_nodes: set[str] = set()  # M5：本会话已巩固的知识点（循环选题不重复；恢复会话兜底初始化）
         self.review_queue: list[str] = []  # M5：错题复习队列（qid，去重；复习答对移除）
         self.review_tries: dict[str, int] = {}  # M5：错题复习次数（≥2 次未答对 → 移出队列防无限反复）
+        self.due_override: list[str] = []  # M6：跨会话到期复习题（routes 层按 SM-2 调度表注入，优先出题）
+        self.due_count: int = 0  # M6：跨会话到期复习题数（routes 层刷新，完成提示用）
         self.is_review: bool = False  # M5：当前题是否为错题复习题
         self.current_node: str | None = None  # M4r7i：当前辅导知识点（变式题匹配依据）
         self._ease_verify: bool = False  # M4r20 T3：挫败后变式降档标记
@@ -498,7 +500,11 @@ class TutorOrchestrator:
         if self.practice_rounds >= self.max_rounds:
             weak = "、".join((self.weak_nodes or ["—"])[:3])
             self.verify_question = None
-            left = f"还有 {len(self.review_queue)} 道错题未巩固，可开启新会话复习。" if self.review_queue else ""
+            left = (
+                f"还有 {self.due_count} 道复习到期（按遗忘曲线），可开启新会话复习。"
+                if self.due_count
+                else ""
+            )
             return TurnResult(
                 state=State.DONE.value,
                 message=(
@@ -529,7 +535,18 @@ class TutorOrchestrator:
         )
 
     def _next_question(self) -> tuple[str | None, Question | None]:
-        """M5：下一题——错题复习（随机命中、不与刚做完的题相邻）或新知识点题。"""
+        """M6：下一题——跨会话到期复习（SM-2 调度，routes 注入 due_override）优先，
+        其次会话内随机队列（无 db 环境），最后新知识点题。"""
+        # M6：SM-2 到期复习题（跨会话持久化）
+        if self.due_override:
+            qid = self.due_override.pop(0)
+            q = next((x for x in self.pack.questions if x.id == qid), None)
+            if q is not None:
+                self.is_review = True
+                return next(iter(q.step_node_map.values()), None), q
+            self.is_review = False
+            return self._pick_node_question()
+        # 原有：会话内随机队列（兼容无 db 环境）
         if self.review_queue and random.random() < 0.25:
             cur_id = self.verify_question.id if self.verify_question else None
             cands = [qid for qid in self.review_queue if qid != cur_id]

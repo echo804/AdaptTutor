@@ -16,6 +16,7 @@ from app.persistence.models import (
     LearningEvent,
     MasteryState,
     Message,
+    ReviewSchedule,
     Session,
 )
 
@@ -376,3 +377,101 @@ async def delete_sessions(
     )
     await db.commit()
     return res.rowcount or 0
+
+
+# ---------- SM-2 间隔重复调度（M6 遗忘调度升级） ----------
+
+async def get_due_reviews(
+    db: AsyncSession, student_id: int, pack_id: str, limit: int = 5
+) -> list[ReviewSchedule]:
+    """到期（due_at <= now）的复习题，按到期先后排序。"""
+    res = await db.execute(
+        select(ReviewSchedule)
+        .where(
+            ReviewSchedule.user_id == student_id,
+            ReviewSchedule.pack_id == pack_id,
+            ReviewSchedule.due_at <= _now(),
+        )
+        .order_by(ReviewSchedule.due_at)
+        .limit(limit)
+    )
+    return list(res.scalars().all())
+
+
+async def count_due_reviews(
+    db: AsyncSession, student_id: int, pack_id: str
+) -> int:
+    """到期复习题数量（完成提示用）。"""
+    res = await db.execute(
+        select(func.count(ReviewSchedule.id)).where(
+            ReviewSchedule.user_id == student_id,
+            ReviewSchedule.pack_id == pack_id,
+            ReviewSchedule.due_at <= _now(),
+        )
+    )
+    return int(res.scalar() or 0)
+
+
+async def upsert_review(
+    db: AsyncSession,
+    student_id: int,
+    pack_id: str,
+    qid: str,
+    *,
+    correct: bool,
+) -> ReviewSchedule | None:
+    """记录一次作答结果（SM-2 推进）：
+    - 答错且无记录 → 插入（due=now 立即可复习）
+    - 已有记录 → 按 on_answered 推进间隔（答对排期、答错重置）
+    - 答对且无记录 → 不插入（未错过无需复习）
+    """
+    from datetime import timedelta
+
+    from app.engine.spaced_repetition import on_answered
+
+    row = (
+        await db.execute(
+            select(ReviewSchedule).where(
+                ReviewSchedule.user_id == student_id,
+                ReviewSchedule.pack_id == pack_id,
+                ReviewSchedule.qid == qid,
+            )
+        )
+    ).scalar_one_or_none()
+    now = _now()
+
+    if row is None:
+        if not correct:
+            row = ReviewSchedule(
+                user_id=student_id,
+                pack_id=pack_id,
+                qid=qid,
+                due_at=now,  # 答错立即可复习
+                interval_days=1,
+                ease=2.5,
+                repetitions=0,
+                last_result=False,
+                updated_at=now,
+            )
+            db.add(row)
+            await db.commit()
+            await db.refresh(row)
+            return row
+        return None
+
+    s, due_at = on_answered(
+        correct,
+        interval_days=row.interval_days,
+        ease=row.ease,
+        repetitions=row.repetitions,
+        now=now,
+    )
+    row.interval_days = s.interval_days
+    row.ease = s.ease
+    row.repetitions = s.repetitions
+    row.last_result = correct
+    row.due_at = due_at
+    row.updated_at = now
+    await db.commit()
+    await db.refresh(row)
+    return row

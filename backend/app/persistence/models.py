@@ -201,6 +201,34 @@ class KnowledgeGraph(Base):
     version: Mapped[str] = mapped_column(String(16))
 
 
+class ReviewSchedule(Base):
+    """SM-2 间隔重复调度（M6 遗忘调度升级）：错题跨会话复习计划。
+
+    答错 → 入表（interval=1 天）；到期（due_at <= now）优先出现在辅导/诊断选题中；
+    复习答对 → repetitions+1、间隔按 ease 倍增；再答错 → 重置为 1 天并衰减 ease。
+    """
+
+    __tablename__ = "review_schedule"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True
+    )
+    pack_id: Mapped[str] = mapped_column(String(64), index=True)
+    qid: Mapped[str] = mapped_column(String(64))
+    due_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)  # 下次复习时间
+    interval_days: Mapped[int] = mapped_column(Integer, default=1)  # 当前间隔（天）
+    ease: Mapped[float] = mapped_column(Float, default=2.5)  # 易度因子（下限 1.3）
+    repetitions: Mapped[int] = mapped_column(Integer, default=0)  # 连续答对次数
+    last_result: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
+    )
+    __table_args__ = (
+        UniqueConstraint("user_id", "pack_id", "qid", name="uq_review_user_pack_qid"),
+    )
+
+
 class UserDomain(Base):
     """用户自建领域（M4r8d）：素材导入 → AI 生成 → 发布/审核。
 
