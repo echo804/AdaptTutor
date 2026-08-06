@@ -470,7 +470,7 @@
  {
   "id": "lq025",
   "type": "blank",
-  "content": "Flash Attention 通过将注意力矩阵分块，将显存占用从 $O(N^2)$ 降低到 $\\boxed{O(N)}$。",
+  "content": "Flash Attention 通过将注意力矩阵分块，将显存占用从 $O(N^2)$ 降低到 $______$。",
   "difficulty": 0.6,
   "options": [],
   "answer": "O(N)",
@@ -526,7 +526,7 @@
  {
   "id": "lq028",
   "type": "blank",
-  "content": "MoE 中的 Router 负责决定每个 token 进入哪个 \\boxed{专家}。",
+  "content": "MoE 中的 Router 负责决定每个 token 进入哪个 ______。",
   "difficulty": 0.6,
   "options": [],
   "answer": "专家",
@@ -655,7 +655,7 @@
  {
   "id": "lq035",
   "type": "choice",
-  "content": "量化的核心目标是将模型参数从高精度浮点数映射到低精度整数，其主要收益包括：$\\boxed{\\text{A. 显存占用降低}}$、$\\boxed{\\text{B. 推理速度提升}}$、$\\boxed{\\text{C. 模型体积减小}}$、$\\boxed{\\text{D. 精度损失增加}}$",
+  "content": "量化的核心目标是将模型参数从高精度浮点数映射到低精度整数，其主要收益包括：$A. 显存占用降低$、$B. 推理速度提升$、$C. 模型体积减小$、$D. 精度损失增加$",
   "difficulty": 0.5,
   "options": [
    "A. 显存占用降低",
@@ -711,7 +711,7 @@
  {
   "id": "lq038",
   "type": "choice",
-  "content": "以下哪些是 GPTQ 的特点？$\\boxed{\\text{A. 支持极端低位量化}}$、$\\boxed{\\text{B. 量化耗时短}}$、$\\boxed{\\text{C. 不依赖模型结构}}$、$\\boxed{\\text{D. 误差补偿机制}}$",
+  "content": "以下哪些是 GPTQ 的特点？$A. 支持极端低位量化$、$B. 量化耗时短$、$C. 不依赖模型结构$、$D. 误差补偿机制$",
   "difficulty": 0.5,
   "options": [
    "A. 支持极端低位量化",
@@ -733,7 +733,7 @@
  {
   "id": "lq039",
   "type": "choice",
-  "content": "关于 Scaling Law 的描述，哪一项是正确的？$\\boxed{\\text{A. 模型规模越大，损失值一定越小}}$、$\\boxed{\\text{B. 损失值随模型规模、数据量、算力按幂律下降}}$、$\\boxed{\\text{C. 模型规模没有上限}}$、$\\boxed{\\text{D. 数据量越多效果越好}}$",
+  "content": "关于 Scaling Law 的描述，哪一项是正确的？$A. 模型规模越大，损失值一定越小$、$B. 损失值随模型规模、数据量、算力按幂律下降$、$C. 模型规模没有上限$、$D. 数据量越多效果越好$",
   "difficulty": 0.6,
   "options": [
    "A. 模型规模越大，损失值一定越小",
@@ -772,7 +772,7 @@
  {
   "id": "lq041",
   "type": "choice",
-  "content": "关于 Top-P 和 Top-K 的区别，哪一项是正确的？$\\boxed{\\text{A. Top-P 是固定截断}}$、$\\boxed{\\text{B. Top-K 是自适应截断}}$、$\\boxed{\\text{C. Top-P 根据概率分布自动调整候选池大小}}$、$\\boxed{\\text{D. Top-K 更适合开放性任务}}$",
+  "content": "关于 Top-P 和 Top-K 的区别，哪一项是正确的？$A. Top-P 是固定截断$、$B. Top-K 是自适应截断$、$C. Top-P 根据概率分布自动调整候选池大小$、$D. Top-K 更适合开放性任务$",
   "difficulty": 0.5,
   "options": [
    "A. Top-P 是固定截断",
@@ -811,7 +811,7 @@
  {
   "id": "lq043",
   "type": "choice",
-  "content": "以下哪些是涌现能力的特点？$\\boxed{\\text{A. 随着模型规模增加而突变出现}}$、$\\boxed{\\text{B. 与数据量无关}}$、$\\boxed{\\text{C. 在 50B-100B 参数时出现}}$、$\\boxed{\\text{D. 只出现在大模型中}}$",
+  "content": "以下哪些是涌现能力的特点？$A. 随着模型规模增加而突变出现$、$B. 与数据量无关$、$C. 在 50B-100B 参数时出现$、$D. 只出现在大模型中$",
   "difficulty": 0.5,
   "options": [
    "A. 随着模型规模增加而突变出现",
@@ -833,7 +833,7 @@
  {
   "id": "lq044",
   "type": "choice",
-  "content": "Tokenizer 的主要作用是？$\\boxed{\\text{A. 将文本转换为数字 ID 序列}}$ $\\boxed{\\text{B. 生成代码}}$ $\\boxed{\\text{C. 计算损失函数}}$ $\\boxed{\\text{D. 优化模型参数}}$",
+  "content": "Tokenizer 的主要作用是？$A. 将文本转换为数字 ID 序列$ $B. 生成代码$ $C. 计算损失函数$ $D. 优化模型参数$",
   "difficulty": 0.5,
   "options": [
    "A. 将文本转换为数字 ID 序列",
@@ -855,7 +855,7 @@
  {
   "id": "lq045",
   "type": "choice",
-  "content": "以下哪种分词方式能有效处理新词问题？$\\boxed{\\text{A. 字符级分词}}$ $\\boxed{\\text{B. 词级分词}}$ $\\boxed{\\text{C. 子词分词}}$ $\\boxed{\\text{D. 无分词}}$",
+  "content": "以下哪种分词方式能有效处理新词问题？$A. 字符级分词$ $B. 词级分词$ $C. 子词分词$ $D. 无分词$",
   "difficulty": 0.55,
   "options": [
    "A. 字符级分词",
@@ -911,7 +911,7 @@
  {
   "id": "lq048",
   "type": "choice",
-  "content": "以下哪项不是 Transformer 的组成部分？$\\boxed{\\text{A. Multi-Head Attention}}$ $\\boxed{\\text{B. 位置编码}}$ $\\boxed{\\text{C. LSTM}}$ $\\boxed{\\text{D. 前馈网络}}$",
+  "content": "以下哪项不是 Transformer 的组成部分？$A. Multi-Head Attention$ $B. 位置编码$ $C. LSTM$ $D. 前馈网络$",
   "difficulty": 0.55,
   "options": [
    "A. Multi-Head Attention",
@@ -2602,7 +2602,7 @@
  {
   "id": "tq001",
   "type": "choice",
-  "content": "Function Calling 的核心设计是模型全程只做 $\\boxed{\\text{决策}}$，执行的事情由宿主代码完成。",
+  "content": "Function Calling 的核心设计是模型全程只做 $决策$，执行的事情由宿主代码完成。",
   "difficulty": 0.5,
   "options": [
    "A. 执行",
@@ -2624,7 +2624,7 @@
  {
   "id": "tq002",
   "type": "blank",
-  "content": "工具 schema 中最关键的字段是 $\\boxed{\\text{description}}$。",
+  "content": "工具 schema 中最关键的字段是 $______$。",
   "difficulty": 0.5,
   "options": [],
   "answer": "description",
@@ -2658,7 +2658,7 @@
  {
   "id": "tq004",
   "type": "choice",
-  "content": "RLHF 的主要作用是帮助模型建立 $\\boxed{\\text{边界感}}$。",
+  "content": "RLHF 的主要作用是帮助模型建立 $边界感$。",
   "difficulty": 0.6,
   "options": [
    "A. 执行能力",
@@ -2680,7 +2680,7 @@
  {
   "id": "tq005",
   "type": "blank",
-  "content": "在 Function Calling 流程中，模型输出的 JSON 格式称为 $\\boxed{\\text{tool_calls}}$。",
+  "content": "在 Function Calling 流程中，模型输出的 JSON 格式称为 $______$。",
   "difficulty": 0.5,
   "options": [],
   "answer": "tool_calls",
