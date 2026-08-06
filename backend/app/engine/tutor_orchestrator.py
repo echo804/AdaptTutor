@@ -314,9 +314,29 @@ class TutorOrchestrator:
             if correct is True:
                 self.sm.step(Event.CLASSIFIED, error_category="concept")
                 return self._hint_turn()
+            if correct is None:
+                # M4r24h：IDENTIFY 态求助 → 针对性提示，不推进状态机
+                _seek = ("我不会", "讲讲", "帮我", "教教", "求助", "不懂", "怎么解", "提示我")
+                if any(k in user_msg for k in _seek):
+                    targeted = self._gen_targeted_hint(1)
+                    return TurnResult(
+                        state=self.sm.state.value,
+                        message=targeted or "先想想刚答错的这步，依据是什么？",
+                        context=dict(self.sm.context),
+                    )
             self.sm.step(Event.CLASSIFIED, error_category="operation")
             return self._hint_turn()
         if state == State.HINT:
+            # M4r24h：HINT 态输入区分——求助类 → 给针对性提示不推进；
+            # 其他（"好，我按提示想想"）→ 正常 HINT_GIVEN → 变式验证
+            _seek = ("我不会", "讲讲", "帮我", "教教", "求助", "不懂", "怎么解", "提示我")
+            if correct is None and any(k in user_msg for k in _seek):
+                targeted = self._gen_targeted_hint(1)
+                return TurnResult(
+                    state=self.sm.state.value,
+                    message=targeted or "先想想刚答错的这步，依据是什么？",
+                    context=dict(self.sm.context),
+                )
             # 状态机保证：HINT 态只能经 HINT_GIVEN 离开（提示给出 → 变式验证）
             self.sm.step(Event.HINT_GIVEN)
             return self._verify_turn()
