@@ -22,18 +22,41 @@ fi
 
 echo "[entrypoint] 执行数据库迁移…"
 alembic upgrade head
-# 兜底：补齐 alembic 未覆盖的模型表（如 user_domains/review_schedule 等后加表，幂等 create_all）
-echo "[entrypoint] 补齐缺失表（模型 create_all，幂等）…"
+# 兜底：补齐 alembic 未覆盖的表（create_all，幂等）与列（模型 metadata 对比，幂等 ALTER）
+echo "[entrypoint] 同步模型表/列（幂等）…"
 python -c "
 import asyncio
+from sqlalchemy import inspect, text
 from app.persistence.models import Base
 from app.persistence.db import get_engine
 
-async def _create_all():
+async def _sync():
     async with get_engine().begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+        def _do(sync_conn):
+            insp = inspect(sync_conn)
+            tables = set(insp.get_table_names())
+            for table in Base.metadata.sorted_tables:
+                if table.name not in tables:
+                    table.create(bind=sync_conn, checkfirst=True)
+                    print(f'[sync] 建表 {table.name}')
+                    continue
+                cols = {c['name'] for c in insp.get_columns(table.name)}
+                for c in table.columns:
+                    if c.name in cols:
+                        continue
+                    col_type = c.type.compile(dialect=sync_conn.dialect)
+                    nullable = '' if c.nullable else ' NOT NULL'
+                    default = ''
+                    if c.default is not None and c.default.is_scalar:
+                        arg = c.default.arg
+                        default = f' DEFAULT {arg!r}' if isinstance(arg, str) else f' DEFAULT {arg}'
+                    sync_conn.execute(text(
+                        f'ALTER TABLE {table.name} ADD COLUMN IF NOT EXISTS {c.name} {col_type}{default}{nullable}'
+                    ))
+                    print(f'[sync] 补列 {table.name}.{c.name}')
+        await conn.run_sync(_do)
 
-asyncio.run(_create_all())
+asyncio.run(_sync())
 "
 
 exec "$@"
