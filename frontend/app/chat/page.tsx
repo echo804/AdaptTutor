@@ -480,7 +480,7 @@ export default function ChatPage() {
                 >
                   <span
                     className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl"
-                    style={{ background: "rgba(212,165,116,0.16)", color: "#b08a54" }}
+                    style={{ background: "var(--amber-soft)", color: "var(--amber)" }}
                   >
                     {/* 辅导：简约对话气泡线稿 */}
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
@@ -495,7 +495,7 @@ export default function ChatPage() {
                   </div>
                   <span
                     className="mt-3 inline-flex items-center gap-1 text-xs font-medium transition-transform duration-200 group-hover:translate-x-0.5"
-                    style={{ color: "#b08a54" }}
+                    style={{ color: "var(--amber)" }}
                   >
                     {hasKey === false ? "去配置 →" : "开始 →"}
                   </span>
@@ -520,8 +520,8 @@ export default function ChatPage() {
                         <span
                           className="shrink-0 rounded px-2 py-0.5 text-[11px] font-medium"
                           style={{
-                            background: s.type === "tutor" ? "rgba(212,165,116,0.16)" : "var(--accent-soft)",
-                            color: s.type === "tutor" ? "#b08a54" : "var(--accent)",
+                            background: s.type === "tutor" ? "var(--amber-soft)" : "var(--accent-soft)",
+                            color: s.type === "tutor" ? "var(--amber)" : "var(--accent)",
                           }}
                         >
                           {typeLabel(s.type)}
