@@ -75,8 +75,6 @@ export default function DashboardPage() {
   const weakest = entries[0];
   const avgMastery = entries.length ? entries.reduce((s, [, p]) => s + p, 0) / entries.length : 0;
 
-  const gaugeData = [{ name: "整体掌握", value: Math.round(avgMastery * 100) }];
-
   return (
     <div className="mx-auto max-w-5xl space-y-6 p-6">
       <h1 className="text-lg font-semibold">仪表盘</h1>
@@ -131,22 +129,24 @@ export default function DashboardPage() {
             <p className="text-sm" style={{ color: "var(--muted)" }}>暂无数据</p>
           ) : (
             <div className="flex items-center gap-4">
-              <ResponsiveContainer width="45%" height={150}>
-                <AreaChart data={gaugeData} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="avgGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor={amber} />
-                      <stop offset="100%" stopColor="#94a3b8" />
-                    </linearGradient>
-                  </defs>
-                  <YAxis domain={[0, 100]} hide />
-                  <Area type="monotone" dataKey="value" stroke="none" fill="url(#avgGrad)" />
-                  <Tooltip contentStyle={{ fontSize: 12, background: "var(--surface)", border: "1px solid var(--border)" }} />
-                </AreaChart>
-              </ResponsiveContainer>
+              {/* M6：整体掌握度环形进度（SVG，替换原 AreaChart 竖线问题） */}
+              <div className="relative h-[120px] w-[120px] shrink-0">
+                <svg viewBox="0 0 120 120" className="h-full w-full -rotate-90">
+                  <circle cx="60" cy="60" r="52" fill="none" stroke="var(--border)" strokeWidth="10" />
+                  <circle
+                    cx="60" cy="60" r="52" fill="none"
+                    stroke={amber} strokeWidth="10" strokeLinecap="round"
+                    strokeDasharray={`${2 * Math.PI * 52}`}
+                    strokeDashoffset={`${2 * Math.PI * 52 * (1 - Math.min(1, Math.max(0, avgMastery)))}`}
+                    style={{ transition: "stroke-dashoffset 0.6s ease" }}
+                  />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center text-2xl font-semibold" style={{ color: "var(--text)" }}>
+                  {Math.round(avgMastery * 100)}%
+                </div>
+              </div>
               <div className="text-sm" style={{ color: "var(--muted)" }}>
-                <div className="text-3xl font-semibold" style={{ color: "var(--text)" }}>{Math.round(avgMastery * 100)}%</div>
-                共 {entries.length} 个知识点已测
+                <div>共 {entries.length} 个知识点已测</div>
                 <div className="mt-2 text-xs">最弱：{weakest[0]}（{Math.round(weakest[1] * 100)}%）</div>
               </div>
             </div>
