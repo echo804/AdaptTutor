@@ -1,5 +1,5 @@
 {
-  "purity_threshold": 0.9,
-  "mastery_threshold": 0.85,
-  "regression_suite": []
+ "purity_threshold": 0.9,
+ "mastery_threshold": 0.85,
+ "regression_suite": []
 }

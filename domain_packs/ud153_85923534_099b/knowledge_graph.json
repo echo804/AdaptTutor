@@ -1,29 +1,29 @@
 {
-  "nodes": [
-    {
-      "id": "p101",
-      "name": "版本控制基础概念",
-      "difficulty": 0.5,
-      "importance": 0.8,
-      "error_modes": [
-        "混淆版本控制与文件备份"
-      ]
-    },
-    {
-      "id": "p102",
-      "name": "Git 提交操作原理",
-      "difficulty": 0.6,
-      "importance": 0.7,
-      "error_modes": [
-        "忽略提交说明信息的重要性"
-      ]
-    }
-  ],
-  "edges": [
-    {
-      "from": "p101",
-      "to": "p102",
-      "type": "prerequisite"
-    }
-  ]
+ "nodes": [
+  {
+   "id": "p101",
+   "name": "版本控制基础概念",
+   "difficulty": 0.5,
+   "importance": 0.8,
+   "error_modes": [
+    "混淆版本控制与文件备份"
+   ]
+  },
+  {
+   "id": "p102",
+   "name": "Git 提交操作原理",
+   "difficulty": 0.6,
+   "importance": 0.7,
+   "error_modes": [
+    "忽略提交说明信息的重要性"
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "from": "p101",
+   "to": "p102",
+   "type": "prerequisite"
+  }
+ ]
 }
