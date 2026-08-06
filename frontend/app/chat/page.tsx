@@ -1,6 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+// M6.1：生产部署——交互页不做静态预渲染（prerender 会执行模块级浏览器依赖导致构建失败）
+export const dynamic = "force-dynamic";
+
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { api, HintReply, KeyItem, MessageReply, Question } from "@/lib/api";
 import { useDomain } from "@/lib/domain";
@@ -49,7 +52,7 @@ const QTYPE_LABELS: Record<string, string> = { choice: "选择题", blank: "填�
 const DEFAULT_DIAG: DiagConfig = { qtypes: ["choice", "blank", "open", "multi"], qcount: 10, difficulty: "auto" }; // M4r24
 
 /** 对话学习（M4r5b）：会话历史侧栏（恢复继续）+ 诊断配置面板 + AI 判题 + 正确答案展示 */
-export default function ChatPage() {
+function ChatPageInner() {
   // M6：?sid= 直达会话（复习中心「开始复习」跳转）
   const searchParams = useSearchParams();
   const sidParam = searchParams.get("sid");
@@ -1065,6 +1068,15 @@ export default function ChatPage() {
         />
       )}
     </div>
+  );
+}
+
+// M6.1：useSearchParams 需 Suspense 边界（生产构建 prerender 强制要求）
+export default function ChatPage() {
+  return (
+    <Suspense fallback={null}>
+      <ChatPageInner />
+    </Suspense>
   );
 }
 

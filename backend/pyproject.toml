@@ -15,6 +15,8 @@ dependencies = [
     "bcrypt",
     "PyJWT",
     "cryptography",
+    # M6.1：Form/UploadFile 需要（本地环境历史残留，生产镜像必装）
+    "python-multipart",
 ]
 
 [project.optional-dependencies]

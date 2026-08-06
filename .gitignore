@@ -39,3 +39,6 @@ logs/
 
 # Playwright 临时产物
 .playwright-mcp/
+
+# 生产环境密钥（M6.1：.env.production 含强密钥，必须忽略）
+.env.production

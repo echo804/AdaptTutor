@@ -1,0 +1,71 @@
+# AdaptTutor 生产部署栈（Docker Compose）
+# 用法：
+#   1. 生成生产密钥：python backend/scripts/gen_prod_secrets.py（生成 backend/.env.production）
+#   2. 填写 backend/.env.production 中 LLM key 等
+#   3. 构建并启动：docker compose -f docker-compose.prod.yml up -d --build
+#   4. 停止：docker compose -f docker-compose.prod.yml down
+# 端口：web 3000（前端）、api 8010（后端），用 IP 访问 http://<服务器IP>:3000
+name: adapttutor-prod
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: adapttutor-prod-pg
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: adapt
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-adapt_prod_pw}
+      POSTGRES_DB: adapttutor
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U adapt -d adapttutor"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: adapttutor-prod-api
+    restart: unless-stopped
+    env_file: ./backend/.env.production
+    environment:
+      # 容器内网直连 postgres 服务名（不暴露 5432 到公网）
+      DATABASE_URL: postgresql+asyncpg://adapt:${POSTGRES_PASSWORD:-adapt_prod_pw}@postgres:5432/adapttutor
+      # 领域包与备份目录用挂载卷（持久化）
+      DOMAIN_PACK_PATH: /app/domain_packs
+      BACKUP_DIR: /app/backups
+      LOG_LEVEL: INFO
+    volumes:
+      - packs:/app/domain_packs
+      - backups:/app/backups
+    ports:
+      - "8010:8010"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8010/healthz')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build:
+      context: ./frontend
+      # 浏览器侧访问的后端地址：IP 场景用 http://<服务器IP>:8010；有域名后改为 https://<域名>/api
+      args:
+        NEXT_PUBLIC_API_BASE: ${NEXT_PUBLIC_API_BASE:-http://localhost:8010}
+    container_name: adapttutor-prod-web
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+
+volumes:
+  pgdata:
+  packs:
+  backups:
