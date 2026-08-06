@@ -1,71 +1,5 @@
 [
   {
-    "id": "p1q001",
-    "type": "choice",
-    "content": "下列句子中，分词作状语的是：",
-    "tags": [
-      "非谓语动词.md"
-    ],
-    "difficulty": 0.5,
-    "options": [
-      "A. He is a teacher.",
-      "B. Walking along the street, I met an old friend.",
-      "C. She is reading a book.",
-      "D. They are playing football."
-    ],
-    "answer": "B",
-    "step_node_map": {
-      "step1": "p101"
-    }
-  },
-  {
-    "id": "p1q002",
-    "type": "choice",
-    "content": "以下哪种情况需要使用独立主格结构？",
-    "tags": [
-      "非谓语动词.md"
-    ],
-    "difficulty": 0.6,
-    "options": [
-      "A. 分词逻辑主语与主句主语一致",
-      "B. 分词逻辑主语与主句主语不一致",
-      "C. 分词表示被动关系",
-      "D. 分词表示完成动作"
-    ],
-    "answer": "B",
-    "step_node_map": {
-      "step1": "p102"
-    }
-  },
-  {
-    "id": "p1q003",
-    "type": "blank",
-    "content": "独立主格结构的常见形式是______ + 分词。",
-    "tags": [
-      "非谓语动词.md"
-    ],
-    "difficulty": 0.5,
-    "options": [],
-    "answer": "名词/代词",
-    "step_node_map": {
-      "step1": "p102"
-    }
-  },
-  {
-    "id": "p1q004",
-    "type": "open",
-    "content": "请解释什么是悬垂分词，并举一个例子。",
-    "tags": [
-      "非谓语动词.md"
-    ],
-    "difficulty": 0.6,
-    "options": [],
-    "answer": "悬垂分词是指分词的逻辑主语与主句主语不一致。例如：Looking out of the window, the garden is beautiful.（错误）应改为：Looking out of the window, I saw a beautiful garden.",
-    "step_node_map": {
-      "step1": "p101"
-    }
-  },
-  {
     "id": "p2q001",
     "type": "choice",
     "content": "下列哪个短语表示‘起飞’？",
@@ -85,34 +19,6 @@
     }
   },
   {
-    "id": "p2q002",
-    "type": "blank",
-    "content": "动词短语由______和介词/副词构成。",
-    "tags": [
-      "高频动词短语.md"
-    ],
-    "difficulty": 0.5,
-    "options": [],
-    "answer": "动词",
-    "step_node_map": {
-      "step1": "p201"
-    }
-  },
-  {
-    "id": "p2q003",
-    "type": "open",
-    "content": "请解释 'take off' 的含义，并举一个例子。",
-    "tags": [
-      "高频动词短语.md"
-    ],
-    "difficulty": 0.5,
-    "options": [],
-    "answer": "take off 表示‘起飞’或‘突然成功’。例如：The plane took off on time.",
-    "step_node_map": {
-      "step1": "p202"
-    }
-  },
-  {
     "id": "p2q004",
     "type": "choice",
     "content": "下列哪个短语表示‘接管’？",
@@ -129,364 +35,6 @@
     "answer": "B",
     "step_node_map": {
       "step1": "p202"
-    }
-  },
-  {
-    "id": "p2q005",
-    "type": "blank",
-    "content": "动词短语的含义常与______相关。",
-    "tags": [
-      "高频动词短语.md"
-    ],
-    "difficulty": 0.5,
-    "options": [],
-    "answer": "介词/副词的空间意象",
-    "step_node_map": {
-      "step1": "p201"
-    }
-  },
-  {
-    "id": "p3q001",
-    "type": "choice",
-    "content": "定语从句中，当先行词指人且在从句中作主语时，应使用哪个关系代词？",
-    "tags": [
-      "定语从句.md"
-    ],
-    "difficulty": 0.5,
-    "options": [
-      "A. whom",
-      "B. which",
-      "C. who",
-      "D. that"
-    ],
-    "answer": "C",
-    "step_node_map": {
-      "step1": "p301"
-    }
-  },
-  {
-    "id": "p3q002",
-    "type": "choice",
-    "content": "下列哪种情况必须使用关系副词？",
-    "tags": [
-      "定语从句.md"
-    ],
-    "difficulty": 0.5,
-    "options": [
-      "A. 先行词指物且在从句中作宾语",
-      "B. 先行词指人且在从句中作主语",
-      "C. 从句中不缺主语或宾语",
-      "D. 先行词被最高级修饰"
-    ],
-    "answer": "C",
-    "step_node_map": {
-      "step1": "p302"
-    }
-  },
-  {
-    "id": "p3q003",
-    "type": "blank",
-    "content": "定语从句中，当从句缺少介词后的宾语时，介词提前后，关系代词是否可以省略？",
-    "tags": [
-      "定语从句.md"
-    ],
-    "difficulty": 0.5,
-    "options": [],
-    "answer": "不可以",
-    "step_node_map": {
-      "step1": "p301"
-    }
-  },
-  {
-    "id": "p3q004",
-    "type": "open",
-    "content": "请简述关系副词 when、where、why 的使用条件。",
-    "tags": [
-      "定语从句.md"
-    ],
-    "difficulty": 0.5,
-    "options": [],
-    "answer": "when 指时间，where 指地点，why 指原因。当从句中不缺主语或宾语时使用关系副词。",
-    "step_node_map": {
-      "step1": "p302"
-    }
-  },
-  {
-    "id": "p4q001",
-    "type": "choice",
-    "content": "下列哪个词根表示'看'？",
-    "tags": [
-      "词根词缀.md"
-    ],
-    "difficulty": 0.5,
-    "options": [
-      "A. -port",
-      "B. -spect",
-      "C. -ment",
-      "D. -tion"
-    ],
-    "answer": "B",
-    "step_node_map": {
-      "step1": "p401"
-    }
-  },
-  {
-    "id": "p4q002",
-    "type": "choice",
-    "content": "下列哪个前缀表示'否定'？",
-    "tags": [
-      "词根词缀.md"
-    ],
-    "difficulty": 0.5,
-    "options": [
-      "A. re-",
-      "B. pre-",
-      "C. un-/im-/in-/ir-",
-      "D. -ize"
-    ],
-    "answer": "C",
-    "step_node_map": {
-      "step1": "p402"
-    }
-  },
-  {
-    "id": "p4q003",
-    "type": "blank",
-    "content": "词根 -port 表示______。",
-    "tags": [
-      "词根词缀.md"
-    ],
-    "difficulty": 0.5,
-    "options": [],
-    "answer": "携带",
-    "step_node_map": {
-      "step1": "p401"
-    }
-  },
-  {
-    "id": "p4q004",
-    "type": "open",
-    "content": "请简述前缀 're-' 的含义及一个例词。",
-    "tags": [
-      "词根词缀.md"
-    ],
-    "difficulty": 0.5,
-    "options": [],
-    "answer": "表示'再次、返回'，例如 rewrite（重写）。",
-    "step_node_map": {
-      "step1": "p402"
-    }
-  },
-  {
-    "id": "p5q001",
-    "type": "choice",
-    "content": "在与现在事实相反的虚拟语气中，if 从句的动词形式应为？",
-    "tags": [
-      "虚拟语气.md"
-    ],
-    "difficulty": 0.5,
-    "options": [
-      "A. 过去完成时",
-      "B. 一般过去时",
-      "C. 现在完成时",
-      "D. 一般现在时"
-    ],
-    "answer": "B",
-    "step_node_map": {
-      "step1": "p501"
-    }
-  },
-  {
-    "id": "p5q002",
-    "type": "choice",
-    "content": "与过去事实相反的虚拟语气中，主句的动词形式是？",
-    "tags": [
-      "虚拟语气.md"
-    ],
-    "difficulty": 0.6,
-    "options": [
-      "A. would have done",
-      "B. would do",
-      "C. would be doing",
-      "D. would have been doing"
-    ],
-    "answer": "A",
-    "step_node_map": {
-      "step1": "p502"
-    }
-  },
-  {
-    "id": "p5q003",
-    "type": "blank",
-    "content": "与将来事实相反的虚拟语气中，if 从句可用 ______ 或 were to + 动词原形。",
-    "tags": [
-      "虚拟语气.md"
-    ],
-    "difficulty": 0.5,
-    "options": [],
-    "answer": "should",
-    "step_node_map": {
-      "step1": "p501"
-    }
-  },
-  {
-    "id": "p5q004",
-    "type": "open",
-    "content": "请简述虚拟语气中 '时态倒退' 的含义。",
-    "tags": [
-      "虚拟语气.md"
-    ],
-    "difficulty": 0.5,
-    "options": [],
-    "answer": "虚拟语气中动词形式向过去推一格，用于表达与事实相反或难以实现的假设。",
-    "step_node_map": {
-      "step1": "p501"
-    }
-  },
-  {
-    "id": "p6q001",
-    "type": "choice",
-    "content": "汉译英时，如何处理中文的伴随状语？",
-    "tags": [
-      "汉译英策略.md"
-    ],
-    "difficulty": 0.5,
-    "options": [
-      "A. 直接省略",
-      "B. 作为主干部分",
-      "C. 作为修饰成分后置",
-      "D. 置于句首"
-    ],
-    "answer": "C",
-    "step_node_map": {
-      "step1": "p601"
-    }
-  },
-  {
-    "id": "p6q002",
-    "type": "choice",
-    "content": "中文'这是一个古老的城市，它有着悠久的历史'，英文应如何表达？",
-    "tags": [
-      "汉译英策略.md"
-    ],
-    "difficulty": 0.5,
-    "options": [
-      "A. This is an ancient city and it has a long history",
-      "B. This is an ancient city, which has a long history",
-      "C. This is an ancient city that has a long history",
-      "D. This is an ancient city with a long history"
-    ],
-    "answer": "B",
-    "step_node_map": {
-      "step1": "p602"
-    }
-  },
-  {
-    "id": "p6q003",
-    "type": "blank",
-    "content": "中文定语前置，英文通常采用______形式表达。",
-    "tags": [
-      "汉译英策略.md"
-    ],
-    "difficulty": 0.5,
-    "options": [],
-    "answer": "定语后置",
-    "step_node_map": {
-      "step1": "p601"
-    }
-  },
-  {
-    "id": "p6q004",
-    "type": "open",
-    "content": "汉译英时，如何处理中文的时间地点状语？",
-    "tags": [
-      "汉译英策略.md"
-    ],
-    "difficulty": 0.5,
-    "options": [],
-    "answer": "时间地点状语常后置，如'我昨天在图书馆里看到了他'翻译为'I saw him in the library yesterday'",
-    "step_node_map": {
-      "step1": "p601"
-    }
-  },
-  {
-    "id": "p7q001",
-    "type": "choice",
-    "content": "英语写作的稳妥结构是哪种形式？",
-    "tags": [
-      "英语写作结构.md"
-    ],
-    "difficulty": 0.5,
-    "options": [
-      "A. 总—分—总",
-      "B. 分—总—分",
-      "C. 总—总—分",
-      "D. 分—分—总"
-    ],
-    "answer": "A",
-    "step_node_map": {
-      "step1": "p701"
-    }
-  },
-  {
-    "id": "p7q002",
-    "type": "blank",
-    "content": "英语写作开头段的两个基本思路是现象引入和______。",
-    "tags": [
-      "英语写作结构.md"
-    ],
-    "difficulty": 0.5,
-    "options": [],
-    "answer": "观点陈述",
-    "step_node_map": {
-      "step1": "p701"
-    }
-  },
-  {
-    "id": "p7q003",
-    "type": "choice",
-    "content": "以下哪个属于递进类的衔接词？",
-    "tags": [
-      "英语写作结构.md"
-    ],
-    "difficulty": 0.6,
-    "options": [
-      "A. however",
-      "B. therefore",
-      "C. moreover",
-      "D. for instance"
-    ],
-    "answer": "C",
-    "step_node_map": {
-      "step1": "p702"
-    }
-  },
-  {
-    "id": "p7q004",
-    "type": "open",
-    "content": "英语写作中，主体段落应如何组织？",
-    "tags": [
-      "英语写作结构.md"
-    ],
-    "difficulty": 0.6,
-    "options": [],
-    "answer": "每个论点一个段落，使用连接词显式衔接，每段包含主题句和支撑细节。",
-    "step_node_map": {
-      "step1": "p701"
-    }
-  },
-  {
-    "id": "p7q005",
-    "type": "blank",
-    "content": "结尾段通常包括总结和______。",
-    "tags": [
-      "英语写作结构.md"
-    ],
-    "difficulty": 0.5,
-    "options": [],
-    "answer": "建议",
-    "step_node_map": {
-      "step1": "p701"
     }
   },
   {
@@ -1108,6 +656,146 @@
     ],
     "step_node_map": {
       "step1": "p402"
+    }
+  },
+  {
+    "id": "tq001",
+    "type": "open",
+    "content": "汉译英：'他是一个老师。'",
+    "difficulty": 0.4,
+    "options": [],
+    "answer": "He is a teacher.",
+    "tags": [
+      "translation"
+    ],
+    "step_node_map": {
+      "step1": "p601"
+    }
+  },
+  {
+    "id": "tq002",
+    "type": "open",
+    "content": "汉译英：'我昨天在图书馆里看到了他。'",
+    "difficulty": 0.5,
+    "options": [],
+    "answer": "I saw him in the library yesterday.",
+    "tags": [
+      "translation"
+    ],
+    "step_node_map": {
+      "step1": "p601"
+    }
+  },
+  {
+    "id": "tq003",
+    "type": "open",
+    "content": "汉译英：'随着经济的发展，人们的生活水平有了显著提高。'",
+    "difficulty": 0.65,
+    "options": [],
+    "answer": "With the development of economy, people's living standards have improved significantly.",
+    "tags": [
+      "translation"
+    ],
+    "step_node_map": {
+      "step1": "p601"
+    }
+  },
+  {
+    "id": "tq004",
+    "type": "open",
+    "content": "汉译英：'这是一个古老的城市，它有着悠久的历史。'",
+    "difficulty": 0.6,
+    "options": [],
+    "answer": "This is an ancient city, which has a long history.",
+    "tags": [
+      "translation"
+    ],
+    "step_node_map": {
+      "step1": "p602"
+    }
+  },
+  {
+    "id": "tq005",
+    "type": "open",
+    "content": "汉译英：'一座建在河上的桥连接了两个村庄。'",
+    "difficulty": 0.6,
+    "options": [],
+    "answer": "A bridge built over the river connects the two villages.",
+    "tags": [
+      "translation"
+    ],
+    "step_node_map": {
+      "step1": "p602"
+    }
+  },
+  {
+    "id": "tq006",
+    "type": "open",
+    "content": "汉译英：'如果我有时间，我会帮你。'",
+    "difficulty": 0.55,
+    "options": [],
+    "answer": "If I had time, I would help you.",
+    "tags": [
+      "translation"
+    ],
+    "step_node_map": {
+      "step1": "p601"
+    }
+  },
+  {
+    "id": "tq007",
+    "type": "open",
+    "content": "汉译英：'他成功地完成了任务。'",
+    "difficulty": 0.55,
+    "options": [],
+    "answer": "He completed the task successfully.",
+    "tags": [
+      "translation"
+    ],
+    "step_node_map": {
+      "step1": "p601"
+    }
+  },
+  {
+    "id": "tq008",
+    "type": "open",
+    "content": "汉译英：'手机给我们带来便利的同时，也带来了健康问题。'",
+    "difficulty": 0.7,
+    "options": [],
+    "answer": "While smartphones bring convenience, they also bring health problems.",
+    "tags": [
+      "translation"
+    ],
+    "step_node_map": {
+      "step1": "p602"
+    }
+  },
+  {
+    "id": "tq009",
+    "type": "open",
+    "content": "英译汉：'Actions speak louder than words.'",
+    "difficulty": 0.5,
+    "options": [],
+    "answer": "行动胜于言语。",
+    "tags": [
+      "translation"
+    ],
+    "step_node_map": {
+      "step1": "p601"
+    }
+  },
+  {
+    "id": "tq010",
+    "type": "open",
+    "content": "英译汉：'The book you lent me is interesting.'",
+    "difficulty": 0.55,
+    "options": [],
+    "answer": "你借给我的那本书很有趣。",
+    "tags": [
+      "translation"
+    ],
+    "step_node_map": {
+      "step1": "p602"
     }
   }
 ]

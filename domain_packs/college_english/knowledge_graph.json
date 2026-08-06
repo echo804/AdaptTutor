@@ -1,125 +1,67 @@
 {
- "nodes": [
-  {
-   "id": "p101",
-   "name": "非谓语动词作状语的基本用法",
-   "difficulty": 0.5,
-   "importance": 0.8
-  },
-  {
-   "id": "p102",
-   "name": "独立主格结构的使用条件",
-   "difficulty": 0.6,
-   "importance": 0.75
-  },
-  {
-   "id": "p201",
-   "name": "动词短语的构成与含义",
-   "difficulty": 0.5,
-   "importance": 0.8
-  },
-  {
-   "id": "p202",
-   "name": "take 系列动词短语",
-   "difficulty": 0.5,
-   "importance": 0.8
-  },
-  {
-   "id": "p301",
-   "name": "关系代词的选择规则",
-   "difficulty": 0.5,
-   "importance": 0.8
-  },
-  {
-   "id": "p302",
-   "name": "关系副词的使用场景",
-   "difficulty": 0.5,
-   "importance": 0.8
-  },
-  {
-   "id": "p401",
-   "name": "词根决定核心语义",
-   "difficulty": 0.5,
-   "importance": 0.8
-  },
-  {
-   "id": "p402",
-   "name": "前缀改变方向或程度",
-   "difficulty": 0.5,
-   "importance": 0.75
-  },
-  {
-   "id": "p501",
-   "name": "与现在事实相反的虚拟语气结构",
-   "difficulty": 0.5,
-   "importance": 0.8
-  },
-  {
-   "id": "p502",
-   "name": "与过去事实相反的虚拟语气结构",
-   "difficulty": 0.6,
-   "importance": 0.85
-  },
-  {
-   "id": "p601",
-   "name": "汉译英策略：主干提取与修饰挂接",
-   "difficulty": 0.5,
-   "importance": 0.8
-  },
-  {
-   "id": "p602",
-   "name": "中文短句与英文从句合并方法",
-   "difficulty": 0.5,
-   "importance": 0.7
-  },
-  {
-   "id": "p701",
-   "name": "英语写作三段式结构",
-   "difficulty": 0.5,
-   "importance": 0.8
-  },
-  {
-   "id": "p702",
-   "name": "英语写作衔接手段分类",
-   "difficulty": 0.6,
-   "importance": 0.85
-  }
- ],
- "edges": [
-  {
-   "from": "p101",
-   "to": "p102",
-   "type": "prerequisite"
-  },
-  {
-   "from": "p201",
-   "to": "p202",
-   "type": "prerequisite"
-  },
-  {
-   "from": "p301",
-   "to": "p302",
-   "type": "prerequisite"
-  },
-  {
-   "from": "p401",
-   "to": "p402",
-   "type": "prerequisite"
-  },
-  {
-   "from": "p501",
-   "to": "p502",
-   "type": "prerequisite"
-  },
-  {
-   "from": "p601",
-   "to": "p602",
-   "type": "prerequisite"
-  },
-  {
-   "from": "p701",
-   "to": "p702",
-   "type": "prerequisite"
-  }
- ]
+  "nodes": [
+    {
+      "id": "p401",
+      "name": "词根决定核心语义",
+      "difficulty": 0.5,
+      "importance": 0.8
+    },
+    {
+      "id": "p402",
+      "name": "前缀改变方向或程度",
+      "difficulty": 0.5,
+      "importance": 0.7
+    },
+    {
+      "id": "p201",
+      "name": "动词短语的构成与含义",
+      "difficulty": 0.5,
+      "importance": 0.75
+    },
+    {
+      "id": "p202",
+      "name": "take 系列动词短语",
+      "difficulty": 0.5,
+      "importance": 0.7
+    },
+    {
+      "id": "p601",
+      "name": "汉译英策略：主干提取与修饰挂接",
+      "difficulty": 0.55,
+      "importance": 0.85
+    },
+    {
+      "id": "p602",
+      "name": "中文短句与英文从句合并方法",
+      "difficulty": 0.6,
+      "importance": 0.8
+    }
+  ],
+  "edges": [
+    {
+      "from": "p401",
+      "to": "p402",
+      "type": "prerequisite"
+    },
+    {
+      "from": "p401",
+      "to": "p201",
+      "type": "prerequisite"
+    },
+    {
+      "from": "p201",
+      "to": "p202",
+      "type": "prerequisite"
+    },
+    {
+      "from": "p201",
+      "to": "p601",
+      "type": "prerequisite"
+    },
+    {
+      "from": "p601",
+      "to": "p602",
+      "type": "prerequisite"
+    }
+  ]
 }
