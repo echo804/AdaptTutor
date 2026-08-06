@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { api } from "@/lib/api";
 
 /** 我的领域（M4r8d）：用户自助导入素材 → AI 生成 → 发布/审核。
@@ -332,6 +333,15 @@ export default function DomainsPage() {
                   <button className="rounded px-3 py-1 text-xs" style={{ background: "var(--accent-soft)", color: "var(--accent)" }} onClick={() => viewChecklist(d.id)}>
                     审阅清单
                   </button>
+                  {!running && (
+                    <Link
+                      href={`/editor/${d.pack_id}`}
+                      className="rounded px-3 py-1 text-xs"
+                      style={{ background: "var(--amber-soft)", color: "var(--amber)" }}
+                    >
+                      编辑
+                    </Link>
+                  )}
                   <button className="rounded px-3 py-1 text-xs" style={{ color: "var(--warn)" }} onClick={() => remove(d.id, d.name)}>
                     删除
                   </button>

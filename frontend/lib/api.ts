@@ -131,3 +131,60 @@ export interface MessageOut {
   trace_id: string;
   created_at: string;
 }
+
+// ---- M6 领域编辑器 ----
+
+export interface PackGraphNode {
+  id: string;
+  name: string;
+  difficulty: number;
+  importance: number;
+  error_modes: string[];
+}
+
+export interface PackGraphEdge {
+  from: string;
+  to: string;
+  type: "prerequisite";
+}
+
+export interface PackQuestion {
+  id: string;
+  type: "choice" | "blank" | "open" | "multi";
+  content: string;
+  tags: string[];
+  difficulty: number;
+  options: string[] | null;
+  answer: string | number | string[];
+  error_modes: string[];
+  step_node_map: Record<string, string>;
+}
+
+export interface DomainPackOut {
+  manifest: { id: string; version: string; subject: string; engine_version: string };
+  graph: { nodes: PackGraphNode[]; edges: PackGraphEdge[] };
+  questions: PackQuestion[];
+  diagnostic_rules: Record<string, unknown>;
+  assessment: Record<string, unknown>;
+  editable: boolean;
+}
+
+export interface ValidateOut {
+  valid: boolean;
+  errors: string[];
+}
+
+export function getDomainPack(packId: string): Promise<DomainPackOut> {
+  return api(`/api/v1/domains/${packId}`);
+}
+
+export function validateDomainPack(body: Record<string, unknown>): Promise<ValidateOut> {
+  return api("/api/v1/domains/validate", { method: "POST", body });
+}
+
+export function saveDomainPack(
+  packId: string,
+  body: Record<string, unknown>,
+): Promise<{ ok: boolean; pack_id: string; questions: number; nodes: number }> {
+  return api(`/api/v1/domains/${packId}`, { method: "PUT", body });
+}

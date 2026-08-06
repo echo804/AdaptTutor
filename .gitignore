@@ -36,3 +36,6 @@ logs/
 
 # 临时打包缓存
 .tmp_packs/
+
+# Playwright 临时产物
+.playwright-mcp/
