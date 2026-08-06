@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { clearToken, getToken, api } from "@/lib/api";
 import { ACCENTS, MODES, applyTheme, loadThemePrefs, saveThemePrefs, type ThemeAccent, type ThemeMode } from "@/lib/theme";
 import { useDomain } from "@/lib/domain";
+import FeedbackWidget from "@/components/FeedbackWidget";
 
 const NAV = [
   { href: "/chat", label: "对话学习" },
@@ -220,6 +221,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           <div className="relative z-10 h-full">{children}</div>
         </main>
       </div>
+
+      {/* 用户反馈（M4r22：右下角悬浮） */}
+      <FeedbackWidget />
     </div>
   );
 }
