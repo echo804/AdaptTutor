@@ -45,11 +45,13 @@ class TurnResult:
 
 
 class TutorOrchestrator:
-    def __init__(self, pack_id: str = "junior_math_eq_ineq", gateway=None) -> None:
+    def __init__(self, pack_id: str = "junior_math_eq_ineq", gateway=None, user_api_key: str | None = None) -> None:
         self.pack = load_pack(pack_id)
         self.graph = KnowledgeGraph(self.pack.graph)
         self.rules = self.pack.diagnostic_rules
         self.gateway = gateway or LLMGateway()
+        # M4r24d：按用户 key 调用 LLM（此前编排器不传 key → 永远 mock 模板）
+        self.user_api_key = user_api_key
         self.sanitizer = OutputSanitizer()
         self.sm = TutorStateMachine()
         self.mastery: dict[str, float] = {
@@ -405,7 +407,7 @@ class TutorOrchestrator:
                 f"提示层级：{'最模糊' if level == 0 else '中等' if level == 1 else '较具体但无答案'}\n"
                 f"只输出 1-2 句提示，不要解释，不要给答案。"
             )
-            resp = self.gateway.generate("tutor", prompt, ctx={"max_tokens": 120, "temperature": 0.7})
+            resp = self.gateway.generate("tutor", prompt, ctx={"max_tokens": 120, "temperature": 0.7, "user_api_key": self.user_api_key})
             # M4r24c：mock/降级响应无针对性（固定模板）→ 丢弃，用题目信息回退
             if getattr(resp, "mock", False) or getattr(resp, "level", 0) >= 1:
                 raise ValueError("mock response, use fallback")

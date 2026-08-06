@@ -32,11 +32,39 @@ from app.persistence.models import Session, User
 router = APIRouter(prefix="/api/v1", tags=["sessions"])
 
 
-def _new_orchestrator(pack_id: str | None = None) -> TutorOrchestrator:
-    """构造辅导引擎；pack_id 为空时回退系统默认领域包（M4r8）。"""
+async def _new_orchestrator(
+    pack_id: str | None = None,
+    db: AsyncSession | None = None,
+    user_id: int | None = None,
+) -> TutorOrchestrator:
+    """构造辅导引擎；pack_id 为空时回退系统默认领域包（M4r8）。
+    M4r24d：传入 db+user_id 时，解密用户 API key 供 LLM 调用（否则 mock）。"""
     from app.config import get_settings
 
-    return TutorOrchestrator(pack_id or get_settings().active_domain_pack)
+    # 查用户任一有效 key（优先 bailian/deepseek，取第一个）
+    user_key: str | None = None
+    if db is not None and user_id is not None:
+        try:
+            from sqlalchemy import select
+
+            from app.keys.service import decrypt_key
+            from app.persistence.models import UserApiKey
+
+            res = await db.execute(
+                select(UserApiKey.encrypted_key)
+                .where(UserApiKey.user_id == user_id)
+                .order_by(UserApiKey.id)
+                .limit(1)
+            )
+            row = res.scalar_one_or_none()
+            if row:
+                user_key = decrypt_key(row)
+        except Exception:
+            user_key = None
+    return TutorOrchestrator(
+        pack_id or get_settings().active_domain_pack,
+        user_api_key=user_key,
+    )
 
 
 def _question_to_dict(q: Question | None) -> dict | None:
@@ -67,7 +95,7 @@ async def api_create_session(
     db: AsyncSession = Depends(get_db),
 ) -> SessionCreated:
     pack_id = body.pack_id or _active_pack(user)
-    t = _new_orchestrator(pack_id)
+    t = await _new_orchestrator(pack_id, db, user.id)
     first: str | None = None
     question: dict | None = None
     if body.type == "tutor":
@@ -145,7 +173,7 @@ async def api_send_message(
     s = await _own_session(db, sid, user.id)
     state = s.context or {}
     # M4r8：按会话快照的领域包恢复（切领域后旧会话仍可继续）
-    t = _new_orchestrator(state.get("pack_id"))
+    t = await _new_orchestrator(state.get("pack_id"), db, user.id)
     t.restore_state(state)
     pack_id = state.get("pack_id") or "junior_math_eq_ineq"
 
@@ -349,9 +377,10 @@ async def api_send_message(
 async def api_graph(
     pack_id: str | None = None,
     user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
 ) -> dict:
     """领域包图谱（M4 前端可视化用，需登录）；pack_id 默认用户激活包。"""
-    t = _new_orchestrator(pack_id or _active_pack(user))
+    t = await _new_orchestrator(pack_id or _active_pack(user), db, user.id)
     return {
         "nodes": [
             {"id": n.id, "name": n.name, "difficulty": n.difficulty, "importance": n.importance}
@@ -388,7 +417,7 @@ async def api_session_state(
 ) -> dict:
     """会话当前状态（M4r5b 前端"继续会话"）：恢复快照返回当前题/进度/阶段。"""
     s = await _own_session(db, sid, user.id)
-    t = _new_orchestrator((s.context or {}).get("pack_id"))
+    t = await _new_orchestrator((s.context or {}).get("pack_id"), db, user.id)
     t.restore_state(s.context or {})
     q = t.current_question
     is_diag = s.type == "diagnostic"
@@ -427,3 +456,4 @@ async def api_session_messages(
         )
         for m in msgs
     ]
+
