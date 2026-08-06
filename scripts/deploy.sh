@@ -48,7 +48,10 @@ export NEXT_PUBLIC_API_BASE="http://$IP:8010"
 echo "      公网 IP: $IP  →  前端 API 指向 $NEXT_PUBLIC_API_BASE"
 
 # ---------- 4/6 配置提示 ----------
-echo "[4/6] 提示：如需修改 PG 密码 / LLM key，编辑 backend/.env.production 后重跑本脚本"
+# 生产 CORS：放行前端来源 http://IP:3000（追加到 .env.production，已有则跳过）
+ENVF=backend/.env.production
+grep -q '^CORS_ORIGINS_EXTRA=' "$ENVF" || echo "CORS_ORIGINS_EXTRA=http://$IP:3000" >> "$ENVF"
+echo "[4/6] 已配置 CORS 白名单: http://$IP:3000（如需改 PG 密码 / LLM key 编辑 backend/.env.production 后重跑）"
 
 # ---------- 5/6 构建启动 ----------
 echo "[5/6] 构建并启动五服务（首次约 5-10 分钟，取决于网络）…"

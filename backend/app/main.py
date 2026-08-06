@@ -14,14 +14,18 @@ app = FastAPI(
     description="自适应学习引擎后端",
 )
 
-# CORS：前端 Next.js dev（localhost:3000）；生产同源部署可收紧
+# CORS：本地开发源 + 生产额外放行（CORS_ORIGINS_EXTRA 逗号分隔，见 .env.production）
+_cors_origins = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:5173",
+]
+_extra = get_settings().cors_origins_extra
+if _extra:
+    _cors_origins += [o.strip() for o in _extra.split(",") if o.strip()]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        "http://localhost:5173",
-    ],
+    allow_origins=_cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

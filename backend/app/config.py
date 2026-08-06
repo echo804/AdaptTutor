@@ -43,6 +43,8 @@ class Settings(BaseSettings):
     # --- 日志 / 备份 ---
     log_level: str = "INFO"
     backup_dir: str = "D:\\AdaptTutorBackup"
+    # M6.1：生产 CORS 额外放行源（逗号分隔，如 http://1.2.3.4:3000；空 = 仅本地开发源）
+    cors_origins_extra: str = ""
 
     def validate_config(self) -> None:
         """fast fail：启动前校验，非法直接抛异常拒绝启动。"""
