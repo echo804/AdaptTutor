@@ -625,6 +625,8 @@ export default function ChatPage() {
                       {currentQuestion.options.map((o, i) => {
                         const letter = String.fromCharCode(65 + i);
                         const active = selectedChoice === letter;
+                        // M4r21：兼容 options 自带 "A." 前缀的领域包——剥离前缀，统一用 letter 圆标
+                        const clean = typeof o === "string" ? o.replace(/^[A-Z][\.．、]\s*/, "") : o;
                         return (
                           <button
                             key={i}
@@ -640,7 +642,7 @@ export default function ChatPage() {
                             <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-medium" style={{ background: active ? "var(--accent)" : "var(--bg)", color: active ? "#fff" : "var(--muted)" }}>
                               {letter}
                             </span>
-                            <MathText text={o} />
+                            <MathText text={clean} />
                           </button>
                         );
                       })}

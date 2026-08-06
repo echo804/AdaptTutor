@@ -73,6 +73,8 @@ async def api_create_session(
     if body.type == "tutor":
         r = t.tutor_start(body.config)
         first = r.message
+        # M4r21：辅导会话创建时返回当前题目（verify_question），前端才能渲染作答组件
+        question = _question_to_dict(t.verify_question)
     elif body.type == "diagnostic":
         st = t.start_diagnosis(body.config)
         q = st.get("question")
@@ -243,12 +245,14 @@ async def api_send_message(
                     correct=False,
                     feedback=j.feedback,
                     judge_method="rule",
+                    question=_question_to_dict(t.verify_question),
                 )
             elif j.indeterminate:
                 # ELICIT 非答案（说思路/闲聊）→ 正常对话流转（"先说说你的思路"）
                 r = t.tutor_step(body.content, correct=None)
                 reply = MessageReply(
-                    state=r.state, message=r.message, degraded=r.degraded, mock=r.mock
+                    state=r.state, message=r.message, degraded=r.degraded, mock=r.mock,
+                    question=_question_to_dict(t.verify_question),
                 )
             else:
                 r = t.tutor_step(body.content, correct=j.correct)
@@ -266,11 +270,13 @@ async def api_send_message(
                     feedback=j.feedback,
                     judge_method=j.method,
                     correct_answer=None if j.correct else j.correct_answer,
+                    question=_question_to_dict(t.verify_question),
                 )
         else:
             r = t.tutor_step(body.content or "", correct=body.correct)
             reply = MessageReply(
-                state=r.state, message=r.message, degraded=r.degraded, mock=r.mock
+                state=r.state, message=r.message, degraded=r.degraded, mock=r.mock,
+                question=_question_to_dict(t.verify_question),
             )
 
     # 掌握度快照落库（mastery_states，供仪表盘真实数据）
