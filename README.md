@@ -1,6 +1,8 @@
 <div align="center">
 
-# 🧠 AdaptTutor
+<img src="docs/assets/socrates-full.webp" alt="苏格拉底人物剪影" width="140" style="border-radius: 12px;" />
+
+# AdaptTutor
 
 **通用自适应学习引擎 · 领域无关 · 苏格拉底式引导**
 
