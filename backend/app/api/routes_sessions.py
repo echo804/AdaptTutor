@@ -62,6 +62,11 @@ async def _new_orchestrator(
                 user_key = decrypt_key(row)
         except Exception:
             user_key = None
+    # M6.1：用户无 key 时回退系统级 key（LITELLM_API_KEYS）——演示账号/新用户无需自配即可完整体验
+    if not user_key:
+        _sys_key = get_settings().litellm_api_keys.strip()
+        if _sys_key and not _sys_key.startswith(("sk-xxx", "sk-secret")):
+            user_key = _sys_key
     return TutorOrchestrator(
         pack_id or get_settings().active_domain_pack,
         user_api_key=user_key,
