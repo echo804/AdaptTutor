@@ -46,12 +46,20 @@ const TYPE_LABEL: Record<string, string> = {
 /** 图谱节点组件：名称 + 难度徽标（墨蓝/琥珀语义）。 */
 function PackNode({ data }: NodeProps) {
   const d = data as unknown as PackNodeData;
+  const dot: CSSProperties = {
+    width: 12,
+    height: 12,
+    borderRadius: "50%",
+    border: "2px solid var(--surface)",
+    background: "var(--amber)",
+    cursor: "crosshair",
+  };
   return (
     <div
       className="rounded-lg border px-3 py-2 text-xs shadow-sm"
       style={{ background: "var(--surface)", borderColor: "var(--border)" }}
     >
-      <Handle type="target" position={Position.Top} style={{ opacity: 0 }} />
+      <Handle type="target" position={Position.Top} style={{ ...dot, background: "var(--accent)" }} title="拖到这里连接" />
       <div style={{ color: "var(--text)", fontWeight: 600, whiteSpace: "nowrap" }}>
         {d.name}
       </div>
@@ -69,7 +77,7 @@ function PackNode({ data }: NodeProps) {
           权重 {Math.round((d.importance ?? 0.5) * 100)}
         </span>
       </div>
-      <Handle type="source" position={Position.Bottom} style={{ opacity: 0 }} />
+      <Handle type="source" position={Position.Bottom} style={dot} title="从这里拖出连线" />
     </div>
   );
 }
@@ -380,6 +388,12 @@ export default function EditorPage() {
               {selNode ? "节点属性" : `题目 ${pack.questions.length}`}
             </span>
           </div>
+
+          {editable && !selNode && (
+            <div className="border-b px-3 py-1.5 text-[11px]" style={{ borderColor: "var(--border)", color: "var(--muted)" }}>
+              连线：从节点<span style={{ color: "var(--amber)" }}>底部圆点</span>拖到另一节点<span style={{ color: "var(--accent)" }}>顶部圆点</span>，方向 = 前置依赖
+            </div>
+          )}
 
           <div className="flex-1 overflow-auto p-3">
             {selNode ? (
