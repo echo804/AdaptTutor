@@ -27,6 +27,8 @@ export default function SettingsPage() {
   const [invites, setInvites] = useState<{ id: number; code: string; created_at: string; expires_at: string; used: boolean; expired: boolean }[]>([]);
   const [inviting, setInviting] = useState(false);
   const [pendingRevoke, setPendingRevoke] = useState<number | null>(null);
+  // M4r22d：管理员删除反馈确认
+  const [pendingFbDelete, setPendingFbDelete] = useState<number | null>(null);
   // 反馈管理（M4r22：管理员可见全部反馈）
   const [isAdmin, setIsAdmin] = useState(false);
   const [adminFeedbacks, setAdminFeedbacks] = useState<{ id: number; user_id: number | null; content: string; category: string; status: string; created_at: string }[]>([]);
@@ -127,9 +129,8 @@ export default function SettingsPage() {
     }
   }
 
-  // M4r22c：管理员删除反馈
+  // M4r22c：管理员删除反馈（站内确认，M4r22d 替代原生 confirm）
   async function deleteAdminFeedback(id: number) {
-    if (!window.confirm("确认删除这条反馈？")) return;
     try {
       await api(`/admin/feedback/${id}`, { method: "DELETE" });
       setAdminFeedbacks((prev) => prev.filter((f) => f.id !== id));
@@ -340,11 +341,11 @@ export default function SettingsPage() {
                       <option value="read">已读</option>
                       <option value="done">已解决</option>
                     </select>
-                    {/* M4r22c：管理员删除反馈 */}
+                    {/* M4r22c：管理员删除反馈（站内确认） */}
                     <button
                       className="shrink-0 text-[10px]"
                       style={{ color: "var(--warn)" }}
-                      onClick={() => deleteAdminFeedback(f.id)}
+                      onClick={() => setPendingFbDelete(f.id)}
                       title="删除"
                     >
                       删除
@@ -372,6 +373,23 @@ export default function SettingsPage() {
             revokeInvite(id);
           }}
           onCancel={() => setPendingRevoke(null)}
+        />
+      )}
+
+      {/* 删除反馈确认弹窗（M4r22d：站内确认，替代原生 confirm） */}
+      {pendingFbDelete !== null && (
+        <ConfirmDialog
+          title="删除反馈"
+          message="确认删除这条反馈？"
+          confirmText="删除"
+          cancelText="取消"
+          danger
+          onConfirm={() => {
+            const id = pendingFbDelete;
+            setPendingFbDelete(null);
+            deleteAdminFeedback(id);
+          }}
+          onCancel={() => setPendingFbDelete(null)}
         />
       )}
     </div>

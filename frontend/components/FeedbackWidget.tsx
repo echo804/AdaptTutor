@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
+import ConfirmDialog from "@/components/ConfirmDialog";
 
 /** 用户反馈（M4r22）：右下角悬浮按钮 → 弹窗表单，复古玻璃风。
  * 提交后显示成功状态；支持分类选择；我的历史反馈列表。
@@ -30,6 +31,8 @@ export default function FeedbackWidget() {
   const [msg, setMsg] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [history, setHistory] = useState<FeedbackItem[]>([]);
+  // M4r22d：删除确认（站内弹窗，替代原生 confirm）
+  const [pendingDelete, setPendingDelete] = useState<number | null>(null);
 
   // Esc 关闭
   useEffect(() => {
@@ -70,9 +73,8 @@ export default function FeedbackWidget() {
     }
   }
 
-  // M4r22c：删除自己的反馈
+  // M4r22c：删除自己的反馈（站内确认，M4r22d 替代原生 confirm）
   async function deleteFeedback(id: number) {
-    if (!window.confirm("确认删除这条反馈？")) return;
     setErr(null);
     setMsg(null);
     try {
@@ -185,11 +187,11 @@ export default function FeedbackWidget() {
                         }}>
                           {{ new: "待处理", read: "已读", done: "已解决" }[h.status] || h.status}
                         </span>
-                        {/* M4r22c：删除自己的反馈 */}
+                        {/* M4r22c：删除自己的反馈（站内确认） */}
                         <button
                           className="shrink-0 text-[10px]"
                           style={{ color: "var(--warn)" }}
-                          onClick={() => deleteFeedback(h.id)}
+                          onClick={() => setPendingDelete(h.id)}
                           title="删除"
                         >
                           删除
@@ -202,6 +204,23 @@ export default function FeedbackWidget() {
             )}
           </div>
         </div>
+      )}
+
+      {/* 删除确认弹窗（M4r22d：站内确认，替代原生 confirm） */}
+      {pendingDelete !== null && (
+        <ConfirmDialog
+          title="删除反馈"
+          message="确认删除这条反馈？"
+          confirmText="删除"
+          cancelText="取消"
+          danger
+          onConfirm={() => {
+            const id = pendingDelete;
+            setPendingDelete(null);
+            deleteFeedback(id);
+          }}
+          onCancel={() => setPendingDelete(null)}
+        />
       )}
     </>
   );
