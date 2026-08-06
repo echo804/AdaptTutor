@@ -313,14 +313,16 @@ async def api_send_message(
             if t.sm.state in (SMState.ELICIT, SMState.VERIFY) and t.verify_question and (body.content or "").strip():
                 j = judge_answer(body.content, t.verify_question)
                 if j.indeterminate and t.sm.state == SMState.VERIFY:
-                    # M4r7f：VERIFY 非答案输入（"好"等）→ 温和提示重答，不推进状态机
+                    # M4r7f 修正：VERIFY 非答案输入（追问/求助）→ 保持 verify 态，
+                    # 给针对性提示（不推进状态机，也不回"请直接输入你的答案"）M4r24g
+                    hint = t._gen_targeted_hint(1) or "可以结合题目的关键步骤想想，不急着给最终答案。"
                     reply = MessageReply(
                         state="verify",
-                        message=j.feedback,
+                        message=hint,
                         degraded=True,
                         mock=True,
                         correct=False,
-                        feedback=j.feedback,
+                        feedback=hint,
                         judge_method="rule",
                         question=_question_to_dict(t.verify_question),
                     )
