@@ -301,9 +301,11 @@ class TutorOrchestrator:
                 self.sm.step(Event.ANSWER_CORRECT)
                 return self._verify_turn()
             self.sm.step(Event.LOCATED)
+            # M4r24c：ELICIT 求助（"我不会/讲讲"）→ 针对性提示，替代固定"先说说你的思路"
+            targeted = self._gen_targeted_hint(0)
             return TurnResult(
                 state=self.sm.state.value,
-                message="先说说你的思路，卡在哪一步了？",
+                message=targeted or "先说说你的思路，卡在哪一步了？",
                 context=dict(self.sm.context),
             )
         if state == State.IDENTIFY:
@@ -366,18 +368,56 @@ class TutorOrchestrator:
     def _hint_turn(self) -> TurnResult:
         """给出最小提示并停留在 HINT 态（等待学生回应后由 HINT 分支触发 HINT_GIVEN → 变式验证）。
 
-        修复 M4r7f：原来此处提前触发 HINT_GIVEN 导致提示态瞬移 VERIFY，
-        学生下一条消息被误当作变式题作答判错。
+        M4r24c：提示结合当前题目——有 key 时用 LLM 生成针对性提示（不泄露答案），
+        无 key/mock 时用题目知识点 + 题干关键词构造针对性话术，替代固定 _HINTS 模板。
         """
         level = min(self.sm.context["hint_level"], len(_HINTS) - 1)
-        raw = _HINTS[level]
-        res = self.sanitizer.sanitize(raw)
+        # 针对性提示（优先 LLM，回退题目信息模板）
+        targeted = self._gen_targeted_hint(level)
+        raw = targeted or _HINTS[level]
+        res = self.sanitizer.sanitize(raw, question=self.verify_question, fallback=_HINTS[level])
         return TurnResult(
             state=self.sm.state.value,  # hint
             message=res.text,
             degraded=res.degraded,
             context=dict(self.sm.context),
         )
+
+    def _gen_targeted_hint(self, level: int) -> str | None:
+        """生成结合当前题目的针对性提示。有 key → LLM；无 key → 题目信息模板。
+
+        返回 None 表示放弃（回退 _HINTS 模板）。均不泄露答案。
+        """
+        q = self.verify_question
+        if q is None:
+            return None
+        node = self.current_node or next(iter(q.step_node_map.values()), None)
+        # 题干去 LaTeX/占位符，取前 60 字
+        import re as _re
+
+        brief = _re.sub(r"[_\\{}${}]", "", q.content)[:60]
+        try:
+            prompt = (
+                f"你是苏格拉底式辅导老师。学生卡在下面这道题，请给出一个【提示】帮 TA 继续思考，"
+                f"但绝不要直接给出答案或完整步骤。\n"
+                f"题目：{brief}\n"
+                f"涉及知识点：{node}\n"
+                f"提示层级：{'最模糊' if level == 0 else '中等' if level == 1 else '较具体但无答案'}\n"
+                f"只输出 1-2 句提示，不要解释，不要给答案。"
+            )
+            resp = self.gateway.generate("tutor", prompt, ctx={"max_tokens": 120, "temperature": 0.7})
+            # M4r24c：mock/降级响应无针对性（固定模板）→ 丢弃，用题目信息回退
+            if getattr(resp, "mock", False) or getattr(resp, "level", 0) >= 1:
+                raise ValueError("mock response, use fallback")
+            text = (resp.text or "").strip()
+            if len(text) >= 8 and len(text) <= 200:
+                return text
+        except Exception:
+            pass
+        # 无 key/失败回退：用题目知识点构造（仍针对性，不泄露答案）
+        if node:
+            return f"这道题围绕「{node}」，先回忆一下这个知识点涉及的关键概念，再对照题目试试。"
+        return None
 
     def _verify_turn(self) -> TurnResult:
         self.verify_question = self._pick_verify()
