@@ -130,9 +130,8 @@ export default function ChatPage() {
   async function startSession(type: "diagnostic" | "tutor") {
     setShowConfig(true); // 先配置再开始（诊断/辅导共用面板，M4r7h）
     setConfigType(type);
-    if (type === "tutor" && ![1, 3, 5].includes(diagConfig.qcount)) {
-      setDiagConfig((c) => ({ ...c, qcount: 1 })); // 辅导轮数默认 1
-    }
+    // M4r21f：不再把 diagConfig.qcount 改成 1（此前辅导"轮数默认 1"污染诊断题量，
+    // 导致点过辅导后诊断也变成 1 题就结束）；辅导轮数在创建时单独传（见"开始辅导"）
   }
 
   async function createSession(type: "diagnostic" | "tutor", config?: DiagConfig) {
@@ -141,9 +140,10 @@ export default function ChatPage() {
     try {
       const body: any = { type };
       if (activePack) body.pack_id = activePack; // M4r8：按当前领域创建会话
-      if (type === "diagnostic" && config) {
+      if (config) {
+        // M4r21f：诊断传题量/题型/难度；辅导传轮数（qcount=轮数）
         body.config = { qtypes: config.qtypes, qcount: config.qcount, difficulty: config.difficulty };
-        localStorage.setItem("diag_config", JSON.stringify(config));
+        if (type === "diagnostic") localStorage.setItem("diag_config", JSON.stringify(config));
       }
       const r = await api<MessageReply & { session_id: number; first_message?: string | null; qcount?: number; answered?: number }>("/api/v1/sessions", { method: "POST", body });
       setSessionId(r.session_id);
@@ -769,8 +769,8 @@ export default function ChatPage() {
                 onClick={() => {
                   setShowConfig(false);
                   if (configType === "tutor") {
-                    // 辅导：练习轮数默认 1（诊断默认 10 不串扰）
-                    const cfg = { ...diagConfig, qcount: diagConfig.qcount };
+                    // 辅导：轮数固定 1（面板 qcount 是诊断题量，不用于辅导轮数，M4r21f）
+                    const cfg = { ...diagConfig, qcount: 1 };
                     createSession("tutor", cfg);
                   } else {
                     createSession("diagnostic", diagConfig);
