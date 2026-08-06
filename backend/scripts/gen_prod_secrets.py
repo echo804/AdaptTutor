@@ -9,15 +9,26 @@
 from __future__ import annotations
 
 import argparse
+import base64
 import secrets
 import sys
 from pathlib import Path
 
-from cryptography.fernet import Fernet
+try:
+    from cryptography.fernet import Fernet
+except ImportError:  # 服务器裸 python3 无 cryptography 时用标准库生成等价 Fernet key
+    Fernet = None
 
 BACKEND = Path(__file__).resolve().parent.parent
 TEMPLATE = BACKEND / ".env.production.example"
 TARGET = BACKEND / ".env.production"
+
+
+def _new_enc_key() -> str:
+    """生成 Fernet 兼容密钥（44 字符 urlsafe base64，32 字节随机）。"""
+    if Fernet is not None:
+        return Fernet.generate_key().decode()
+    return base64.urlsafe_b64encode(secrets.token_bytes(32)).decode()
 
 
 def main() -> int:
@@ -47,7 +58,7 @@ def main() -> int:
             return 0
         print("补充缺失密钥到现有 .env.production …")
 
-    enc = Fernet.generate_key().decode()
+    enc = _new_enc_key()
     jwt = secrets.token_hex(32)
     out_lines = []
     for line in TEMPLATE.read_text(encoding="utf-8").splitlines():
