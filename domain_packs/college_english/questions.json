@@ -1,0 +1,1113 @@
+[
+  {
+    "id": "p1q001",
+    "type": "choice",
+    "content": "下列句子中，分词作状语的是：",
+    "tags": [
+      "非谓语动词.md"
+    ],
+    "difficulty": 0.5,
+    "options": [
+      "A. He is a teacher.",
+      "B. Walking along the street, I met an old friend.",
+      "C. She is reading a book.",
+      "D. They are playing football."
+    ],
+    "answer": "B",
+    "step_node_map": {
+      "step1": "p101"
+    }
+  },
+  {
+    "id": "p1q002",
+    "type": "choice",
+    "content": "以下哪种情况需要使用独立主格结构？",
+    "tags": [
+      "非谓语动词.md"
+    ],
+    "difficulty": 0.6,
+    "options": [
+      "A. 分词逻辑主语与主句主语一致",
+      "B. 分词逻辑主语与主句主语不一致",
+      "C. 分词表示被动关系",
+      "D. 分词表示完成动作"
+    ],
+    "answer": "B",
+    "step_node_map": {
+      "step1": "p102"
+    }
+  },
+  {
+    "id": "p1q003",
+    "type": "blank",
+    "content": "独立主格结构的常见形式是______ + 分词。",
+    "tags": [
+      "非谓语动词.md"
+    ],
+    "difficulty": 0.5,
+    "options": [],
+    "answer": "名词/代词",
+    "step_node_map": {
+      "step1": "p102"
+    }
+  },
+  {
+    "id": "p1q004",
+    "type": "open",
+    "content": "请解释什么是悬垂分词，并举一个例子。",
+    "tags": [
+      "非谓语动词.md"
+    ],
+    "difficulty": 0.6,
+    "options": [],
+    "answer": "悬垂分词是指分词的逻辑主语与主句主语不一致。例如：Looking out of the window, the garden is beautiful.（错误）应改为：Looking out of the window, I saw a beautiful garden.",
+    "step_node_map": {
+      "step1": "p101"
+    }
+  },
+  {
+    "id": "p2q001",
+    "type": "choice",
+    "content": "下列哪个短语表示‘起飞’？",
+    "tags": [
+      "高频动词短语.md"
+    ],
+    "difficulty": 0.5,
+    "options": [
+      "A. take off",
+      "B. take over",
+      "C. take up",
+      "D. take on"
+    ],
+    "answer": "A",
+    "step_node_map": {
+      "step1": "p201"
+    }
+  },
+  {
+    "id": "p2q002",
+    "type": "blank",
+    "content": "动词短语由______和介词/副词构成。",
+    "tags": [
+      "高频动词短语.md"
+    ],
+    "difficulty": 0.5,
+    "options": [],
+    "answer": "动词",
+    "step_node_map": {
+      "step1": "p201"
+    }
+  },
+  {
+    "id": "p2q003",
+    "type": "open",
+    "content": "请解释 'take off' 的含义，并举一个例子。",
+    "tags": [
+      "高频动词短语.md"
+    ],
+    "difficulty": 0.5,
+    "options": [],
+    "answer": "take off 表示‘起飞’或‘突然成功’。例如：The plane took off on time.",
+    "step_node_map": {
+      "step1": "p202"
+    }
+  },
+  {
+    "id": "p2q004",
+    "type": "choice",
+    "content": "下列哪个短语表示‘接管’？",
+    "tags": [
+      "高频动词短语.md"
+    ],
+    "difficulty": 0.5,
+    "options": [
+      "A. take off",
+      "B. take over",
+      "C. take up",
+      "D. take in"
+    ],
+    "answer": "B",
+    "step_node_map": {
+      "step1": "p202"
+    }
+  },
+  {
+    "id": "p2q005",
+    "type": "blank",
+    "content": "动词短语的含义常与______相关。",
+    "tags": [
+      "高频动词短语.md"
+    ],
+    "difficulty": 0.5,
+    "options": [],
+    "answer": "介词/副词的空间意象",
+    "step_node_map": {
+      "step1": "p201"
+    }
+  },
+  {
+    "id": "p3q001",
+    "type": "choice",
+    "content": "定语从句中，当先行词指人且在从句中作主语时，应使用哪个关系代词？",
+    "tags": [
+      "定语从句.md"
+    ],
+    "difficulty": 0.5,
+    "options": [
+      "A. whom",
+      "B. which",
+      "C. who",
+      "D. that"
+    ],
+    "answer": "C",
+    "step_node_map": {
+      "step1": "p301"
+    }
+  },
+  {
+    "id": "p3q002",
+    "type": "choice",
+    "content": "下列哪种情况必须使用关系副词？",
+    "tags": [
+      "定语从句.md"
+    ],
+    "difficulty": 0.5,
+    "options": [
+      "A. 先行词指物且在从句中作宾语",
+      "B. 先行词指人且在从句中作主语",
+      "C. 从句中不缺主语或宾语",
+      "D. 先行词被最高级修饰"
+    ],
+    "answer": "C",
+    "step_node_map": {
+      "step1": "p302"
+    }
+  },
+  {
+    "id": "p3q003",
+    "type": "blank",
+    "content": "定语从句中，当从句缺少介词后的宾语时，介词提前后，关系代词是否可以省略？",
+    "tags": [
+      "定语从句.md"
+    ],
+    "difficulty": 0.5,
+    "options": [],
+    "answer": "不可以",
+    "step_node_map": {
+      "step1": "p301"
+    }
+  },
+  {
+    "id": "p3q004",
+    "type": "open",
+    "content": "请简述关系副词 when、where、why 的使用条件。",
+    "tags": [
+      "定语从句.md"
+    ],
+    "difficulty": 0.5,
+    "options": [],
+    "answer": "when 指时间，where 指地点，why 指原因。当从句中不缺主语或宾语时使用关系副词。",
+    "step_node_map": {
+      "step1": "p302"
+    }
+  },
+  {
+    "id": "p4q001",
+    "type": "choice",
+    "content": "下列哪个词根表示'看'？",
+    "tags": [
+      "词根词缀.md"
+    ],
+    "difficulty": 0.5,
+    "options": [
+      "A. -port",
+      "B. -spect",
+      "C. -ment",
+      "D. -tion"
+    ],
+    "answer": "B",
+    "step_node_map": {
+      "step1": "p401"
+    }
+  },
+  {
+    "id": "p4q002",
+    "type": "choice",
+    "content": "下列哪个前缀表示'否定'？",
+    "tags": [
+      "词根词缀.md"
+    ],
+    "difficulty": 0.5,
+    "options": [
+      "A. re-",
+      "B. pre-",
+      "C. un-/im-/in-/ir-",
+      "D. -ize"
+    ],
+    "answer": "C",
+    "step_node_map": {
+      "step1": "p402"
+    }
+  },
+  {
+    "id": "p4q003",
+    "type": "blank",
+    "content": "词根 -port 表示______。",
+    "tags": [
+      "词根词缀.md"
+    ],
+    "difficulty": 0.5,
+    "options": [],
+    "answer": "携带",
+    "step_node_map": {
+      "step1": "p401"
+    }
+  },
+  {
+    "id": "p4q004",
+    "type": "open",
+    "content": "请简述前缀 're-' 的含义及一个例词。",
+    "tags": [
+      "词根词缀.md"
+    ],
+    "difficulty": 0.5,
+    "options": [],
+    "answer": "表示'再次、返回'，例如 rewrite（重写）。",
+    "step_node_map": {
+      "step1": "p402"
+    }
+  },
+  {
+    "id": "p5q001",
+    "type": "choice",
+    "content": "在与现在事实相反的虚拟语气中，if 从句的动词形式应为？",
+    "tags": [
+      "虚拟语气.md"
+    ],
+    "difficulty": 0.5,
+    "options": [
+      "A. 过去完成时",
+      "B. 一般过去时",
+      "C. 现在完成时",
+      "D. 一般现在时"
+    ],
+    "answer": "B",
+    "step_node_map": {
+      "step1": "p501"
+    }
+  },
+  {
+    "id": "p5q002",
+    "type": "choice",
+    "content": "与过去事实相反的虚拟语气中，主句的动词形式是？",
+    "tags": [
+      "虚拟语气.md"
+    ],
+    "difficulty": 0.6,
+    "options": [
+      "A. would have done",
+      "B. would do",
+      "C. would be doing",
+      "D. would have been doing"
+    ],
+    "answer": "A",
+    "step_node_map": {
+      "step1": "p502"
+    }
+  },
+  {
+    "id": "p5q003",
+    "type": "blank",
+    "content": "与将来事实相反的虚拟语气中，if 从句可用 ______ 或 were to + 动词原形。",
+    "tags": [
+      "虚拟语气.md"
+    ],
+    "difficulty": 0.5,
+    "options": [],
+    "answer": "should",
+    "step_node_map": {
+      "step1": "p501"
+    }
+  },
+  {
+    "id": "p5q004",
+    "type": "open",
+    "content": "请简述虚拟语气中 '时态倒退' 的含义。",
+    "tags": [
+      "虚拟语气.md"
+    ],
+    "difficulty": 0.5,
+    "options": [],
+    "answer": "虚拟语气中动词形式向过去推一格，用于表达与事实相反或难以实现的假设。",
+    "step_node_map": {
+      "step1": "p501"
+    }
+  },
+  {
+    "id": "p6q001",
+    "type": "choice",
+    "content": "汉译英时，如何处理中文的伴随状语？",
+    "tags": [
+      "汉译英策略.md"
+    ],
+    "difficulty": 0.5,
+    "options": [
+      "A. 直接省略",
+      "B. 作为主干部分",
+      "C. 作为修饰成分后置",
+      "D. 置于句首"
+    ],
+    "answer": "C",
+    "step_node_map": {
+      "step1": "p601"
+    }
+  },
+  {
+    "id": "p6q002",
+    "type": "choice",
+    "content": "中文'这是一个古老的城市，它有着悠久的历史'，英文应如何表达？",
+    "tags": [
+      "汉译英策略.md"
+    ],
+    "difficulty": 0.5,
+    "options": [
+      "A. This is an ancient city and it has a long history",
+      "B. This is an ancient city, which has a long history",
+      "C. This is an ancient city that has a long history",
+      "D. This is an ancient city with a long history"
+    ],
+    "answer": "B",
+    "step_node_map": {
+      "step1": "p602"
+    }
+  },
+  {
+    "id": "p6q003",
+    "type": "blank",
+    "content": "中文定语前置，英文通常采用______形式表达。",
+    "tags": [
+      "汉译英策略.md"
+    ],
+    "difficulty": 0.5,
+    "options": [],
+    "answer": "定语后置",
+    "step_node_map": {
+      "step1": "p601"
+    }
+  },
+  {
+    "id": "p6q004",
+    "type": "open",
+    "content": "汉译英时，如何处理中文的时间地点状语？",
+    "tags": [
+      "汉译英策略.md"
+    ],
+    "difficulty": 0.5,
+    "options": [],
+    "answer": "时间地点状语常后置，如'我昨天在图书馆里看到了他'翻译为'I saw him in the library yesterday'",
+    "step_node_map": {
+      "step1": "p601"
+    }
+  },
+  {
+    "id": "p7q001",
+    "type": "choice",
+    "content": "英语写作的稳妥结构是哪种形式？",
+    "tags": [
+      "英语写作结构.md"
+    ],
+    "difficulty": 0.5,
+    "options": [
+      "A. 总—分—总",
+      "B. 分—总—分",
+      "C. 总—总—分",
+      "D. 分—分—总"
+    ],
+    "answer": "A",
+    "step_node_map": {
+      "step1": "p701"
+    }
+  },
+  {
+    "id": "p7q002",
+    "type": "blank",
+    "content": "英语写作开头段的两个基本思路是现象引入和______。",
+    "tags": [
+      "英语写作结构.md"
+    ],
+    "difficulty": 0.5,
+    "options": [],
+    "answer": "观点陈述",
+    "step_node_map": {
+      "step1": "p701"
+    }
+  },
+  {
+    "id": "p7q003",
+    "type": "choice",
+    "content": "以下哪个属于递进类的衔接词？",
+    "tags": [
+      "英语写作结构.md"
+    ],
+    "difficulty": 0.6,
+    "options": [
+      "A. however",
+      "B. therefore",
+      "C. moreover",
+      "D. for instance"
+    ],
+    "answer": "C",
+    "step_node_map": {
+      "step1": "p702"
+    }
+  },
+  {
+    "id": "p7q004",
+    "type": "open",
+    "content": "英语写作中，主体段落应如何组织？",
+    "tags": [
+      "英语写作结构.md"
+    ],
+    "difficulty": 0.6,
+    "options": [],
+    "answer": "每个论点一个段落，使用连接词显式衔接，每段包含主题句和支撑细节。",
+    "step_node_map": {
+      "step1": "p701"
+    }
+  },
+  {
+    "id": "p7q005",
+    "type": "blank",
+    "content": "结尾段通常包括总结和______。",
+    "tags": [
+      "英语写作结构.md"
+    ],
+    "difficulty": 0.5,
+    "options": [],
+    "answer": "建议",
+    "step_node_map": {
+      "step1": "p701"
+    }
+  },
+  {
+    "id": "vq001",
+    "type": "choice",
+    "content": "单词 'inspect' 的意思是什么？",
+    "difficulty": 0.55,
+    "options": [
+      "A. 检查",
+      "B. 预防",
+      "C. 进口",
+      "D. 尊重"
+    ],
+    "answer": "A",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p401"
+    }
+  },
+  {
+    "id": "vq002",
+    "type": "choice",
+    "content": "单词 'respect' 的意思是什么？",
+    "difficulty": 0.55,
+    "options": [
+      "A. 可读的",
+      "B. 出口",
+      "C. 进口",
+      "D. 尊重"
+    ],
+    "answer": "D",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p401"
+    }
+  },
+  {
+    "id": "vq003",
+    "type": "choice",
+    "content": "单词 'prospect' 的意思是什么？",
+    "difficulty": 0.55,
+    "options": [
+      "A. 返回",
+      "B. 前景",
+      "C. 预习",
+      "D. 出口"
+    ],
+    "answer": "B",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p401"
+    }
+  },
+  {
+    "id": "vq004",
+    "type": "choice",
+    "content": "单词 'export' 的意思是什么？",
+    "difficulty": 0.55,
+    "options": [
+      "A. 可读的",
+      "B. 发展",
+      "C. 预习",
+      "D. 出口"
+    ],
+    "answer": "D",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p401"
+    }
+  },
+  {
+    "id": "vq005",
+    "type": "choice",
+    "content": "单词 'import' 的意思是什么？",
+    "difficulty": 0.55,
+    "options": [
+      "A. 进口",
+      "B. 检查",
+      "C. 重写",
+      "D. 发展"
+    ],
+    "answer": "A",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p401"
+    }
+  },
+  {
+    "id": "vq006",
+    "type": "choice",
+    "content": "单词 'transport' 的意思是什么？",
+    "difficulty": 0.55,
+    "options": [
+      "A. 出口",
+      "B. 运输",
+      "C. 不可能的",
+      "D. 返回"
+    ],
+    "answer": "B",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p401"
+    }
+  },
+  {
+    "id": "vq007",
+    "type": "choice",
+    "content": "单词 'rewrite' 的意思是什么？",
+    "difficulty": 0.55,
+    "options": [
+      "A. 重写",
+      "B. 现代化",
+      "C. 预防",
+      "D. 不开心的"
+    ],
+    "answer": "A",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p402"
+    }
+  },
+  {
+    "id": "vq008",
+    "type": "choice",
+    "content": "单词 'return' 的意思是什么？",
+    "difficulty": 0.55,
+    "options": [
+      "A. 返回",
+      "B. 出口",
+      "C. 决定",
+      "D. 可读的"
+    ],
+    "answer": "A",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p402"
+    }
+  },
+  {
+    "id": "vq009",
+    "type": "choice",
+    "content": "单词 'preview' 的意思是什么？",
+    "difficulty": 0.55,
+    "options": [
+      "A. 重写",
+      "B. 预习",
+      "C. 前景",
+      "D. 不开心的"
+    ],
+    "answer": "B",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p402"
+    }
+  },
+  {
+    "id": "vq010",
+    "type": "choice",
+    "content": "单词 'precaution' 的意思是什么？",
+    "difficulty": 0.55,
+    "options": [
+      "A. 预防",
+      "B. 返回",
+      "C. 前景",
+      "D. 不规则的"
+    ],
+    "answer": "A",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p402"
+    }
+  },
+  {
+    "id": "vq011",
+    "type": "choice",
+    "content": "单词 'irregular' 的意思是什么？",
+    "difficulty": 0.55,
+    "options": [
+      "A. 不规则的",
+      "B. 幸福",
+      "C. 不开心的",
+      "D. 运输"
+    ],
+    "answer": "A",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p402"
+    }
+  },
+  {
+    "id": "vq012",
+    "type": "choice",
+    "content": "单词 'impossible' 的意思是什么？",
+    "difficulty": 0.55,
+    "options": [
+      "A. 运输",
+      "B. 不可能的",
+      "C. 预习",
+      "D. 前景"
+    ],
+    "answer": "B",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p402"
+    }
+  },
+  {
+    "id": "vq013",
+    "type": "choice",
+    "content": "单词 'unhappy' 的意思是什么？",
+    "difficulty": 0.55,
+    "options": [
+      "A. 预习",
+      "B. 不开心的",
+      "C. 决定",
+      "D. 返回"
+    ],
+    "answer": "B",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p402"
+    }
+  },
+  {
+    "id": "vq014",
+    "type": "choice",
+    "content": "单词 'decision' 的意思是什么？",
+    "difficulty": 0.55,
+    "options": [
+      "A. 不规则的",
+      "B. 决定",
+      "C. 尊重",
+      "D. 不开心的"
+    ],
+    "answer": "B",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p402"
+    }
+  },
+  {
+    "id": "vq015",
+    "type": "choice",
+    "content": "单词 'development' 的意思是什么？",
+    "difficulty": 0.55,
+    "options": [
+      "A. 现代化",
+      "B. 重写",
+      "C. 不规则的",
+      "D. 发展"
+    ],
+    "answer": "D",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p402"
+    }
+  },
+  {
+    "id": "vq016",
+    "type": "choice",
+    "content": "单词 'happiness' 的意思是什么？",
+    "difficulty": 0.55,
+    "options": [
+      "A. 进口",
+      "B. 幸福",
+      "C. 现代化",
+      "D. 预习"
+    ],
+    "answer": "B",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p402"
+    }
+  },
+  {
+    "id": "vq017",
+    "type": "choice",
+    "content": "单词 'useful' 的意思是什么？",
+    "difficulty": 0.55,
+    "options": [
+      "A. 决定",
+      "B. 有用的",
+      "C. 现代化",
+      "D. 不开心的"
+    ],
+    "answer": "B",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p402"
+    }
+  },
+  {
+    "id": "vq018",
+    "type": "choice",
+    "content": "单词 'useless' 的意思是什么？",
+    "difficulty": 0.55,
+    "options": [
+      "A. 幸福",
+      "B. 前景",
+      "C. 无用的",
+      "D. 有用的"
+    ],
+    "answer": "C",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p402"
+    }
+  },
+  {
+    "id": "vq019",
+    "type": "choice",
+    "content": "单词 'readable' 的意思是什么？",
+    "difficulty": 0.55,
+    "options": [
+      "A. 运输",
+      "B. 前景",
+      "C. 决定",
+      "D. 可读的"
+    ],
+    "answer": "D",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p402"
+    }
+  },
+  {
+    "id": "vq020",
+    "type": "choice",
+    "content": "单词 'modernize' 的意思是什么？",
+    "difficulty": 0.55,
+    "options": [
+      "A. 现代化",
+      "B. 预习",
+      "C. 检查",
+      "D. 有用的"
+    ],
+    "answer": "A",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p402"
+    }
+  },
+  {
+    "id": "vq021",
+    "type": "choice",
+    "content": "中文'起飞'对应的英语动词短语是？",
+    "difficulty": 0.55,
+    "options": [
+      "A. put off",
+      "B. take over",
+      "C. get over",
+      "D. take off"
+    ],
+    "answer": "D",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p202"
+    }
+  },
+  {
+    "id": "vq022",
+    "type": "choice",
+    "content": "中文'接管'对应的英语动词短语是？",
+    "difficulty": 0.55,
+    "options": [
+      "A. get over",
+      "B. take off",
+      "C. take over",
+      "D. get along with"
+    ],
+    "answer": "C",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p202"
+    }
+  },
+  {
+    "id": "vq023",
+    "type": "choice",
+    "content": "中文'开始从事'对应的英语动词短语是？",
+    "difficulty": 0.55,
+    "options": [
+      "A. get along with",
+      "B. take over",
+      "C. take up",
+      "D. get over"
+    ],
+    "answer": "C",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p202"
+    }
+  },
+  {
+    "id": "vq024",
+    "type": "choice",
+    "content": "中文'推迟'对应的英语动词短语是？",
+    "difficulty": 0.55,
+    "options": [
+      "A. put off",
+      "B. get rid of",
+      "C. take over",
+      "D. take up"
+    ],
+    "answer": "A",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p202"
+    }
+  },
+  {
+    "id": "vq025",
+    "type": "choice",
+    "content": "中文'忍受'对应的英语动词短语是？",
+    "difficulty": 0.55,
+    "options": [
+      "A. put up with",
+      "B. get rid of",
+      "C. take off",
+      "D. get along with"
+    ],
+    "answer": "A",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p202"
+    }
+  },
+  {
+    "id": "vq026",
+    "type": "choice",
+    "content": "中文'提出（建议）'对应的英语动词短语是？",
+    "difficulty": 0.55,
+    "options": [
+      "A. put up with",
+      "B. take over",
+      "C. put forward",
+      "D. take off"
+    ],
+    "answer": "C",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p202"
+    }
+  },
+  {
+    "id": "vq027",
+    "type": "choice",
+    "content": "中文'克服'对应的英语动词短语是？",
+    "difficulty": 0.55,
+    "options": [
+      "A. put up with",
+      "B. get over",
+      "C. take over",
+      "D. get along with"
+    ],
+    "answer": "B",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p202"
+    }
+  },
+  {
+    "id": "vq028",
+    "type": "choice",
+    "content": "中文'与……相处'对应的英语动词短语是？",
+    "difficulty": 0.55,
+    "options": [
+      "A. get rid of",
+      "B. put up with",
+      "C. take up",
+      "D. get along with"
+    ],
+    "answer": "D",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p202"
+    }
+  },
+  {
+    "id": "vq029",
+    "type": "choice",
+    "content": "中文'摆脱'对应的英语动词短语是？",
+    "difficulty": 0.55,
+    "options": [
+      "A. put up with",
+      "B. get rid of",
+      "C. put off",
+      "D. put forward"
+    ],
+    "answer": "B",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p202"
+    }
+  },
+  {
+    "id": "vq030",
+    "type": "blank",
+    "content": "根据词根构词规则，'重写'的英文是 ______。",
+    "difficulty": 0.6,
+    "options": [],
+    "answer": "rewrite",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p402"
+    }
+  },
+  {
+    "id": "vq031",
+    "type": "blank",
+    "content": "'不规则的'的英文是 ______（ir- 表否定 + regular）。",
+    "difficulty": 0.6,
+    "options": [],
+    "answer": "irregular",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p402"
+    }
+  },
+  {
+    "id": "vq032",
+    "type": "blank",
+    "content": "'发展'的名词形式是 ______（develop + -ment）。",
+    "difficulty": 0.6,
+    "options": [],
+    "answer": "development",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p402"
+    }
+  },
+  {
+    "id": "vq033",
+    "type": "blank",
+    "content": "'幸福'的名词形式是 ______（happy 变 y 为 i + -ness）。",
+    "difficulty": 0.6,
+    "options": [],
+    "answer": "happiness",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p402"
+    }
+  },
+  {
+    "id": "vq034",
+    "type": "blank",
+    "content": "'简化'的动词是 ______（simple 变 i + -ify）。",
+    "difficulty": 0.6,
+    "options": [],
+    "answer": "simplify",
+    "tags": [
+      "core-vocabulary"
+    ],
+    "step_node_map": {
+      "step1": "p402"
+    }
+  }
+]
