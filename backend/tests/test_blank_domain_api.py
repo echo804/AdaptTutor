@@ -170,16 +170,51 @@ async def test_blank_domain_editor_roundtrip(client, blank_domain):
 
 
 async def test_blank_domain_other_user_forbidden(client, blank_domain):
-    _, _, pack_id, _ = blank_domain
+    token, uid, pack_id, domain_id = blank_domain
     token2, _ = await _register(client)
+    # M6.1 安全修复：非 owner 读他人私有包 → 404（不再可越权读取，含答案内容）
     r = await client.get(f"/api/v1/domains/{pack_id}", headers={"Authorization": f"Bearer {token2}"})
-    assert r.status_code == 200, r.text
-    # 非 owner 也可读包内容（内置包同规则），但 editable=false
-    assert r.json()["editable"] is False
+    assert r.status_code == 404, r.text
     r = await client.put(
         f"/api/v1/domains/{pack_id}",
         json={"manifest": {"id": pack_id, "version": "0.1.0", "subject": "x"}, "graph": {"nodes": [], "edges": []}, "questions": [], "diagnostic_rules": {}, "assessment": {}},
         headers={"Authorization": f"Bearer {token2}"},
     )
     assert r.status_code == 403
+
+    # 发布流程：private → published 后仍非公开，他人依旧 404
+    r = await client.post(f"/api/v1/user-domains/{domain_id}/publish", headers={"Authorization": f"Bearer {token}"})
+    assert r.status_code == 200, r.text
+    r = await client.get(f"/api/v1/domains/{pack_id}", headers={"Authorization": f"Bearer {token2}"})
+    assert r.status_code == 404
+
+    # 置为 public + pending_review（模拟提交公开审核），他人仍 404
+    factory = get_session_factory()
+    from sqlalchemy import select as _select
+    from app.persistence.models import User as _User
+    async with factory() as db:
+        d = (await db.execute(_select(UserDomain).where(UserDomain.pack_id == pack_id))).scalar_one()
+        d.visibility = "public"
+        d.status = "pending_review"
+        await db.commit()
+    r = await client.get(f"/api/v1/domains/{pack_id}", headers={"Authorization": f"Bearer {token2}"})
+    assert r.status_code == 404, r.text
+
+    # 管理员审核通过 → 他人可读（editable=False），owner 仍可读可改
+    async with factory() as db:
+        u = (await db.execute(_select(_User).where(_User.id == uid))).scalar_one()
+        u.meta = {**(u.meta or {}), "is_admin": True}
+        await db.commit()
+    r = await client.post(
+        f"/api/v1/admin/domains/{domain_id}/review",
+        data={"approve": "true", "reason": "ok"},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert r.status_code == 200, r.text
+    r = await client.get(f"/api/v1/domains/{pack_id}", headers={"Authorization": f"Bearer {token2}"})
+    assert r.status_code == 200, r.text
+    assert r.json()["editable"] is False
+    r = await client.get(f"/api/v1/domains/{pack_id}", headers={"Authorization": f"Bearer {token}"})
+    assert r.status_code == 200
+    assert r.json()["editable"] is True
 

@@ -32,6 +32,16 @@ def _is_admin(user: User) -> bool:
     return bool((user.meta or {}).get("is_admin"))
 
 
+# M6.1 安全：上传大小限制（单文件/zip 原始 5MB，解压后 20MB）
+MAX_UPLOAD_BYTES = 5 * 1024 * 1024
+MAX_EXTRACT_TOTAL = 20 * 1024 * 1024
+
+
+def _check_size(data: bytes) -> None:
+    if len(data) > MAX_UPLOAD_BYTES:
+        raise HTTPException(status_code=413, detail=f"上传文件过大（上限 {MAX_UPLOAD_BYTES // (1024 * 1024)}MB）")
+
+
 async def _own_domain(db: AsyncSession, domain_id: int, user_id: int) -> UserDomain:
     d = await db.get(UserDomain, domain_id)
     if d is None or d.user_id != user_id:
@@ -40,12 +50,16 @@ async def _own_domain(db: AsyncSession, domain_id: int, user_id: int) -> UserDom
 
 
 def _safe_extract_zip(zf: zipfile.ZipFile, target: Path) -> None:
-    """安全解压：拒绝路径穿越（../、绝对路径）。"""
+    """安全解压：拒绝路径穿越（../、绝对路径）+ 压缩炸弹（解压后总大小超限）。"""
+    total = 0
     for m in zf.infolist():
+        total += m.file_size
         name = m.filename
         p = (target / name).resolve()
         if not str(p).startswith(str(target.resolve())):
             raise HTTPException(status_code=400, detail=f"压缩包包含非法路径: {name}")
+    if total > MAX_EXTRACT_TOTAL:
+        raise HTTPException(status_code=413, detail=f"压缩包解压后内容过大（上限 {MAX_EXTRACT_TOTAL // (1024 * 1024)}MB）")
     zf.extractall(target)
 
 
@@ -66,7 +80,9 @@ async def _save_uploads(
 
     if zip_file and zip_file.filename and zip_file.filename.endswith(".zip"):
         zpath = base / "upload.zip"
-        zpath.write_bytes(await zip_file.read())
+        zdata = await zip_file.read()
+        _check_size(zdata)
+        zpath.write_bytes(zdata)
         try:
             with zipfile.ZipFile(zpath) as zf:
                 _safe_extract_zip(zf, base)
@@ -77,7 +93,9 @@ async def _save_uploads(
     for i, f in enumerate(files or []):
         if not f.filename or not f.filename.endswith((".md", ".markdown", ".txt")):
             continue
-        (general / f"{i:02d}_{Path(f.filename).name}").write_bytes(await f.read())
+        fdata = await f.read()
+        _check_size(fdata)
+        (general / f"{i:02d}_{Path(f.filename).name}").write_bytes(fdata)
     if text and text.strip():
         (general / "01_粘贴文本.md").write_text(text, encoding="utf-8")
     return base

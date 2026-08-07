@@ -199,11 +199,23 @@ async def api_domain_detail(
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> dict:
-    """包全量内容（编辑器加载）。editable = 是否当前用户的自建包（决定可否保存）。"""
+    """包全量内容（编辑器/学习加载）。
+
+    可见性（M6.1 安全修复）：内置包公开可读；自建包仅 owner 或「已公开且审核通过」可读。
+    非 owner 读私有包返回 404（不暴露包存在性，防枚举）。
+    editable = 是否当前用户的自建包（决定可否保存）。
+    """
     pack = _load_pack_or_404(pack_id)
     res = await db.execute(select(UserDomain).where(UserDomain.pack_id == pack_id))
     ud = res.scalar_one_or_none()
-    editable = ud is not None and ud.user_id == user.id
+    if ud is not None:
+        is_owner = ud.user_id == user.id
+        is_public = ud.visibility == "public" and ud.status == "published"
+        if not (is_owner or is_public):
+            raise HTTPException(status_code=404, detail="领域包不存在")
+        editable = is_owner
+    else:
+        editable = False  # 内置包只读
     data = pack.model_dump(mode="json", by_alias=True)
     data["editable"] = editable
     return data
