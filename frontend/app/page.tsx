@@ -5,13 +5,15 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getToken } from "@/lib/api";
 import Magnet from "@/components/reactbits/Magnet";
-import BlobCursor from "@/components/reactbits/BlobCursor";
+import DecryptedText from "@/components/reactbits/DecryptedText";
 import RotatingText from "@/components/reactbits/RotatingText";
+import ClickSpark from "@/components/reactbits/ClickSpark";
 
 /** 欢迎页（M4r9k + M6.1）：淡黄素描纸 + 精细单线手绘苏格拉底完整人物线稿（无文字） + 文字浮于其上。
  * 素材：用户从 AI 生成图中裁出的完整人物线稿（波浪卷发/长胡须/分层排线），透明背景。
  * 已登录 → 直接进入 /chat；未登录 → 展示欢迎页 + 登录/注册 CTA。
- * M6.1 动效：RotatingText 哲思句轮换 + Magnet CTA 磁吸 + BlobCursor 琥珀墨点跟随鼠标。
+ * M6.1 动效：品牌名 DecryptedText 逐字解密 + RotatingText 哲思句轮换 + Magnet CTA 磁吸 + ClickSpark 点击琥珀火花。
+ * 文字运动语言统一（字符级逐字变换），品牌名→副标题→CTA 递进浮现。
  */
 
 const BRAND = "AdaptTutor";
@@ -23,8 +25,7 @@ const TITLES = [
 
 export default function WelcomePage() {
   const router = useRouter();
-  const [printed, setPrinted] = useState(0); // 已打印字符数
-  const [showTitle, setShowTitle] = useState(false);   // 哲思标题
+  const [showTitle, setShowTitle] = useState(false);   // 哲思标题（品牌名解密完成后出现）
   const [showCta, setShowCta] = useState(false);       // 开启思辨之旅按钮
   const [showLogin, setShowLogin] = useState(false);   // 登录链接
 
@@ -47,14 +48,10 @@ export default function WelcomePage() {
     if (getToken()) router.replace("/chat");
   }, [router]);
 
-  // 品牌名逐字打印 → 标题 → 按钮 → 登录 → 底部小字（各段独立浮现，节奏从容）
+  // 品牌名逐字解密（DecryptedText 内部处理，约 9 字符 × 120ms ≈ 1.1s）→ 标题 → 按钮 → 登录（各段独立浮现，节奏从容）
   useEffect(() => {
-    if (printed < BRAND.length) {
-      const t = setTimeout(() => setPrinted((p) => p + 1), 110);
-      return () => clearTimeout(t);
-    }
     if (!showTitle) {
-      const t = setTimeout(() => setShowTitle(true), 500);
+      const t = setTimeout(() => setShowTitle(true), 1400);
       return () => clearTimeout(t);
     }
     if (!showCta) {
@@ -65,41 +62,45 @@ export default function WelcomePage() {
       const t = setTimeout(() => setShowLogin(true), 650);
       return () => clearTimeout(t);
     }
-  }, [printed, showTitle, showCta, showLogin]);
+  }, [showTitle, showCta, showLogin]);
 
   return (
-    <div className="welcome-paper relative flex min-h-screen items-center justify-center overflow-hidden">
-      {/* M6.1：琥珀墨点跟随鼠标（div blob + gsap，pointer-events-none，低透明度不抢线稿） */}
-      <BlobCursor
-        fillColor="#c89b6d"
-        trailCount={5}
-        sizes={[4, 7, 10, 14, 18]}
-        innerSizes={[0, 0, 0, 0, 0]}
-        opacities={[0.30, 0.22, 0.16, 0.10, 0.06]}
-        shadowBlur={10}
-        shadowOffsetX={4}
-        shadowOffsetY={4}
-      />
+    <ClickSpark
+      className="z-0"
+      sparkColor="#c89b6d"
+      sparkSize={2.5}
+      sparkRadius={44}
+      sparkCount={10}
+      duration={550}
+      easing="ease-out"
+    >
+      <div className="welcome-paper relative flex min-h-screen items-center justify-center overflow-hidden">
+        {/* 精细线稿水印（z-0，透明 PNG/WebP） */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/socrates-full.webp"
+          alt=""
+          aria-hidden
+          className="pointer-events-none absolute z-0 h-[92vh] w-auto max-w-none select-none"
+          draggable={false}
+        />
 
-      {/* 精细线稿水印（z-0，透明 PNG/WebP） */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src="/socrates-full.webp"
-        alt=""
-        aria-hidden
-        className="pointer-events-none absolute z-0 h-[92vh] w-auto max-w-none select-none"
-        draggable={false}
-      />
-
-      {/* 文字浮于线稿上（z-10） */}
-      <main className="relative z-10 flex flex-col items-center px-6 py-16 text-center">
-        <h1
-          className="font-mono text-4xl font-bold tracking-[0.14em] sm:text-5xl"
-          style={{ color: "#2c3e50" }}
-        >
-          {BRAND.slice(0, printed)}
-          <span className="type-cursor" style={{ display: printed >= BRAND.length ? "none" : "inline-block" }} />
-        </h1>
+        {/* 文字浮于线稿上（z-10） */}
+        <main className="relative z-10 flex flex-col items-center px-6 py-16 text-center">
+          <h1
+            className="font-mono text-4xl font-bold tracking-[0.14em] sm:text-5xl"
+            style={{ color: "#2c3e50" }}
+          >
+            <DecryptedText
+              text={BRAND}
+              sequential
+              speed={120}
+              maxIterations={4}
+              useOriginalCharsOnly
+              revealDirection="start"
+              animateOn="view"
+            />
+          </h1>
 
         {showTitle && (
           <RotatingText
@@ -108,6 +109,7 @@ export default function WelcomePage() {
             splitLevelClassName="overflow-hidden pb-0.5"
             staggerDuration={0.04}
             rotationInterval={7000}
+            animatePresenceInitial
             transition={{ type: "tween", duration: 0.45, ease: "easeInOut" }}
             style={{ color: "rgba(44,62,80,0.85)" }}
           />
@@ -136,7 +138,8 @@ export default function WelcomePage() {
             已有账号？登录
           </Link>
         )}
-      </main>
-    </div>
+        </main>
+      </div>
+    </ClickSpark>
   );
 }
