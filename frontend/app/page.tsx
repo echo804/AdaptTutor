@@ -94,8 +94,8 @@ export default function WelcomePage() {
             <DecryptedText
               text={BRAND}
               sequential
-              speed={120}
-              maxIterations={4}
+              speed={150}
+              maxIterations={3}
               useOriginalCharsOnly
               revealDirection="start"
               animateOn="view"
@@ -105,7 +105,7 @@ export default function WelcomePage() {
         {showTitle && (
           <RotatingText
             texts={TITLES}
-            mainClassName="welcome-fade mt-6 min-h-[2.25rem] text-xl font-light leading-relaxed tracking-wide sm:min-h-[2.5rem] sm:text-2xl"
+            mainClassName="mt-6 min-h-[2.25rem] text-xl font-light leading-relaxed tracking-wide sm:min-h-[2.5rem] sm:text-2xl"
             splitLevelClassName="overflow-hidden pb-0.5"
             staggerDuration={0.04}
             rotationInterval={7000}
