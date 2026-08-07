@@ -7,13 +7,12 @@ import { getToken } from "@/lib/api";
 import Magnet from "@/components/reactbits/Magnet";
 import DecryptedText from "@/components/reactbits/DecryptedText";
 import RotatingText from "@/components/reactbits/RotatingText";
-import ClickSpark from "@/components/reactbits/ClickSpark";
 
 /** 欢迎页（M4r9k + M6.1）：淡黄素描纸 + 精细单线手绘苏格拉底完整人物线稿（无文字） + 文字浮于其上。
  * 素材：用户从 AI 生成图中裁出的完整人物线稿（波浪卷发/长胡须/分层排线），透明背景。
  * 已登录 → 直接进入 /chat；未登录 → 展示欢迎页 + 登录/注册 CTA。
- * M6.1 动效：品牌名 DecryptedText 逐字解密 + RotatingText 哲思句轮换 + Magnet CTA 磁吸 + ClickSpark 点击琥珀火花。
- * 文字运动语言统一（字符级逐字变换），品牌名→副标题→CTA 递进浮现。
+ * M6.1 动效：品牌名 DecryptedText 逐字解密 + RotatingText 哲思句轮换 + Magnet CTA 磁吸。
+ * 文字运动语言统一（字符级逐字变换），品牌名→副标题→CTA 从容递进浮现。
  */
 
 const BRAND = "AdaptTutor";
@@ -48,34 +47,25 @@ export default function WelcomePage() {
     if (getToken()) router.replace("/chat");
   }, [router]);
 
-  // 品牌名逐字解密（DecryptedText 内部处理，约 9 字符 × 120ms ≈ 1.1s）→ 标题 → 按钮 → 登录（各段独立浮现，节奏从容）
+  // 品牌名逐字解密（DecryptedText 内部处理，约 9 字符 × 150ms ≈ 1.35s）→ 标题 → 按钮 → 登录（各段独立浮现，节奏从容）
   useEffect(() => {
     if (!showTitle) {
-      const t = setTimeout(() => setShowTitle(true), 1400);
+      const t = setTimeout(() => setShowTitle(true), 1450);
       return () => clearTimeout(t);
     }
     if (!showCta) {
-      const t = setTimeout(() => setShowCta(true), 750);
+      const t = setTimeout(() => setShowCta(true), 1300);
       return () => clearTimeout(t);
     }
     if (!showLogin) {
-      const t = setTimeout(() => setShowLogin(true), 650);
+      const t = setTimeout(() => setShowLogin(true), 1100);
       return () => clearTimeout(t);
     }
   }, [showTitle, showCta, showLogin]);
 
   return (
-    <ClickSpark
-      className="z-0"
-      sparkColor="#c89b6d"
-      sparkSize={2.5}
-      sparkRadius={44}
-      sparkCount={10}
-      duration={550}
-      easing="ease-out"
-    >
-      <div className="welcome-paper relative flex min-h-screen items-center justify-center overflow-hidden">
-        {/* 精细线稿水印（z-0，透明 PNG/WebP） */}
+    <div className="welcome-paper relative flex min-h-screen items-center justify-center overflow-hidden">
+      {/* 精细线稿水印（z-0，透明 PNG/WebP） */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/socrates-full.webp"
@@ -139,7 +129,6 @@ export default function WelcomePage() {
           </Link>
         )}
         </main>
-      </div>
-    </ClickSpark>
+    </div>
   );
 }
