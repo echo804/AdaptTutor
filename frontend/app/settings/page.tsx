@@ -267,33 +267,34 @@ export default function SettingsPage() {
         ))}
       </div>
 
-      {/* 邀请码管理（M4r19：每位用户可邀请朋友/家人） */}
-      <div className="mt-6 glass-card rounded-xl border p-4" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
-        <div className="mb-1 flex items-center justify-between">
-          <span className="text-sm font-medium">邀请码</span>
-          <button
-            className="rounded px-3 py-1 text-xs font-medium text-white disabled:opacity-50"
-            style={{ background: "var(--accent)" }}
-            disabled={inviting}
-            onClick={createInvite}
-          >
-            {inviting ? "生成中…" : "+ 生成邀请码"}
-          </button>
-        </div>
-        <p className="mb-3 text-xs" style={{ color: "var(--muted)" }}>
-          把邀请码发给朋友即可注册。每人最多同时持有 5 个未使用邀请码，有效期 7 天，一次性。
-        </p>
-        {invites.length === 0 ? (
-          <p className="text-xs" style={{ color: "var(--muted)" }}>还没有邀请码，点右上角生成。</p>
-        ) : (
-          <ul className="space-y-2">
-            {invites.map((it) => (
-              <li key={it.id} className="flex items-center justify-between rounded-lg border px-3 py-2" style={{ borderColor: "var(--border)" }}>
-                <div className="flex items-center gap-2">
-                  <code className="font-mono text-sm" style={{ color: "var(--text)" }}>{it.code}</code>
-                  <span className="rounded px-1.5 py-0.5 text-[10px]" style={{
-                    background: it.used ? "#7ec8a022" : it.expired ? "var(--amber-soft)" : "var(--accent-soft)",
-                    color: it.used ? "#7ec8a0" : it.expired ? "var(--amber)" : "var(--accent)",
+      {/* 邀请码管理（M6.1 收紧：仅管理员可见可生成，防公网随意扩散） */}
+      {isAdmin && (
+        <div className="mt-6 glass-card rounded-xl border p-4" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
+          <div className="mb-1 flex items-center justify-between">
+            <span className="text-sm font-medium">邀请码（管理员）</span>
+            <button
+              className="rounded px-3 py-1 text-xs font-medium text-white disabled:opacity-50"
+              style={{ background: "var(--accent)" }}
+              disabled={inviting}
+              onClick={createInvite}
+            >
+              {inviting ? "生成中…" : "+ 生成邀请码"}
+            </button>
+          </div>
+          <p className="mb-3 text-xs" style={{ color: "var(--muted)" }}>
+            仅管理员可生成邀请码，发给体验者即可注册。最多同时持有 5 个未使用，有效期 7 天，一次性。
+          </p>
+          {invites.length === 0 ? (
+            <p className="text-xs" style={{ color: "var(--muted)" }}>还没有邀请码，点右上角生成。</p>
+          ) : (
+            <ul className="space-y-2">
+              {invites.map((it) => (
+                <li key={it.id} className="flex items-center justify-between rounded-lg border px-3 py-2" style={{ borderColor: "var(--border)" }}>
+                  <div className="flex items-center gap-2">
+                    <code className="font-mono text-sm" style={{ color: "var(--text)" }}>{it.code}</code>
+                    <span className="rounded px-1.5 py-0.5 text-[10px]" style={{
+                      background: it.used ? "#7ec8a022" : it.expired ? "var(--amber-soft)" : "var(--accent-soft)",
+                      color: it.used ? "#7ec8a0" : it.expired ? "var(--amber)" : "var(--accent)",
                   }}>
                     {it.used ? "已使用" : it.expired ? "已作废" : "可用"}
                   </span>
@@ -318,6 +319,7 @@ export default function SettingsPage() {
           </ul>
         )}
       </div>
+      )}
 
       {/* 反馈管理（M4r22：管理员处理用户反馈） */}
       {isAdmin && (

@@ -1,6 +1,8 @@
-"""邀请码管理 API（M4r19）：每个用户可在设置页生成/查看/作废自己的邀请码。
-对齐 04：邀请制多用户平权（无角色分级）——每个用户都能邀请自己的朋友/家人。
-限制：每人同时最多持有 MAX_ACTIVE=5 个未使用邀请码；默认 7 天有效期；一次性。
+"""邀请码管理 API（M4r19 → M6.1 收紧）：仅管理员可生成邀请码。
+原设计：每个用户可生成邀请码邀请朋友（多用户平权）；
+收紧原因：公网引流后防止任意用户随意扩散邀请码，生成权收敛给管理员。
+限制：管理员同时最多持有 MAX_ACTIVE=5 个未使用邀请码；默认 7 天有效期；一次性。
+历史已生成的邀请码不受影响（仍可用）；普通用户可查看/作废自己生成的历史码。
 """
 
 from __future__ import annotations
@@ -17,8 +19,12 @@ from app.persistence.models import InviteCode, User
 
 router = APIRouter(prefix="/me/invite-codes", tags=["invites"])
 
-MAX_ACTIVE = 5      # 每人同时最多持有的未使用邀请码
+MAX_ACTIVE = 5      # 同时最多持有的未使用邀请码
 DEFAULT_DAYS = 7    # 默认有效期（天）
+
+
+def _is_admin(user: User) -> bool:
+    return bool((user.meta or {}).get("is_admin"))
 
 
 @router.post("")
@@ -26,7 +32,9 @@ async def create_invite(
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> dict:
-    """生成一个邀请码。超出持有上限 → 400。"""
+    """生成一个邀请码（仅管理员）。超出持有上限 → 400；非管理员 → 403。"""
+    if not _is_admin(user):
+        raise HTTPException(status_code=403, detail="仅管理员可生成邀请码")
     now = datetime.now(timezone.utc)
     active = (
         await db.execute(
