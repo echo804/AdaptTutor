@@ -104,11 +104,11 @@ export default function WelcomePage() {
         {showTitle && (
           <RotatingText
             texts={TITLES}
-            mainClassName="welcome-fade mt-6 text-xl font-light leading-relaxed tracking-wide sm:text-2xl"
+            mainClassName="welcome-fade mt-6 min-h-[2.25rem] text-xl font-light leading-relaxed tracking-wide sm:min-h-[2.5rem] sm:text-2xl"
             splitLevelClassName="overflow-hidden pb-0.5"
             staggerDuration={0.04}
-            rotationInterval={6000}
-            transition={{ type: "spring", stiffness: 80, damping: 20 }}
+            rotationInterval={7000}
+            transition={{ type: "tween", duration: 0.45, ease: "easeInOut" }}
             style={{ color: "rgba(44,62,80,0.85)" }}
           />
         )}

@@ -93,7 +93,7 @@ export default function BlobCursor({
       ref={containerRef}
       onMouseMove={handleMove}
       onTouchMove={handleMove}
-      className="relative top-0 left-0 w-full h-full"
+      className="pointer-events-none fixed inset-0 top-0 left-0"
       style={{ zIndex }}
     >
       {useFilter && (
