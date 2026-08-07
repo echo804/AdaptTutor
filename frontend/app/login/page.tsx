@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { api, setToken, AuthResponse } from "@/lib/api";
 import { QuillInk, Glasses, MapleLeaf, Feather, InkDots } from "@/components/NoteDecor";
+import BlurText from "@/components/reactbits/BlurText";
 
 /** 登录页（M4r10）：复古笔记风，与欢迎页素描纸同系列（白纸 + 横线格 + 红边线 + 胶带） */
 export default function LoginPage() {
@@ -61,9 +62,15 @@ export default function LoginPage() {
         <span className="note-tape" aria-hidden />
 
         <h1 className="note-title text-2xl">登录</h1>
-        <p className="mt-1 mb-8 text-sm" style={{ color: "rgba(44,62,80,0.6)" }}>
-          重新翻开思考的笔记
-        </p>
+        {/* M6.1：react-bits BlurText——「重新翻开思考的笔记」逐字浮现（翻开笔记的语义） */}
+        <BlurText
+          text="重新翻开思考的笔记"
+          delay={70}
+          animateBy="letters"
+          direction="top"
+          threshold={0.1}
+          className="mt-1 mb-8 block text-sm text-[rgba(44,62,80,0.6)]"
+        />
 
         {error && (
           <p className="note-error mb-6">{error}</p>
