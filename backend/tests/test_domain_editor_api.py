@@ -195,11 +195,21 @@ async def test_domain_save_bad_data_422(client, tmp_pack):
 
 
 async def test_domain_save_not_owner_forbidden(client, tmp_pack):
-    """他人自建包不可编辑（403）。"""
+    """他人自建包不可编辑（403）；M6.1 起他人读私有包也 404。"""
     _, user_a = await _register(client)
     await _create_user_domain(user_a, tmp_pack)
     token_b, _ = await _register(client)
     hb = {"Authorization": f"Bearer {token_b}"}
-    body = await _load_body(client, hb, tmp_pack)
+    # M6.1：非 owner 读他人私有包 → 404（不再返回内容）
+    r = await client.get(f"/api/v1/domains/{tmp_pack}", headers=hb)
+    assert r.status_code == 404
+    # 直接构造合法 body 测写权限（owner 检查在 schema 校验前）
+    body = {
+        "manifest": {"id": tmp_pack, "version": "0.1.0", "subject": "x"},
+        "graph": {"nodes": [], "edges": []},
+        "questions": [],
+        "diagnostic_rules": {},
+        "assessment": {},
+    }
     r = await client.put(f"/api/v1/domains/{tmp_pack}", json=body, headers=hb)
     assert r.status_code == 403
