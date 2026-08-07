@@ -4,14 +4,22 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getToken } from "@/lib/api";
+import Magnet from "@/components/reactbits/Magnet";
+import BlobCursor from "@/components/reactbits/BlobCursor";
+import RotatingText from "@/components/reactbits/RotatingText";
 
-/** 欢迎页（M4r9k）：淡黄素描纸 + 精细单线手绘苏格拉底完整人物线稿（无文字）+ 文字浮于其上。
+/** 欢迎页（M4r9k + M6.1）：淡黄素描纸 + 精细单线手绘苏格拉底完整人物线稿（无文字） + 文字浮于其上。
  * 素材：用户从 AI 生成图中裁出的完整人物线稿（波浪卷发/长胡须/分层排线），透明背景。
  * 已登录 → 直接进入 /chat；未登录 → 展示欢迎页 + 登录/注册 CTA。
+ * M6.1 动效：RotatingText 哲思句轮换 + Magnet CTA 磁吸 + BlobCursor 琥珀墨点跟随鼠标。
  */
 
 const BRAND = "AdaptTutor";
-const TITLE = "不是给予答案，而是唤醒思考";
+const TITLES = [
+  "不是给予答案，而是唤醒思考",
+  "问题，比答案更珍贵",
+  "每一次错误，都是思考的路径",
+];
 
 export default function WelcomePage() {
   const router = useRouter();
@@ -61,6 +69,18 @@ export default function WelcomePage() {
 
   return (
     <div className="welcome-paper relative flex min-h-screen items-center justify-center overflow-hidden">
+      {/* M6.1：琥珀墨点跟随鼠标（div blob + gsap，pointer-events-none，低透明度不抢线稿） */}
+      <BlobCursor
+        fillColor="#c89b6d"
+        trailCount={5}
+        sizes={[4, 7, 10, 14, 18]}
+        innerSizes={[0, 0, 0, 0, 0]}
+        opacities={[0.30, 0.22, 0.16, 0.10, 0.06]}
+        shadowBlur={10}
+        shadowOffsetX={4}
+        shadowOffsetY={4}
+      />
+
       {/* 精细线稿水印（z-0，透明 PNG/WebP） */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
@@ -82,23 +102,28 @@ export default function WelcomePage() {
         </h1>
 
         {showTitle && (
-          <h2
-            className="welcome-fade mt-6 text-xl font-light leading-relaxed tracking-wide sm:text-2xl"
+          <RotatingText
+            texts={TITLES}
+            mainClassName="welcome-fade mt-6 text-xl font-light leading-relaxed tracking-wide sm:text-2xl"
+            splitLevelClassName="overflow-hidden pb-0.5"
+            staggerDuration={0.04}
+            rotationInterval={6000}
+            transition={{ type: "spring", stiffness: 80, damping: 20 }}
             style={{ color: "rgba(44,62,80,0.85)" }}
-          >
-            {TITLE}
-          </h2>
+          />
         )}
 
         {showCta && (
           <div className="welcome-rise mt-10">
-            <Link
-              href="/register"
-              className="inline-block rounded-full px-10 py-3.5 text-sm font-medium transition-transform hover:scale-105 hover:opacity-90"
-              style={{ background: "var(--amber)", color: "#1a1a1a", boxShadow: "0 4px 20px rgba(212,165,116,0.45)" }}
-            >
-              开启思辨之旅
-            </Link>
+            <Magnet padding={26} magnetStrength={45}>
+              <Link
+                href="/register"
+                className="inline-block rounded-full px-10 py-3.5 text-sm font-medium transition-transform hover:scale-105 hover:opacity-90"
+                style={{ background: "var(--amber)", color: "#1a1a1a", boxShadow: "0 4px 20px rgba(212,165,116,0.45)" }}
+              >
+                开启思辨之旅
+              </Link>
+            </Magnet>
           </div>
         )}
 
