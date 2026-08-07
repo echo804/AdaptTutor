@@ -9,14 +9,84 @@ import { useDomain } from "@/lib/domain";
 import FeedbackWidget from "@/components/FeedbackWidget";
 
 const NAV = [
-  { href: "/chat", label: "对话学习" },
-  { href: "/graph", label: "知识图谱" },
-  { href: "/report", label: "诊断报告" },
-  { href: "/review", label: "错题复盘" },
-  { href: "/dashboard", label: "仪表盘" },
-  { href: "/market", label: "领域市场" },
-  { href: "/domains", label: "我的领域" },
-  { href: "/settings", label: "设置" },
+  {
+    href: "/chat",
+    label: "对话学习",
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+      </svg>
+    ),
+  },
+  {
+    href: "/graph",
+    label: "知识图谱",
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M5 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm14 0a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM12 21a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM7 8l3.5 9M17 8l-3.5 9" />
+      </svg>
+    ),
+  },
+  {
+    href: "/report",
+    label: "诊断报告",
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+        <path d="M14 2v6h6" />
+        <path d="M8 13h8M8 17h5" />
+      </svg>
+    ),
+  },
+  {
+    href: "/review",
+    label: "错题复盘",
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M21 12a9 9 0 1 1-2.64-6.36M21 3v6h-6" />
+      </svg>
+    ),
+  },
+  {
+    href: "/dashboard",
+    label: "仪表盘",
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="3" y="3" width="7" height="7" rx="1" />
+        <rect x="14" y="3" width="7" height="7" rx="1" />
+        <rect x="3" y="14" width="7" height="7" rx="1" />
+        <rect x="14" y="14" width="7" height="7" rx="1" />
+      </svg>
+    ),
+  },
+  {
+    href: "/market",
+    label: "领域市场",
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M3 9l1.5-5h15L21 9M3 9a2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 4 0M5 11v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-8" />
+      </svg>
+    ),
+  },
+  {
+    href: "/domains",
+    label: "我的领域",
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+      </svg>
+    ),
+  },
+  {
+    href: "/settings",
+    label: "设置",
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="3" />
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+      </svg>
+    ),
+  },
 ];
 
 /** 顶栏 + 侧边栏双层布局（05 规范）；登录/注册页隐藏侧边栏。 */
@@ -25,12 +95,27 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [username, setUsername] = useState<string | null>(null);
   const [themeOpen, setThemeOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
   const [mode, setMode] = useState<ThemeMode>("auto");
   const [accent, setAccent] = useState<ThemeAccent>("ink");
   const { packs, active, ready, setActive } = useDomain();
 
   // 免登录页：欢迎页 / 登录 / 注册（M4r9 欢迎页加入）
   const isAuthPage = pathname === "/" || pathname === "/login" || pathname === "/register";
+
+  // 侧边栏折叠：localStorage 记忆 + 窄屏(<768px)默认折叠
+  useEffect(() => {
+    const saved = localStorage.getItem("sidebar-collapsed");
+    const narrow = window.innerWidth < 768;
+    setCollapsed(saved === "1" || (saved === null && narrow));
+  }, []);
+
+  const toggleSidebar = () => {
+    setCollapsed((v) => {
+      localStorage.setItem("sidebar-collapsed", v ? "0" : "1");
+      return !v;
+    });
+  };
 
   useEffect(() => {
     if (isAuthPage) return;
@@ -74,6 +159,18 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       {/* 顶栏 */}
       <header className="flex h-14 shrink-0 items-center justify-between border-b px-4" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
         <div className="flex items-center gap-2">
+          <button
+            aria-label={collapsed ? "展开侧边栏" : "收起侧边栏"}
+            title={collapsed ? "展开侧边栏" : "收起侧边栏"}
+            onClick={toggleSidebar}
+            className="flex h-8 w-8 items-center justify-center rounded transition-opacity hover:opacity-80"
+            style={{ color: "var(--muted)" }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" />
+              <line x1="9" y1="3" x2="9" y2="21" />
+            </svg>
+          </button>
           <span className="text-lg font-semibold" style={{ color: "var(--accent)" }}>
             AdaptTutor
           </span>
@@ -197,19 +294,24 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       </header>
 
       <div className="flex flex-1 overflow-hidden">
-        {/* 侧边栏 */}
-        <nav className="w-48 shrink-0 border-r p-3" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
+        {/* 侧边栏（可折叠：展开 w-48 / 折叠 w-14 图标模式，localStorage 记忆） */}
+        <nav
+          className={`${collapsed ? "w-14" : "w-48"} shrink-0 border-r p-2 transition-[width] duration-200`}
+          style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+        >
           {NAV.map((n) => (
             <Link
               key={n.href}
               href={n.href}
-              className="mb-1 block rounded px-3 py-2 text-sm transition-opacity hover:opacity-80"
+              title={collapsed ? n.label : undefined}
+              className={`mb-1 flex items-center rounded px-2 py-2 text-sm transition-opacity hover:opacity-80 ${collapsed ? "justify-center" : "gap-2"}`}
               style={{
                 background: pathname === n.href ? "var(--accent-soft)" : "transparent",
                 color: pathname === n.href ? "var(--accent)" : "var(--text)",
               }}
             >
-              {n.label}
+              <span className="shrink-0">{n.icon}</span>
+              {!collapsed && <span className="truncate">{n.label}</span>}
             </Link>
           ))}
         </nav>
