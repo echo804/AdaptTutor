@@ -10,18 +10,21 @@ import { useDomain } from "@/lib/domain";
 import MathText from "@/components/Math";
 import ConfirmDialog from "@/components/ConfirmDialog";
 
-/** 会话内一张抽卡：题目 + 作答结果（错题复盘式卡片浏览，M5） */
-interface Card {
-  qid: string;
-  question: Question;
-  userAnswer?: string;
-  correct?: boolean | null;
-  feedback?: string | null;
-  correctAnswer?: string | null;
-  state: string;       // 辅导状态机状态；诊断恒 "diagnose"
-  answered: boolean;   // 已提交（可翻面看答案）
-  done?: boolean;
-  is_review?: boolean; // M5：错题复习题标记
+/**
+ * 对话流里的一条消息（A 刀 · 替换原 `interface Card`）
+ *
+ * 为什么要换掉 Card：原 Card 的 `answered` 一个字段同时表达
+ * "判过分"和"本轮结束"两件事，而 `correct=false` 在后端有三种含义
+ * （真答错 / 诊断不支持追问 / VERIFY 非答案输入），于是前端一律
+ * 把它当成"结束"→ 关掉作答区 → 死锁。拆成 msgs + closed 才分得开。
+ */
+interface Msg {
+  role: "ai" | "me";
+  text: string;
+  /** 判题结论（仅 role==="me" 且本轮确实判过分时有） */
+  verdict?: { correct: boolean; answer?: string | null; feedback?: string | null };
+  /** 需要认真对待的追问 → 主强调色 + 左侧细竖线（05 §5.1） */
+  probe?: boolean;
 }
 
 interface SessionItem {
@@ -31,14 +34,13 @@ interface SessionItem {
   created_at: string;
 }
 
-/** M5：GET /sessions/{sid}/cards 返回的历史卡（重建卡片栈用） */
-interface SessionCard {
-  qid: string;
-  question: Question | null;
-  user_answer?: string;
-  correct?: boolean;
-  state: string;
-  answered: boolean;
+/** GET /sessions/{sid}/messages 返回的历史消息（A6 用它重建对话流） */
+interface MessageOut {
+  id: number;
+  role: string;
+  content: string;
+  trace_id: string;
+  created_at: string;
 }
 
 interface DiagConfig {
@@ -58,9 +60,15 @@ function ChatPageInner() {
   const sidParam = searchParams.get("sid");
   const [sessionId, setSessionId] = useState<number | null>(null);
   const [sessionType, setSessionType] = useState<string | null>(null);
-  // M5 抽卡：卡片栈 + 当前索引（上一张/下一张浏览，非对话流）
-  const [cards, setCards] = useState<Card[]>([]);
-  const [currentIdx, setCurrentIdx] = useState(0);
+  // A 刀：对话流状态（替换原 M5 卡片栈 cards/currentIdx/flipped）
+  const [msgs, setMsgs] = useState<Msg[]>([]);          // 可见的对话流
+  const [question, setQuestion] = useState<Question | null>(null); // 当前待作答的题
+  const [closed, setClosed] = useState(false);          // 当前题是否已终结（只由 state/换题决定，与 correct 无关）
+  const [unlocked, setUnlocked] = useState<{ answer: string | null; qid: string } | null>(null); // 终结后才放出的标准答案
+  const [gateOpen, setGateOpen] = useState(false);      // 答案闸门是否解锁
+  const [qIndex, setQIndex] = useState<{ no: number; total: number } | null>(null); // 第几题 / 共几题
+  const [draftMode, setDraftMode] = useState(true);     // 输入框处于草稿态（不提交、不判分）
+  const [isReview, setIsReview] = useState(false);      // 当前题是错题复习题
   const [state, setState] = useState("elicit");
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -68,8 +76,7 @@ function ChatPageInner() {
   const [selectedChoice, setSelectedChoice] = useState<string | null>(null);
   const [selectedMulti, setSelectedMulti] = useState<string[]>([]); // M4r24 多选
   const [answerText, setAnswerText] = useState("");
-  // M5 抽卡：翻转状态 + 灯泡弹窗
-  const [flipped, setFlipped] = useState(false);
+  // M5 抽卡：灯泡弹窗
   const [bulbOpen, setBulbOpen] = useState(false);
   const [bulbHint, setBulbHint] = useState<string | null>(null);
   const [bulbLoading, setBulbLoading] = useState(false);
@@ -106,10 +113,14 @@ function ChatPageInner() {
       return DEFAULT_DIAG;
     }
   });
-  // M5 抽卡：派生当前卡与辅助判定
-  const currentCard = cards[currentIdx] ?? null;
+  // A 刀：派生当前题是否已结束（对话流没有"翻面"，只有终结与否）
+  const finished = closed || !question;
   const isTutor = sessionType === "tutor";
-  const isLatest = currentIdx === cards.length - 1;
+  // A16：对话流自动滚到最新一条
+  const flowEndRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    flowEndRef.current?.scrollIntoView({ block: "end", behavior: "smooth" });
+  }, [msgs.length, loading]);
 
   // 加载会话历史列表
   const loadSessions = useCallback(async () => {
@@ -190,15 +201,17 @@ function ChatPageInner() {
       setActiveSessionId(r.session_id);
       setSessionType(type);
       setState(type === "tutor" ? "elicit" : "diagnose");
-      // M5 抽卡：首题入栈为第一张卡
-      setCards(
-        r.question
-          ? [{ qid: r.question.id, question: r.question, state: type === "tutor" ? "elicit" : "diagnose", answered: false }]
-          : [],
-      );
-      setCurrentIdx(0);
+      // A 刀：开场白 + 出题作为消息入流（不再是"第一张卡"）
+      const opening = r.first_message?.trim();
+      const flow: Msg[] = opening ? [{ role: "ai", text: opening }] : [];
+      setMsgs(flow);
+      setQuestion(r.question ?? null);
+      setClosed(!r.question);
+      setUnlocked(null);
+      setGateOpen(false);
+      setDraftMode(true);
+      setIsReview(false);
       setDiagProgress({ qcount: r.qcount, answered: r.answered });
-      setFlipped(false);
       setSelectedChoice(null);
       setSelectedMulti([]); // M4r24
       setAnswerText("");
@@ -210,43 +223,93 @@ function ChatPageInner() {
     }
   }
 
-  // M4r5b：恢复历史会话（M5 抽卡：调 /cards 重建完整卡片栈，可回看历史卡）
-  async function resumeSession(id: number) {
-    setErr(null);
+  // A 刀：把后端 `message`（判题行 + "\n" + 引导语）拆成判词与引导语两部分。
+// TODO(B 刀)：这是临时启发式 —— 后端把两段拼在同一个字段里（routes_sessions.py:403）。
+// B 刀给 MessageReply 加 `kind: verdict|coach` 后，这里应改为按 kind 分流并删掉本函数。
+const JUDGE_LINE_RE = /^[✓✗]/;
+
+/** 从一条 assistant 消息文本还原出判词与引导语 */
+function splitAssistant(text: string): { verdictText: string | null; coach: string } {
+  const lines = text.split("\n");
+  if (!JUDGE_LINE_RE.test(lines[0] ?? "")) return { verdictText: null, coach: text };
+  const verdictText = lines[0];
+  const coach = lines.slice(1).join("\n").trim();
+  return { verdictText, coach };
+}
+
+/** 从判题行还原判对错与标准答案（"✗ 答错了，正确答案是：X。"） */
+function parseVerdictLine(line: string): { correct: boolean; answer: string | null } {
+  if (line.startsWith("✓")) return { correct: true, answer: null };
+  const m = line.match(/正确答案是[：:]\s*(.+?)[。.]?\s*$/);
+  return { correct: false, answer: m ? m[1] : null };
+}
+
+interface HistoryTurn {
+  verdict?: { correct: boolean; answer?: string | null };
+  answered: boolean;
+  done: boolean;
+  unlocked: { answer: string | null; qid: string } | null;
+}
+
+/**
+ * A 刀：恢复历史会话 —— 调 GET /sessions/{sid}/messages 重建对话流。
+ * 这个接口此前从未被前端调用过（全仓 grep 0 处），接上它就有了"思路轨迹回看"。
+ */
+async function resumeSession(id: number) {
+  setErr(null);
     setLoading(true);
     try {
       const st = await api<{ session_id: number; type: string; state: string; question: Question | null; verify_question?: Question | null; qcount?: number; answered?: number; done: boolean }>(`/api/v1/sessions/${id}/state`);
-      const cardsR = await api<{ items: SessionCard[]; done: boolean }>(`/api/v1/sessions/${id}/cards`).catch(() => null);
+      // A6：用历史消息重建对话流（失败不阻塞，仍可用当前题单条渲染）
+      const hist = await api<MessageOut[]>(`/api/v1/sessions/${id}/messages`).catch(() => null);
       setSessionId(id);
       setActiveSessionId(id);
       setSessionType(st.type);
       setState(st.state);
-      // M5 抽卡：优先用 /cards 重建完整卡片栈（已答卡可翻面回看）；失败/为空时回退为当前题单卡
-      let cards0: Card[] = [];
-      if (cardsR && cardsR.items.length) {
-        cards0 = cardsR.items.map((c) => ({
-          qid: c.qid,
-          question:
-            c.question ??
-            ({ id: c.qid, type: "blank", content: "（内容未保存）", difficulty: 0.5 } as Question),
-          userAnswer: c.user_answer,
-          correct: c.correct,
-          state: c.state,
-          answered: c.answered,
-          done: cardsR.done,
-        }));
+
+      const flow: Msg[] = [];
+      let turn: HistoryTurn = { answered: false, done: false, unlocked: null };
+      if (hist && hist.length) {
+        for (const m of hist) {
+          if (m.role === "user") {
+            flow.push({ role: "me", text: m.content });
+            turn.answered = false;
+            turn.unlocked = null;
+            continue;
+          }
+          // assistant：判题行 + 引导语
+          const { verdictText, coach } = splitAssistant(m.content);
+          if (verdictText) {
+            const v = parseVerdictLine(verdictText);
+            turn.answered = true;
+            turn.verdict = { correct: v.correct, answer: v.answer };
+            // 历史轮次的答案按 7.8 裁决显示（那题已终结），只锁"当前未终结题"
+            turn.unlocked = { answer: v.answer ?? null, qid: "" };
+            // 判词挂回学生那条（与 send() 里的处理一致）
+            for (let i = flow.length - 1; i >= 0; i--) {
+              if (flow[i].role === "me") {
+                flow[i] = { ...flow[i], verdict: { correct: v.correct, answer: v.answer, feedback: null } };
+                break;
+              }
+            }
+          }
+          if (coach) flow.push({ role: "ai", text: coach, probe: !verdictText });
+        }
       }
-      if (!cards0.length) {
-        // M4r21c：辅导会话的当前题在 verify_question 字段（question 仅诊断用），两者都兼容
-        const curQ = st.type === "tutor" ? (st.verify_question ?? st.question) : st.question;
-        cards0 = curQ && !st.done ? [{ qid: curQ.id, question: curQ, state: st.state, answered: false }] : [];
-      }
-      setCards(cards0);
-      // 恢复到最新一张（正在作答的卡）
-      setCurrentIdx(cards0.length ? cards0.length - 1 : 0);
+
+      // M4r21c：辅导会话的当前题在 verify_question 字段（question 仅诊断用），两者都兼容
+      const curQ = st.type === "tutor" ? (st.verify_question ?? st.question) : st.question;
+      setMsgs(flow);
+      setQuestion(curQ ?? null);
+      // 当前题是否已终结：有历史消息时看最后一轮是否已判分；否则按 state==="done"
+      const lastAnswered = turn.answered;
+      const isDone = !!st.done || st.state === "done";
+      setClosed(!curQ || isDone || lastAnswered);
+      setGateOpen(isDone);
+      setUnlocked(turn.unlocked && lastAnswered && !isDone ? turn.unlocked : null);
       setDiagProgress({ qcount: st.qcount, answered: st.answered });
-      setFlipped(false);
       setBulbOpen(false);
+      setDraftMode(true);
       setSelectedChoice(null);
       setSelectedMulti([]); // M4r24
       setAnswerText("");
@@ -278,46 +341,70 @@ function ChatPageInner() {
       setTutorProgress((r.context?.progress as { practice: number; total: number; review_left: number } | null | undefined) ?? null);
       setDiagProgress({ qcount: r.qcount ?? diagProgress.qcount, answered: r.answered ?? diagProgress.answered });
 
-      // M5 抽卡：卡片栈更新（上一张/下一张浏览的数据源）
-      const cur = cards[currentIdx] ?? null;
-      const judged = r.correct !== null;
+      // ===== A7/A8：对话流更新（本刀的核心） =====
+      // 唯一判定规则：closed 只由 state 与"是否换题"决定，与 correct 无关。
+      // 旧规则 judged = (r.correct !== null) 把 correct=false 的三种含义
+      // （真答错 / 诊断不支持追问 / VERIFY 非答案输入）一律当成结束 → 关掉作答区 → 死锁。
+      const judged = r.correct !== null;                 // 只决定"要不要显示判词"
       const newQ = r.question;
-      const sameQ = !!newQ && !!cur && newQ.id === cur.qid;
+      const sameQ = !!newQ && !!question && newQ.id === question.id;
+      const pushed = !!newQ && !sameQ;                   // 换题 → 上一题终结
+      const isDone = r.state === "done" || r.done === true;
 
-      const updatedCur: Card | null = cur
-        ? {
-            ...cur,
-            answered: cur.answered || judged,
-            state: r.state,
-            correct: judged ? r.correct : cur.correct,
-            feedback: judged ? (r.feedback ?? undefined) : cur.feedback,
-            correctAnswer: judged ? (r.correct_answer ?? undefined) : cur.correctAnswer,
-            userAnswer: judged ? (cur.userAnswer ?? userText) : cur.userAnswer,
-            done: !!r.done || !!cur.done,
+      setMsgs((prev) => {
+        const next = [...prev];
+        // 学生这条
+        next.push({ role: "me", text: userText });
+        // 后端把"判题行 + 引导语"拼在同一个 message 里 —— 用 ^[✓✗] 前缀拆开。
+        // TODO(B 刀)：临时启发式，契约清理后应按 kind 分流。
+        const { verdictText, coach } = splitAssistant(r.message ?? "");
+        // 判词挂到学生那条上（"我的答案 → 对不对"）
+        if (judged) {
+          const v = parseVerdictLine(verdictText || (r.correct ? "✓" : "✗"));
+          for (let i = next.length - 1; i >= 0; i--) {
+            if (next[i].role === "me") {
+              next[i] = {
+                ...next[i],
+                verdict: {
+                  correct: !!r.correct,
+                  answer: r.correct ? null : (r.correct_answer ?? v.answer ?? null),
+                  feedback: r.feedback ?? null,
+                },
+              };
+              break;
+            }
           }
-        : null;
+        }
+        // 引导语独立成消息：需要认真对待的追问用主强调色 + 左竖线（05 §5.1）
+        if (coach) next.push({ role: "ai", text: coach, probe: !judged });
+        return next;
+      });
 
-      let next = [...cards];
-      if (cur && updatedCur) next[currentIdx] = updatedCur;
-      let pushed = false;
+      // 换题才更新当前题；否则保留原题（判分后仍可就同一题继续追问）
       if (newQ && !sameQ) {
-        next = [...next, { qid: newQ.id, question: newQ, state: r.state, answered: false, is_review: !!r.context?.is_review }];
-        pushed = true;
+        setQuestion(newQ);
+        setQIndex((prev) => (prev ? { no: prev.no + 1, total: prev.total + 1 } : { no: 1, total: 1 }));
+        setSelectedChoice(null);
+        setSelectedMulti([]);
+        setAnswerText("");
+        setDraftMode(true);
+        setIsReview(!!r.context?.is_review);
       }
-      setCards(next);
 
-      if (judged) {
-        // 作答完成：出现新题/会话完成 → 自动翻面看答案（停留当前卡，点"下一张"到新卡）；
-        // 辅导同题多轮（identify/hint 重定位）→ 不翻面，正面继续
-        setFlipped(!sameQ || !!r.done);
-      } else if (pushed) {
-        // 非判题推进（如"去验证"）返回新题 → 直接跳到新卡正面
-        setFlipped(false);
-        setCurrentIdx((i) => i + 1);
+      // ← 死锁在这里被消除：与 correct 的取值无关
+      setClosed(isDone || pushed || !newQ);
+      // A9：本题终结时才解锁答案（替代原"自动翻面看答案"）
+      // 裁决（7.8-2）：题已终结 → 显示标准答案；未终结 → 答案闸门锁着，DOM 里不出现答案。
+      // 注意：后端 `_question_to_dict` 刻意不下发 answer（防泄题），所以标准答案只能来自
+      // 判题响应的 correct_answer —— 答错时才有；答对时闸门显示"已答对"而非答案。
+      const termThis = isDone || pushed || !newQ;
+      if (termThis) {
+        setGateOpen(true);
+        setUnlocked({
+          answer: r.correct_answer ?? null,
+          qid: question?.id ?? newQ?.id ?? "",
+        });
       }
-      setSelectedChoice(null);
-      setSelectedMulti([]); // M4r24
-      setAnswerText("");
     } catch (e: any) {
       setErr(e.message || "发送失败");
     } finally {
@@ -325,8 +412,9 @@ function ChatPageInner() {
     }
   }
 
-  // M5 卡片流：结构化快捷动作（替代自由文本输入，减少歧义）
-  const goVerify = () => send("message", "好，我试试");
+  // 结构化快捷动作：hint 态"我看懂了，继续下一题 →"
+  // A10：原名 goVerify（"去验证"），实际发的是"好，我试试"，行为保留、名字改准确
+  const continueTurn = () => send("message", "好，我试试");
 
   // M5 抽卡：灯泡求助（弹窗显示 AI 简短讲解/提示，不推进状态机）
   const openBulb = async () => {
@@ -344,25 +432,51 @@ function ChatPageInner() {
     }
   };
 
-  // M5 抽卡：提交辅助（按当前卡题型校验并发送）
-  const q = currentCard?.question;
-  const canSubmit = !!q && (q.type === "choice" ? !!selectedChoice : q.type === "multi" ? selectedMulti.length > 0 : !!answerText.trim());
+  // 提交辅助（按当前题题型校验并发送）—— A11：依据 question，且未终结、非草稿态才可提交
+  const canSubmit =
+    !!question &&
+    !closed &&
+    !draftMode &&
+    (question.type === "choice"
+      ? !!selectedChoice
+      : question.type === "multi"
+        ? selectedMulti.length > 0
+        : !!answerText.trim());
   const submitAnswer = () => {
-    if (!currentCard || !canSubmit || loading) return;
-    const q0 = currentCard.question;
-    const ans = q0.type === "choice" ? selectedChoice! : q0.type === "multi" ? selectedMulti.join(",") : answerText;
+    if (!question || !canSubmit || loading) return;
+    const ans =
+      question.type === "choice"
+        ? selectedChoice!
+        : question.type === "multi"
+          ? selectedMulti.join(",")
+          : answerText;
     send(isTutor ? "message" : "answer", ans!);
   };
 
-  function exitSession() {
+  // A12：退出会话与删除当前会话共用同一套重置（A13）
+  function resetSession() {
     setSessionId(null);
     setActiveSessionId(null);
     setSessionType(null);
-    setCards([]);
-    setCurrentIdx(0);
+    setMsgs([]);
+    setQuestion(null);
+    setClosed(false);
+    setUnlocked(null);
+    setGateOpen(false);
+    setQIndex(null);
+    setDraftMode(true);
+    setIsReview(false);
     setDiagProgress({});
-    setFlipped(false);
     setBulbOpen(false);
+    setBulbHint(null);
+    setSelectedChoice(null);
+    setSelectedMulti([]);
+    setAnswerText("");
+    setErr(null);
+  }
+
+  function exitSession() {
+    resetSession();
     loadSessions();
   }
 
@@ -384,16 +498,9 @@ function ChatPageInner() {
     setPendingDelete(null);
     try {
       await api<{ removed: number }>("/api/v1/sessions", { method: "DELETE", body: { ids } });
-      // 若删除的是当前会话 → 退出
+      // 若删除的是当前会话 → 退出（A13：复用 resetSession，不再抄一遍）
       if (deletingCurrent) {
-        setSessionId(null);
-        setActiveSessionId(null);
-        setSessionType(null);
-        setCards([]);
-        setCurrentIdx(0);
-        setDiagProgress({});
-        setFlipped(false);
-        setBulbOpen(false);
+        resetSession();
       }
       setSelectedIds([]);
       setManageMode(false);
@@ -682,276 +789,325 @@ function ChatPageInner() {
         ) : (
           <>
             <div className="flex items-center justify-between border-b px-4 py-2" style={{ borderColor: "var(--border)" }}>
-              <div className="flex items-center gap-2 text-xs" style={{ color: "var(--muted)" }}>
+              <div className="flex items-center gap-3 text-xs" style={{ color: "var(--muted)" }}>
                 <span className="font-medium" style={{ color: "var(--text)" }}>{typeLabel(sessionType)}会话</span>
-                {diagProgress.qcount ? (
-                  <span>{diagProgress.answered ?? 0} / {diagProgress.qcount} 题</span>
-                ) : (
-                  <span className="flex items-center gap-1.5">
-                    {(["elicit", "identify", "hint", "verify", "done"] as const).map((s) => (
-                      <span key={s} className="flex items-center gap-1">
-                        <span className="inline-block h-2 w-2 rounded-full" style={{ background: state === s ? "var(--accent)" : "var(--border)" }} />
-                        <span style={{ color: state === s ? "var(--accent)" : "var(--muted)" }}>
-                          {{ elicit: "探明", identify: "识别", hint: "提示", verify: "变式", done: "完成" }[s]}
+                {/* 7.8-3：诊断会话不显示台阶刻度与答案闸门（诊断没有多轮引导语义） */}
+                {isTutor ? (
+                  <span className="flex items-center gap-2" aria-label="辅导进度">
+                    {(["elicit", "identify", "hint", "verify"] as const).map((s, i) => (
+                      <span key={s} className="flex items-center gap-2">
+                        <span className="flex items-center gap-1">
+                          {/* 横刻度：竖线是"追问"的专属符号（05 §5.1），刻度不用竖线 */}
+                          <span
+                            className="inline-block h-0.5 w-4 rounded-full"
+                            style={{ background: state === s ? "var(--accent)" : "var(--border)" }}
+                          />
+                          <span style={{ color: state === s ? "var(--accent)" : "var(--muted)" }}>
+                            {{ elicit: "探明", identify: "识别", hint: "提示", verify: "变式" }[s]}
+                          </span>
                         </span>
+                        {i < 3 && <span className="sr-only">→</span>}
                       </span>
                     ))}
                   </span>
+                ) : (
+                  diagProgress.qcount && (
+                    <span>
+                      {diagProgress.answered ?? 0} / {diagProgress.qcount} 题
+                    </span>
+                  )
                 )}
               </div>
               <div className="flex items-center gap-3">
+                {isTutor && tutorProgress && (
+                  <span className="text-xs" style={{ color: "var(--muted)" }}>
+                    新题 {tutorProgress.practice}/{tutorProgress.total}
+                    {tutorProgress.review_left > 0 ? ` · 错题复习 ${tutorProgress.review_left}` : ""}
+                  </span>
+                )}
                 <button className="text-xs" style={{ color: "var(--muted)" }} onClick={exitSession}>✕ 退出会话</button>
               </div>
             </div>
 
-            {/* M5 抽卡：卡片浏览（错题复盘式，非对话流） */}
-            <div className="flex-1 overflow-auto p-4">
-              {/* 顶部：辅导进度（新题 N/总 · 剩余错题） + 卡片计数 */}
-              <div className="mb-4 flex items-center justify-between">
-                <div className="text-xs" style={{ color: "var(--muted)" }}>
-                  {isTutor && tutorProgress && (
-                    <>
-                      新题 {tutorProgress.practice}/{tutorProgress.total}
-                      {tutorProgress.review_left > 0 ? ` · 错题复习 ${tutorProgress.review_left}` : ""}
-                    </>
+            {/* A 刀：左对话流 + 右题卡（题卡常驻参照，不进对话流、不吸顶） */}
+            <div className="flex min-h-0 flex-1">
+              {/* 左：对话流 */}
+              <div className="flex min-w-0 flex-1 flex-col">
+                {err && <p className="px-4 pt-3 text-xs text-red-500">{err}</p>}
+                <div className="flex-1 overflow-auto px-4 py-4">
+                  {msgs.length === 0 ? (
+                    <p className="py-10 text-center text-sm" style={{ color: "var(--muted)" }}>
+                      {finished ? "本轮结束 🎉" : "对话即将开始…"}
+                    </p>
+                  ) : (
+                    <div className="mx-auto w-full max-w-xl space-y-3">
+                      {msgs.map((m, i) =>
+                        m.role === "me" ? (
+                          <div key={i} className="flex flex-col items-end gap-1">
+                            <div
+                              className="max-w-[85%] rounded-2xl rounded-br-md px-3 py-2 text-sm leading-relaxed"
+                              style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--text)" }}
+                            >
+                              <MathText text={m.text} />
+                            </div>
+                            {/* 判词：克制，只给状态，不作装饰（05 §4） */}
+                            {m.verdict && (
+                              <div
+                                className="max-w-[85%] text-xs"
+                                style={{ color: m.verdict.correct ? "var(--success)" : "#b3543c" }}
+                              >
+                                {m.verdict.correct ? "✓ 答对了" : "✗ 答错了"}
+                                {m.verdict.feedback ? ` · ${m.verdict.feedback}` : ""}
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <div key={i} className="flex gap-2">
+                            {/* 追问竖线：05 §5.1 规定竖线是"追问"的专属符号 */}
+                            {m.probe && (
+                              <span
+                                className="w-0.5 shrink-0 self-stretch rounded-full"
+                                style={{ background: "var(--accent)" }}
+                                aria-hidden
+                              />
+                            )}
+                            <div
+                              className="max-w-[85%] text-sm leading-relaxed"
+                              style={{ color: m.probe ? "var(--accent)" : "var(--text)", whiteSpace: "pre-wrap" }}
+                            >
+                              {m.text}
+                            </div>
+                          </div>
+                        ),
+                      )}
+                      {loading && (
+                        <div className="text-xs" style={{ color: "var(--muted)" }}>
+                          思考中…
+                        </div>
+                      )}
+                      <div ref={flowEndRef} />
+                    </div>
                   )}
                 </div>
-                <div className="text-xs" style={{ color: "var(--muted)" }}>
-                  {cards.length > 0 ? `${currentIdx + 1} / ${cards.length} 张` : "0 张"}
+
+                {/* 底部作答区（常驻）—— A11：依据 question，!draftMode && !closed 才可提交 */}
+                <div className="shrink-0 border-t px-4 py-3" style={{ borderColor: "var(--border)" }}>
+                  <div className="mx-auto w-full max-w-xl">
+                    {finished ? (
+                      <p className="py-2 text-center text-sm" style={{ color: "var(--muted)" }}>
+                        {sessionType === "diagnostic" ? "诊断完成 🎉 可去报告页查看结果" : "本轮辅导完成 🎉"}
+                      </p>
+                    ) : (
+                      <>
+                        {/* hint 态的快捷推进（A10） */}
+                        {isTutor && state === "hint" && (
+                          <div className="mb-2 flex items-center justify-between gap-2">
+                            <span className="text-xs" style={{ color: "var(--muted)" }}>
+                              提示已放 💡 里，看看思路后继续。
+                            </span>
+                            <button
+                              className="shrink-0 rounded px-3 py-1 text-sm text-white disabled:opacity-50"
+                              style={{ background: "var(--accent)" }}
+                              onClick={continueTurn}
+                              disabled={loading}
+                            >
+                              继续下一题 →
+                            </button>
+                          </div>
+                        )}
+
+                        {/* 答案闸门（未解锁时锁着，答案不出现在 DOM —— V5） */}
+                        <div
+                          className="mb-2 rounded-lg border px-3 py-2 text-xs"
+                          style={{ borderColor: gateOpen ? "var(--border)" : "var(--border)", background: "transparent" }}
+                        >
+                          {gateOpen && unlocked ? (
+                            unlocked.answer ? (
+                              <span style={{ color: "var(--muted)" }}>
+                                答案闸门已解锁 · 标准答案：
+                                <span style={{ color: "var(--text)" }}>
+                                  <MathText text={unlocked.answer} />
+                                </span>
+                              </span>
+                            ) : (
+                              <span style={{ color: "var(--success)" }}>✓ 本题已答对 · 闸门已关闭（无需看答案）</span>
+                            )
+                          ) : (
+                            <span style={{ color: "var(--muted)" }}>🔒 答案闸门锁着 —— 先自己把话说出来</span>
+                          )}
+                        </div>
+
+                        {/* 作答组件随题型（05 §5.1） */}
+                        {!draftMode && question && (
+                          <div className="mb-2">
+                            {question.type === "blank" && (
+                              <input
+                                className="w-full rounded border px-3 py-2 text-sm outline-none"
+                                style={{ background: "var(--bg)", borderColor: "var(--border)", color: "var(--text)" }}
+                                placeholder="输入你的答案…"
+                                value={answerText}
+                                onChange={(e) => setAnswerText(e.target.value)}
+                                onKeyDown={(e) => e.key === "Enter" && canSubmit && submitAnswer()}
+                                disabled={loading}
+                              />
+                            )}
+                            {question.type === "open" && (
+                              <textarea
+                                className="w-full rounded border px-3 py-2 text-sm outline-none"
+                                style={{ background: "var(--bg)", borderColor: "var(--border)", color: "var(--text)", minHeight: 72 }}
+                                placeholder="写出你的思路和答案…"
+                                value={answerText}
+                                onChange={(e) => setAnswerText(e.target.value)}
+                                disabled={loading}
+                              />
+                            )}
+                            {(question.type === "choice" || question.type === "multi") && question.options && (
+                              <div className="space-y-1.5">
+                                {question.type === "multi" && (
+                                  <p className="text-xs" style={{ color: "var(--muted)" }}>
+                                    （可多选，全部选对才算对）
+                                  </p>
+                                )}
+                                {question.options.map((o, i) => {
+                                  const letter = String.fromCharCode(65 + i);
+                                  const clean = typeof o === "string" ? o.replace(/^[A-Z][\.．、]\s*/, "") : o;
+                                  const active =
+                                    question.type === "multi"
+                                      ? selectedMulti.includes(letter)
+                                      : selectedChoice === letter;
+                                  return (
+                                    <button
+                                      key={i}
+                                      className="flex w-full items-center gap-2 rounded-lg border px-3 py-2 text-left text-sm transition-colors"
+                                      style={{
+                                        borderColor: active ? "var(--accent)" : "var(--border)",
+                                        background: active ? "var(--accent-soft)" : "transparent",
+                                        color: "var(--text)",
+                                      }}
+                                      onClick={() =>
+                                        question.type === "multi"
+                                          ? setSelectedMulti((prev) =>
+                                              prev.includes(letter) ? prev.filter((x) => x !== letter) : [...prev, letter],
+                                            )
+                                          : setSelectedChoice(letter)
+                                      }
+                                      disabled={loading}
+                                    >
+                                      <span
+                                        className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-medium"
+                                        style={{ background: active ? "var(--accent)" : "var(--bg)", color: active ? "#fff" : "var(--muted)" }}
+                                      >
+                                        {letter}
+                                      </span>
+                                      <MathText text={clean} />
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* 草稿/作答双模式（原型 B 方案）—— V7 */}
+                        <div className="flex items-center justify-between gap-2">
+                          <button
+                            className="rounded border px-3 py-1.5 text-xs disabled:opacity-40"
+                            style={{ borderColor: "var(--border)", color: "var(--muted)" }}
+                            onClick={() => setDraftMode((v) => !v)}
+                            disabled={loading}
+                          >
+                            {draftMode ? "想清楚了，转成作答 ✎" : "先打草稿 ↩"}
+                          </button>
+                          <div className="flex items-center gap-2">
+                            {isTutor && !draftMode && (
+                              <button
+                                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-sm transition-transform hover:scale-110 disabled:opacity-50"
+                                style={{ borderColor: "var(--amber)", background: "var(--amber-soft)" }}
+                                onClick={openBulb}
+                                title="给我最接近的那一步"
+                                disabled={bulbLoading || closed}
+                              >
+                                💡
+                              </button>
+                            )}
+                            <button
+                              className="rounded px-4 py-1.5 text-sm text-white disabled:opacity-50"
+                              style={{ background: "var(--accent)" }}
+                              onClick={submitAnswer}
+                              disabled={loading || !canSubmit}
+                            >
+                              提交答案
+                            </button>
+                          </div>
+                        </div>
+                        {draftMode && (
+                          <p className="mt-1.5 text-xs" style={{ color: "var(--muted)" }}>
+                            草稿态：先把你的想法说一遍，不会被判分 —— 说给自己听。
+                          </p>
+                        )}
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
-              {err && <p className="mb-2 text-xs text-red-500">{err}</p>}
 
-              {!currentCard ? (
-                <div className="mx-auto max-w-xl rounded-xl border border-dashed p-8 text-center" style={{ borderColor: "var(--border)" }}>
-                  <p className="text-sm" style={{ color: "var(--muted)" }}>
-                    {sessionType === "diagnostic" ? "诊断完成 🎉 可去报告页查看结果" : "本轮辅导完成 🎉"}
-                  </p>
-                </div>
-              ) : (
-                <>
-                  {/* 翻转卡（点击翻面看答案） */}
-                  <div
-                    className="mx-auto max-w-xl [perspective:1200px]"
-                    onClick={() => {
-                      if (currentCard.answered) setFlipped((f) => !f);
-                    }}
-                  >
-                    <div
-                      className="relative h-[460px] w-full transition-transform duration-500 [transform-style:preserve-3d]"
-                      style={{ transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)", cursor: currentCard.answered ? "pointer" : "default" }}
-                    >
-                      {/* 正面：题目 + 作答 */}
-                      <div
-                        className="absolute inset-0 flex flex-col rounded-2xl border p-5 [backface-visibility:hidden]"
-                        style={{ background: "var(--surface)", borderColor: "var(--border)" }}
-                      >
-                        <div className="mb-2 flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <span className="rounded px-2 py-0.5 text-xs" style={{ background: "var(--accent-soft)", color: "var(--accent)" }}>
-                              {QTYPE_LABELS[currentCard.question.type] || "题目"}
-                            </span>
-                            {isTutor && currentCard.state === "verify" && (
-                              <span className="rounded px-2 py-0.5 text-xs" style={{ background: "var(--accent-soft)", color: "var(--accent)" }}>
-                                变式验证
-                              </span>
-                            )}
-                            {isTutor && currentCard.state === "identify" && (
-                              <span className="rounded px-2 py-0.5 text-xs" style={{ background: "var(--amber-soft)", color: "var(--text)" }}>
-                                定位重试
-                              </span>
-                            )}
-                            {/* M5：错题复习题标记 */}
-                            {currentCard.is_review && (
-                              <span className="rounded px-2 py-0.5 text-xs" style={{ background: "var(--amber-soft)", color: "#b3543c" }}>
-                                复习
-                              </span>
-                            )}
+              {/* 右：当前题卡（常驻参照） */}
+              {question && (
+                <aside
+                  className="hidden w-80 shrink-0 overflow-auto border-l p-4 lg:block"
+                  style={{ borderColor: "var(--border)" }}
+                >
+                  <div className="mb-2 flex items-center gap-2">
+                    {qIndex && (
+                      <span className="rounded px-2 py-0.5 text-xs" style={{ background: "var(--accent-soft)", color: "var(--accent)" }}>
+                        第 {qIndex.no} / {qIndex.total} 题
+                      </span>
+                    )}
+                    <span className="rounded px-2 py-0.5 text-xs" style={{ background: "var(--accent-soft)", color: "var(--accent)" }}>
+                      {QTYPE_LABELS[question.type] || "题目"}
+                    </span>
+                    {isTutor && state === "verify" && (
+                      <span className="rounded px-2 py-0.5 text-xs" style={{ background: "var(--accent-soft)", color: "var(--accent)" }}>
+                        变式验证
+                      </span>
+                    )}
+                    {isTutor && state === "identify" && (
+                      <span className="rounded px-2 py-0.5 text-xs" style={{ background: "var(--amber-soft)", color: "var(--text)" }}>
+                        定位重试
+                      </span>
+                    )}
+                    {isReview && (
+                      <span className="rounded px-2 py-0.5 text-xs" style={{ background: "var(--amber-soft)", color: "#b3543c" }}>
+                        复习
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="text-[15px] leading-relaxed" style={{ color: "var(--text)" }}>
+                    <MathText text={question.content} />
+                  </div>
+
+                  {(question.type === "choice" || question.type === "multi") && question.options && (
+                    <div className="mt-3 space-y-1">
+                      {question.options.map((o, i) => {
+                        const clean = typeof o === "string" ? o.replace(/^[A-Z][\.．、]\s*/, "") : o;
+                        return (
+                          <div key={i} className="text-sm" style={{ color: "var(--muted)" }}>
+                            {String.fromCharCode(65 + i)}. <MathText text={clean} />
                           </div>
-                          {/* 灯泡（仅辅导最新卡） */}
-                          {isTutor && isLatest && (
-                            <button
-                              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-sm transition-transform hover:scale-110 disabled:opacity-50"
-                              style={{ borderColor: "var(--amber)", background: "var(--amber-soft)" }}
-                              onClick={(e) => { e.stopPropagation(); openBulb(); }}
-                              title="求助提示"
-                              disabled={bulbLoading}
-                            >
-                              💡
-                            </button>
-                          )}
-                        </div>
+                        );
+                      })}
+                    </div>
+                  )}
 
-                        {/* 内容滚动区（固定高度下超长题目/选项卡内滚动，不撑破卡片） */}
-                        <div className="flex-1 overflow-y-auto pr-1">
-                          <div className="text-[15px] leading-relaxed">
-                            <MathText text={currentCard.question.content} />
-                          </div>
-                          {/* 只读选项：仅历史卡/已答卡展示（作答中的卡由交互区按钮组呈现，避免选项重复） */}
-                          {!(isLatest && !currentCard.answered) && (currentCard.question.type === "choice" || currentCard.question.type === "multi") && currentCard.question.options && (
-                            <div className="mt-3 space-y-1">
-                              {currentCard.question.options.map((o, i) => {
-                                const clean = typeof o === "string" ? o.replace(/^[A-Z][\.．、]\s*/, "") : o;
-                                return (
-                                  <div key={i} className="text-sm">
-                                    {String.fromCharCode(65 + i)}. <MathText text={clean} />
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          )}
-
-                        {/* 作答交互区：最新未提交卡；hint 态给"去验证" */}
-                        {isLatest && !currentCard.answered ? (
-                          currentCard.state === "hint" ? (
-                            <div className="mt-3 space-y-3">
-                              <p className="text-xs" style={{ color: "var(--muted)" }}>提示已放 💡 里，看看思路后继续。</p>
-                              <button
-                                className="rounded px-4 py-1.5 text-sm text-white disabled:opacity-50"
-                                style={{ background: "var(--accent)" }}
-                                onClick={(e) => { e.stopPropagation(); goVerify(); }}
-                                disabled={loading}
-                              >
-                                继续下一题 →
-                              </button>
-                            </div>
-                          ) : (
-                            <div className="mt-3" onClick={(e) => e.stopPropagation()}>
-                              {currentCard.question.type === "blank" && (
-                                <input
-                                  className="w-full rounded border px-3 py-2 text-sm outline-none"
-                                  style={{ background: "var(--bg)", borderColor: "var(--border)", color: "var(--text)" }}
-                                  placeholder="输入你的答案…"
-                                  value={answerText}
-                                  onChange={(e) => setAnswerText(e.target.value)}
-                                  onKeyDown={(e) => e.key === "Enter" && answerText.trim() && submitAnswer()}
-                                  disabled={loading}
-                                />
-                              )}
-                              {currentCard.question.type === "open" && (
-                                <textarea
-                                  className="w-full rounded border px-3 py-2 text-sm outline-none"
-                                  style={{ background: "var(--bg)", borderColor: "var(--border)", color: "var(--text)", minHeight: 72 }}
-                                  placeholder="写出你的思路和答案…"
-                                  value={answerText}
-                                  onChange={(e) => setAnswerText(e.target.value)}
-                                  disabled={loading}
-                                />
-                              )}
-                              {(currentCard.question.type === "choice" || currentCard.question.type === "multi") && currentCard.question.options && (
-                                <div className="space-y-1.5">
-                                  {/* M4r24：多选题标注（可多选，全部选对才算对） */}
-                                  {currentCard.question.type === "multi" && (
-                                    <p className="text-xs" style={{ color: "var(--muted)" }}>
-                                      （可多选，全部选对才算对）
-                                    </p>
-                                  )}
-                                  {currentCard.question.options.map((o, i) => {
-                                    const letter = String.fromCharCode(65 + i);
-                                    const clean = typeof o === "string" ? o.replace(/^[A-Z][\.．、]\s*/, "") : o;
-                                    const active = currentCard.question.type === "multi" ? selectedMulti.includes(letter) : selectedChoice === letter;
-                                    return (
-                                      <button
-                                        key={i}
-                                        className="flex w-full items-center gap-2 rounded-lg border px-3 py-2 text-left text-sm transition-colors"
-                                        style={{
-                                          borderColor: active ? "var(--accent)" : "var(--border)",
-                                          background: active ? "var(--accent-soft)" : "transparent",
-                                          color: "var(--text)",
-                                        }}
-                                        onClick={() =>
-                                          currentCard.question.type === "multi"
-                                            ? setSelectedMulti((prev) => prev.includes(letter) ? prev.filter((x) => x !== letter) : [...prev, letter])
-                                            : setSelectedChoice(letter)
-                                        }
-                                        disabled={loading}
-                                      >
-                                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-medium" style={{ background: active ? "var(--accent)" : "var(--bg)", color: active ? "#fff" : "var(--muted)" }}>
-                                          {letter}
-                                        </span>
-                                        <MathText text={clean} />
-                                      </button>
-                                    );
-                                  })}
-                                </div>
-                              )}
-                              <div className="mt-3 flex justify-end">
-                                <button
-                                  className="rounded px-4 py-1.5 text-sm text-white disabled:opacity-50"
-                                  style={{ background: "var(--accent)" }}
-                                  onClick={() => submitAnswer()}
-                                  disabled={loading || !canSubmit}
-                                >
-                                  提交答案
-                                </button>
-                              </div>
-                            </div>
-                          )
-                        ) : (
-                          <div className="mt-3 text-center text-xs" style={{ color: "var(--muted)" }}>
-                            {currentCard.answered ? "点击卡片翻面看答案" : ""}
-                          </div>
-                        )}
-                        </div>
-                      </div>
-
-                      {/* 背面：我的答案 vs 正确答案 */}
-                      <div
-                        className="absolute inset-0 flex flex-col rounded-2xl border p-5 [backface-visibility:hidden] [transform:rotateY(180deg)]"
-                        style={{ background: "var(--surface)", borderColor: currentCard.correct ? "var(--success)" : "var(--border)" }}
-                      >
-                        {currentCard.answered ? (
-                          <>
-                            <div className="mb-3 flex items-center justify-between">
-                              <span className="text-sm font-medium" style={{ color: currentCard.correct ? "var(--success)" : "#b3543c" }}>
-                                {currentCard.correct ? "✓ 答对了" : "✗ 答错了"}
-                              </span>
-                              <span className="text-xs" style={{ color: "var(--muted)" }}>点击翻回题目</span>
-                            </div>
-                            <div className="flex-1 space-y-3 overflow-y-auto pr-1 text-sm">
-                              <div>
-                                <div className="mb-1 text-xs" style={{ color: "var(--warn)" }}>我的答案</div>
-                                <MathText text={currentCard.userAnswer || "（未作答）"} />
-                              </div>
-                              <div>
-                                <div className="mb-1 text-xs" style={{ color: "var(--success)" }}>正确答案</div>
-                                <MathText text={currentCard.correctAnswer || "—"} />
-                              </div>
-                              {currentCard.feedback && (
-                                <div className="text-xs" style={{ color: "var(--muted)" }}>{currentCard.feedback}</div>
-                              )}
-                            </div>
-                          </>
-                        ) : (
-                          <p className="m-auto text-sm" style={{ color: "var(--muted)" }}>先作答，提交后翻面看答案</p>
-                        )}
-                      </div>
+                  {/* 当前知识节点 + 掌握度（05 §4：强调色只用在当前节点） */}
+                  <div className="mt-4 border-t pt-3 text-xs" style={{ borderColor: "var(--border)" }}>
+                    <div style={{ color: "var(--muted)" }}>当前状态</div>
+                    <div className="mt-0.5" style={{ color: "var(--accent)" }}>
+                      {{ elicit: "探明 · 先说说你的思路", identify: "识别 · 定位卡点", hint: "提示 · 由浅入深", verify: "变式 · 换个数字再试", diagnose: "诊断中" }[state] ?? state}
                     </div>
                   </div>
-
-                  {/* 操作栏：上一张 / 下一张 */}
-                  <div className="mx-auto mt-5 flex max-w-xl items-center justify-center gap-3">
-                    <button
-                      className="rounded-lg border px-5 py-2 text-sm disabled:opacity-40"
-                      style={{ borderColor: "var(--border)" }}
-                      onClick={() => { setFlipped(false); setCurrentIdx((i) => Math.max(0, i - 1)); }}
-                      disabled={currentIdx === 0 || loading}
-                    >
-                      ← 上一张
-                    </button>
-                    <button
-                      className="rounded-lg px-5 py-2 text-sm text-white disabled:opacity-40"
-                      style={{ background: "var(--accent)" }}
-                      onClick={() => { setFlipped(false); setCurrentIdx((i) => Math.min(cards.length - 1, i + 1)); }}
-                      disabled={currentIdx >= cards.length - 1 || loading}
-                    >
-                      下一张 →
-                    </button>
-                  </div>
-                  <p className="mt-3 text-center text-xs" style={{ color: "var(--muted)" }}>
-                    {isTutor ? "答错的题会引导巩固 · 点 💡 可求助" : "作答后自动翻面 · 可随时回看上一张"}
-                  </p>
-                </>
+                </aside>
               )}
             </div>
           </>
