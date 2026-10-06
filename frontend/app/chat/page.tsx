@@ -237,6 +237,13 @@ function ChatPageInner() {
 // B 刀给 MessageReply 加 `kind: verdict|coach` 后，这里应改为按 kind 分流并删掉本函数。
 const JUDGE_LINE_RE = /^[✓✗]/;
 
+/** 从 Set 里移除一个 key，返回新 Set（React 状态需要新引用才能触发重渲染） */
+function removeFrom(set: Set<string>, key: string): Set<string> {
+  const next = new Set(set);
+  next.delete(key);
+  return next;
+}
+
 /** 从一条 assistant 消息文本还原出判词与引导语 */
 function splitAssistant(text: string): { verdictText: string | null; coach: string } {
   const lines = text.split("\n");
@@ -317,10 +324,17 @@ async function resumeSession(id: number) {
       const isDone = !!st.done || st.state === "done";
       // 当前题是否已终结，按题号判定。服务端 done 只说明「本轮结束」，
       // 若据此把当前题也锁上，恢复会话时会出现「题还在但答不了」。
+      // 注意 sessionOver 只能由「本轮彻底结束」置位：若在 done=true 时把它也置上，
+      // 而服务端仍带着一道待答题（curQ 非空），closed = closedQids.has(id) || sessionOver
+      // 会让这道题一起被锁死 —— 学生看到题却点不动提交（用户反馈：变式题答对后无法作答）。
+      const over = isDone && !curQ;
       setClosedQids(isDone && curQ ? new Set([curQ.id]) : new Set());
-      setSessionOver(isDone);
-      // 历史判题行仍可用于展示"已答过"，但不代表当前题终结
-      setUnlocked(turn.unlocked && !isDone && !curQ ? turn.unlocked : null);
+      setSessionOver(over);
+      // 历史判题行仍可用于展示"已答过"，但不代表当前题终结。
+      // 闸门只在「本轮彻底结束、没有待答题」时才放答案 ——
+      // 有待答题却显示"✓ 本题已答对"，学生会以为新题已经答过了。
+      setUnlocked(over ? turn.unlocked : null);
+      setGateOpen(over && !!turn.unlocked);
       setDiagProgress({ qcount: st.qcount, answered: st.answered });
       setBulbOpen(false);
       setDraftMode(false);
@@ -360,6 +374,9 @@ async function resumeSession(id: number) {
       // （correct=false 同时表示"真答错 / 非答案输入 / 诊断不支持追问"三种情况）。
       const judged = r.judged === true;
       const newQ = r.question;
+      // sameQ：服务端又下发了同一道题（变式题用尽题库后可能回到原题）。
+      // 此时题面/选项/答案完全一致，作答区应保持原样，但仍要清掉选择态与
+      // "已答对"标记 —— 学生看到的是一道新题，不该被上一轮的记录影响。
       const sameQ = !!newQ && !!question && newQ.id === question.id;
       const pushed = !!newQ && !sameQ;                   // 换题 → 上一题终结
       const isDone = r.state === "done" || r.done === true;
@@ -393,27 +410,55 @@ async function resumeSession(id: number) {
         return next;
       });
 
-      // 换题才更新当前题；否则保留原题（判分后仍可就同一题继续追问）
-      if (newQ && !sameQ) {
-        setQuestion(newQ);
-        setQIndex((prev) => (prev ? { no: prev.no + 1, total: prev.total + 1 } : { no: 1, total: 1 }));
+      // 服务端下发了新题（可能是换题，也可能是同一道题被重新下发）。
+      // 两种情况都要清掉上一轮的选择态 —— 学生眼前是一道待答题，
+      // 若还留着上次的勾选，会以为已经作答过了。
+      // 闸门/答案的清理统一放在下面的终结判定里（判据是"是否下发了新题"）。
+      if (newQ) {
+        if (!sameQ) {
+          setQuestion(newQ);
+          // 只有 no 递增，total 由题量配置决定（此前 no/total 同步 +1，
+          // 于是永远显示"第 2/2 题""第 3/3 题"——total 根本不是总题数）。
+          // 服务端在 context.progress 里下发真实题量；拿不到就不显示 total。
+          const total = (r.context?.progress as { total?: number } | null | undefined)?.total;
+          setQIndex((prev) => ({
+            no: (prev?.no ?? 0) + 1,
+            total: typeof total === "number" && total > 0 ? total : (prev?.total ?? 0),
+          }));
+        }
         setSelectedChoice(null);
         setSelectedMulti([]);
         setAnswerText("");
         setDraftMode(false);
         setIsReview(!!r.context?.is_review);
+        // 兜底：凡是服务端下发了待答题，它就一定是可作答的。
+        // 同一道题被重新下发时（变式题用尽题库会回到原题），它可能还留在
+        // closedQids 里 —— 那会让 closed 恒 true，提交按钮永远灰着（用户报障形态）。
+        if (newQ.id) setClosedQids((prev) => (prev.has(newQ.id) ? removeFrom(prev, newQ.id) : prev));
       }
 
       // 终结判定（7.4）：只终结"上一题"，绝不连新题一起锁。
       // 旧规则 setClosed(isDone || pushed || !newQ) 用单个全局开关，
       // 换题时 pushed=true 会把刚下发的新题也标成已终结 → 作答区消失，
       // 用户表现为「答对一道题后新题无法作答，只能刷新或重进」。
+      //
+      // 注意 sameQ 的情况：服务端可能把同一道题再次下发（变式题用完题库兜底
+      // 会回到原题，见 _pick_verify）。此时 prev 里的 question.id 就是新题 id，
+      // 把它记进 closedQids 等于"下发即锁死"，closed 恒 true → 提交按钮永远灰着。
+      // 所以换题时必须把新题 id 从集合里剔除，保证它一定可作答。
       if (isDone) {
         setSessionOver(true);
         if (question?.id) setClosedQids((prev) => new Set(prev).add(question.id));
       } else if (pushed && question?.id) {
-        // 只把旧题记为已终结，新题保持可作答
-        setClosedQids((prev) => new Set(prev).add(question.id));
+        const prevQid = question.id;
+        const nextQid = newQ?.id;
+        setClosedQids((prev) => {
+          const n = new Set(prev);
+          n.add(prevQid);
+          // 同一道题被重新下发 → 从已终结集合里移除，否则新题一出现就是只读
+          if (nextQid) n.delete(nextQid);
+          return n;
+        });
         setSessionOver(false);
       } else if (!newQ) {
         setSessionOver(true);
@@ -422,12 +467,22 @@ async function resumeSession(id: number) {
       // 裁决（7.8-2）：题已终结 → 显示标准答案；未终结 → 答案闸门锁着，DOM 里不出现答案。
       // 注意：后端 `_question_to_dict` 刻意不下发 answer（防泄题），所以标准答案只能来自
       // 判题响应的 correct_answer —— 答错时才有；答对时闸门显示"已答对"而非答案。
-      if (isDone || pushed || !newQ) {
+      //
+      // 解锁的必须是「刚刚作答的那道题」（qid = question.id），不是刚下发的新题：
+      // 判词属于旧题。若把 unlocked 挂到新题上，学生看到新题却写着"已答对"，
+      // 会以为新题已经答过了（用户截图里就是这个形态）。
+      // pushed 且换了新题 → 闸门回到锁定状态，等学生答新题。
+      // A9：答案闸门。判据只有一条 —— **服务端是否下发了待答题**。
+      // 下发了新题（换题或同题重发）→ 闸门锁上，unlocked 清空：学生眼前是新题，
+      //   留着上一轮的"✓ 本题已答对"或旧题标准答案，只会让人以为这题已经答过
+      //   （用户截图：题卡是新题，作答区却写着"已答对·已巩固"，按钮点不动）。
+      // 没下发新题（isDone 或 newQ 为空）→ 本轮结束，闸门解锁展示结果。
+      if (isDone || !newQ) {
         setGateOpen(true);
-        setUnlocked({
-          answer: r.correct_answer ?? null,
-          qid: question?.id ?? newQ?.id ?? "",
-        });
+        setUnlocked({ answer: r.correct_answer ?? null, qid: question?.id ?? newQ?.id ?? "" });
+      } else {
+        setGateOpen(false);
+        setUnlocked(null);
       }
     } catch (e: any) {
       setErr(e.message || "发送失败");
@@ -1068,6 +1123,23 @@ async function resumeSession(id: number) {
                         {draftMode && (
                           <p className="mt-1.5 text-xs" style={{ color: "var(--muted)" }}>
                             草稿态：先把你的想法说一遍，不会被判分 —— 说给自己听。
+                          </p>
+                        )}
+                        {/* 提交按钮在"未选答案/未填内容"时是灰的。用户会误以为卡死
+                            （用户反馈："题目无法提交答案"其实是没选选项）。
+                            明确说出还差什么，比让按钮默默灰着好。 */}
+                        {!draftMode && question && !closed && !canSubmit && !loading && (
+                          <p className="mt-1.5 text-xs" style={{ color: "var(--muted)" }}>
+                            {question.type === "multi"
+                              ? "勾选所有你认为正确的选项后即可提交（多选要不多不少才算全对）"
+                              : question.type === "choice"
+                                ? "先选一个选项，然后点「提交答案」"
+                                : "写下你的答案后点「提交答案」"}
+                          </p>
+                        )}
+                        {closed && !sessionOver && (
+                          <p className="mt-1.5 text-xs" style={{ color: "var(--muted)" }}>
+                            本题已结束，正在看下一题…
                           </p>
                         )}
                       </>

@@ -201,7 +201,11 @@ async def api_send_message(
     )
 
     if body.kind == "answer":
-        q = t.current_question
+        # 判题对象按会话类型取：诊断走 current_question，辅导走 verify_question。
+        # 此前一律取 current_question —— 但辅导会话的题只挂在 verify_question 上
+        # （current_question 仅在诊断路径赋值），于是辅导提交任何答案都 400
+        # 「缺少作答内容」。与下方 state 接口的 M4r21c 判定保持同一套口径。
+        q = t.current_question if s.type == "diagnostic" else t.verify_question
         if q is None or not body.answer:
             raise HTTPException(status_code=400, detail="缺少作答内容")
         # M4r1：AI 判题（choice 比对 / open LLM+规则兜底），用户不再自判
