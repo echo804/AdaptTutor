@@ -312,15 +312,28 @@ class TutorOrchestrator:
         # M4r23：seed 改为随机（此前 hash(node) 固定 → 同一知识点永远同一变式，单调）
         # M5：生成后校验内容/答案与原题是否完全相同（如题干无数字可偏移的文本题）→
         #     完全相同视为"无真变式"返回 None，由错题复习机制替代（避免"变式=原题"）
+        # P1-7：generate_variant 现在会做答案自洽校验并可能返回 ok=False
+        # （解不出真值 / 平移后无解 / 选项形态无法复刻）。拿不到有解变式就返回 None，
+        # 由 _finish_question 正常推进下一题 —— 绝不能下发一道无解题。
         if cur is not None:
             try:
                 from app.engine.variant_generator import generate_variant
 
                 res = generate_variant(cur, seed=random.randint(1, 10**6))
-                if res.question is not None and not self._is_same_question(res.question, cur):
-                    return res.question
+                if not res.ok:
+                    logger.info(
+                        "变式题生成被拒：qid=%s type=%s 原因=%s —— 本节点改走换题/复习",
+                        cur.id, cur.type, res.error,
+                    )
+                    return None
+                vq = res.question
+                # 生成变式同样要计入避重：否则 delta 撞车时会连续下发同一道变式
+                if self._is_same_question(vq, cur) or self._is_same_question(vq, self.verify_question):
+                    return None
+                self._verify_used.add(vq.id)
+                return vq
             except Exception:
-                pass
+                logger.exception("变式题生成异常：qid=%s", cur.id)
         return None
 
     @staticmethod
