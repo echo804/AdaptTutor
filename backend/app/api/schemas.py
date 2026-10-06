@@ -90,6 +90,10 @@ class MessageReply(BaseModel):
     terminated: bool = False
     done: bool = False
     correct: bool | None = None       # AI 判题结果（M4r1）
+    # 本轮是否真的判过分。correct=false 有三种含义（真答错 / 非答案输入 / 诊断不支持追问），
+    # 前端过去只靠 correct 是否为 null 判断"要不要显示判词"，于是把"非答案输入"
+    # 也当成判过分 → 提前终结当前题。显式给出判题事实，消除歧义。
+    judged: bool = False
     feedback: str | None = None       # 判题反馈
     judge_method: str | None = None   # choice|rule|llm
     correct_answer: str | None = None # 判错时标准答案（M4r5 需求 1d）

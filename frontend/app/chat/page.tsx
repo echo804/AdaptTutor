@@ -63,11 +63,15 @@ function ChatPageInner() {
   // A 刀：对话流状态（替换原 M5 卡片栈 cards/currentIdx/flipped）
   const [msgs, setMsgs] = useState<Msg[]>([]);          // 可见的对话流
   const [question, setQuestion] = useState<Question | null>(null); // 当前待作答的题
-  const [closed, setClosed] = useState(false);          // 当前题是否已终结（只由 state/换题决定，与 correct 无关）
+  // 已终结的题号集合 —— 按题记录，而不是一个全局 closed 开关。
+  // 原因：换题时旧规则 setClosed(true) 会把"新题"也一起锁掉，导致
+  // 用户答对一道题后新题无法作答（必须刷新/重进才恢复）。
+  const [closedQids, setClosedQids] = useState<Set<string>>(new Set());
+  const [sessionOver, setSessionOver] = useState(false); // 本轮彻底结束（done/换到末尾）→ 只读
   const [unlocked, setUnlocked] = useState<{ answer: string | null; qid: string } | null>(null); // 终结后才放出的标准答案
   const [gateOpen, setGateOpen] = useState(false);      // 答案闸门是否解锁
   const [qIndex, setQIndex] = useState<{ no: number; total: number } | null>(null); // 第几题 / 共几题
-  const [draftMode, setDraftMode] = useState(true);     // 输入框处于草稿态（不提交、不判分）
+  const [draftMode, setDraftMode] = useState(false);     // 输入框处于草稿态（不提交、不判分）
   const [isReview, setIsReview] = useState(false);      // 当前题是错题复习题
   const [state, setState] = useState("elicit");
   const [loading, setLoading] = useState(false);
@@ -114,7 +118,9 @@ function ChatPageInner() {
     }
   });
   // A 刀：派生当前题是否已结束（对话流没有"翻面"，只有终结与否）
-  const finished = closed || !question;
+  // closed 由 closedQids 按题号判定，sessionOver 表示本轮彻底结束
+  const closed = !!question && (closedQids.has(question.id) || sessionOver);
+  const finished = sessionOver && !question;
   const isTutor = sessionType === "tutor";
   // A16：对话流自动滚到最新一条
   const flowEndRef = useRef<HTMLDivElement | null>(null);
@@ -206,10 +212,13 @@ function ChatPageInner() {
       const flow: Msg[] = opening ? [{ role: "ai", text: opening }] : [];
       setMsgs(flow);
       setQuestion(r.question ?? null);
-      setClosed(!r.question);
+      // 新会话没有已终结的旧题；只有拿不到题时才算本轮结束
+      setClosedQids(new Set());
+      setSessionOver(!r.question);
       setUnlocked(null);
       setGateOpen(false);
-      setDraftMode(true);
+      // 新会话直接进作答态：草稿态会藏起选项与输入框，学生看不到题只能干等
+      setDraftMode(false);
       setIsReview(false);
       setDiagProgress({ qcount: r.qcount, answered: r.answered });
       setSelectedChoice(null);
@@ -306,13 +315,15 @@ async function resumeSession(id: number) {
       // 状态机已推进到下一题（state=elicit + 新 qid），但历史最后一条恰好是判题行，
       // 那样会把新的待答题误判成已终结 → 作答区消失 → 用户看到题却答不了。
       const isDone = !!st.done || st.state === "done";
-      setClosed(!curQ || isDone);
-      setGateOpen(isDone);
+      // 当前题是否已终结，按题号判定。服务端 done 只说明「本轮结束」，
+      // 若据此把当前题也锁上，恢复会话时会出现「题还在但答不了」。
+      setClosedQids(isDone && curQ ? new Set([curQ.id]) : new Set());
+      setSessionOver(isDone);
       // 历史判题行仍可用于展示"已答过"，但不代表当前题终结
       setUnlocked(turn.unlocked && !isDone && !curQ ? turn.unlocked : null);
       setDiagProgress({ qcount: st.qcount, answered: st.answered });
       setBulbOpen(false);
-      setDraftMode(true);
+      setDraftMode(false);
       setSelectedChoice(null);
       setSelectedMulti([]); // M4r24
       setAnswerText("");
@@ -345,10 +356,9 @@ async function resumeSession(id: number) {
       setDiagProgress({ qcount: r.qcount ?? diagProgress.qcount, answered: r.answered ?? diagProgress.answered });
 
       // ===== A7/A8：对话流更新（本刀的核心） =====
-      // 唯一判定规则：closed 只由 state 与"是否换题"决定，与 correct 无关。
-      // 旧规则 judged = (r.correct !== null) 把 correct=false 的三种含义
-      // （真答错 / 诊断不支持追问 / VERIFY 非答案输入）一律当成结束 → 关掉作答区 → 死锁。
-      const judged = r.correct !== null;                 // 只决定"要不要显示判词"
+      // 判题事实由后端 judged 显式给出，不再从 correct !== null 推断
+      // （correct=false 同时表示"真答错 / 非答案输入 / 诊断不支持追问"三种情况）。
+      const judged = r.judged === true;
       const newQ = r.question;
       const sameQ = !!newQ && !!question && newQ.id === question.id;
       const pushed = !!newQ && !sameQ;                   // 换题 → 上一题终结
@@ -390,18 +400,29 @@ async function resumeSession(id: number) {
         setSelectedChoice(null);
         setSelectedMulti([]);
         setAnswerText("");
-        setDraftMode(true);
+        setDraftMode(false);
         setIsReview(!!r.context?.is_review);
       }
 
-      // ← 死锁在这里被消除：与 correct 的取值无关
-      setClosed(isDone || pushed || !newQ);
+      // 终结判定（7.4）：只终结"上一题"，绝不连新题一起锁。
+      // 旧规则 setClosed(isDone || pushed || !newQ) 用单个全局开关，
+      // 换题时 pushed=true 会把刚下发的新题也标成已终结 → 作答区消失，
+      // 用户表现为「答对一道题后新题无法作答，只能刷新或重进」。
+      if (isDone) {
+        setSessionOver(true);
+        if (question?.id) setClosedQids((prev) => new Set(prev).add(question.id));
+      } else if (pushed && question?.id) {
+        // 只把旧题记为已终结，新题保持可作答
+        setClosedQids((prev) => new Set(prev).add(question.id));
+        setSessionOver(false);
+      } else if (!newQ) {
+        setSessionOver(true);
+      }
       // A9：本题终结时才解锁答案（替代原"自动翻面看答案"）
       // 裁决（7.8-2）：题已终结 → 显示标准答案；未终结 → 答案闸门锁着，DOM 里不出现答案。
       // 注意：后端 `_question_to_dict` 刻意不下发 answer（防泄题），所以标准答案只能来自
       // 判题响应的 correct_answer —— 答错时才有；答对时闸门显示"已答对"而非答案。
-      const termThis = isDone || pushed || !newQ;
-      if (termThis) {
+      if (isDone || pushed || !newQ) {
         setGateOpen(true);
         setUnlocked({
           answer: r.correct_answer ?? null,
@@ -463,11 +484,12 @@ async function resumeSession(id: number) {
     setSessionType(null);
     setMsgs([]);
     setQuestion(null);
-    setClosed(false);
+    setClosedQids(new Set());
+    setSessionOver(false);
     setUnlocked(null);
     setGateOpen(false);
     setQIndex(null);
-    setDraftMode(true);
+    setDraftMode(false);
     setIsReview(false);
     setDiagProgress({});
     setBulbOpen(false);

@@ -101,6 +101,9 @@ export interface MessageReply {
   terminated: boolean;
   done: boolean;
   correct: boolean | null;
+  /** 本轮是否真的判过分。correct=false 有三种含义（真答错/非答案输入/诊断不支持追问），
+   *  只看 correct 是否为 null 会把「非答案输入」误当成判过分 → 提前终结当前题。 */
+  judged: boolean;
   feedback: string | null;
   judge_method: string | null;
   correct_answer: string | null;

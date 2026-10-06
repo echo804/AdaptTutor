@@ -50,6 +50,8 @@ TRANSITION_TABLE: dict[tuple[State, Event], State] = {
     # 识别错误
     (State.IDENTIFY, Event.CLASSIFIED): State.HINT,         # 已分类 → 最小提示
     (State.IDENTIFY, Event.ANSWER_WRONG): State.IDENTIFY,   # 追问仍错 → 继续识别
+    # 追问过程中学生自己把题做对了：不必再走 HINT/VERIFY，直接进变式验证确认是否真会
+    (State.IDENTIFY, Event.ANSWER_CORRECT): State.VERIFY,
     (State.IDENTIFY, Event.NOT_LOCATED): State.ELICIT,      # 分类失败 → 回退探明
     (State.IDENTIFY, Event.GIVE_UP): State.DONE,
     (State.IDENTIFY, Event.OFF_THEME): State.IDENTIFY,
@@ -57,6 +59,8 @@ TRANSITION_TABLE: dict[tuple[State, Event], State] = {
     # 最小提示
     (State.HINT, Event.HINT_GIVEN): State.VERIFY,           # 提示给出 → 变式验证
     (State.HINT, Event.ANSWER_WRONG): State.HINT,           # 提示层级再降（受挫败感约束）
+    # 提示后学生做对了：进变式验证（与 HINT_GIVEN 同目标，区别在于本轮已判分、不再重复给提示）
+    (State.HINT, Event.ANSWER_CORRECT): State.VERIFY,
     (State.HINT, Event.NOT_LOCATED): State.ELICIT,          # 提示无效 → 重新探明更深卡点
     (State.HINT, Event.GIVE_UP): State.DONE,
     (State.HINT, Event.OFF_THEME): State.HINT,
@@ -64,6 +68,10 @@ TRANSITION_TABLE: dict[tuple[State, Event], State] = {
     # 变式验证
     (State.VERIFY, Event.VERIFY_PASS): State.DONE,          # 通过 → 完成/下一题
     (State.VERIFY, Event.VERIFY_FAIL): State.IDENTIFY,      # 未通过 → 回到识别
+    # 变式题本身答对 ≡ 验证通过（编排层 VERIFY 态把 correct=True 映射为 VERIFY_PASS，
+    # 此条保证即便调用方直接发 ANSWER_CORRECT 也不会撞非法跳转）
+    (State.VERIFY, Event.ANSWER_CORRECT): State.DONE,
+    (State.VERIFY, Event.ANSWER_WRONG): State.IDENTIFY,     # 变式答错 ≡ 验证未通过
     (State.VERIFY, Event.GIVE_UP): State.DONE,
     (State.VERIFY, Event.OFF_THEME): State.VERIFY,
 

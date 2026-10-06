@@ -311,6 +311,7 @@ async def api_send_message(
                 terminated=bool(st.get("terminated", False)),
                 done=bool(st.get("done", False)),
                 correct=result.correct,
+                judged=True,
                 feedback=result.feedback,
                 judge_method=result.method,
                 correct_answer=None if result.correct else result.correct_answer,
@@ -335,7 +336,12 @@ async def api_send_message(
             from app.engine.evaluator import judge as judge_answer
             from app.engine.state_machine.states import State as SMState
 
-            if t.sm.state in (SMState.ELICIT, SMState.VERIFY) and t.verify_question and (body.content or "").strip():
+            # 判题适用范围：所有「学生有可能在做题」的状态都要判。
+            # 此前只有 ELICIT/VERIFY —— IDENTIFY/HINT（刚被追问或刚拿到提示，
+            # 正在思考的阶段）提交的答案被当成普通对话丢掉，correct 恒为 None，
+            # 状态机也就永远收不到「答对」信号。
+            _ANSWERABLE = (SMState.ELICIT, SMState.IDENTIFY, SMState.HINT, SMState.VERIFY)
+            if t.sm.state in _ANSWERABLE and t.verify_question and (body.content or "").strip():
                 j = judge_answer(body.content, t.verify_question)
                 if j.indeterminate and t.sm.state == SMState.VERIFY:
                     # M4r7f 修正：VERIFY 非答案输入（追问/求助）→ 保持 verify 态，
@@ -361,10 +367,16 @@ async def api_send_message(
                         context=r.context,
                     )
                 else:
+                    # 判题对象要先抓住：tutor_step 内部可能推进状态机并把
+                    # verify_question 换成下一题，此前判题行在推进之后才拼，
+                    # 于是「✗ 正确答案是 C（10）」会被挂到新题上——答案串题。
+                    judged_q = t.verify_question
                     r = t.tutor_step(body.content, correct=j.correct)
                     # M6：辅导作答 → 写入 SM-2 复习调度（答错立即可复习，答对排期）
-                    if t.verify_question is not None:
-                        await repo.upsert_review(db, user.id, pack_id, t.verify_question.id, correct=j.correct)
+                    # 一律用 judged_q（真正被作答的那题），不能用 t.verify_question ——
+                    # tutor_step 可能已把它换成下一题，那样复习调度与学习事件都会记错题号。
+                    if judged_q is not None:
+                        await repo.upsert_review(db, user.id, pack_id, judged_q.id, correct=j.correct)
                     # M4r21h：辅导作答也记 answer 事件（学习趋势数据源）
                     await repo.add_event(
                         db,
@@ -374,21 +386,21 @@ async def api_send_message(
                         session_id=sid,
                         pack_id=pack_id,
                         payload={
-                            "qid": t.verify_question.id if t.verify_question else None,
+                            "qid": judged_q.id if judged_q else None,
                             "correct": j.correct,
                             "user_answer": body.content,
                             # M5：题目快照（历史卡重建数据源，变式题 id 不在领域包也可恢复内容）
                             "question": (
                                 {
-                                    "id": t.verify_question.id,
-                                    "type": t.verify_question.type,
-                                    "content": t.verify_question.content,
-                                    "options": t.verify_question.options,
-                                    "answer": t.verify_question.answer,
-                                    "difficulty": t.verify_question.difficulty,
-                                    "step_node_map": t.verify_question.step_node_map,
+                                    "id": judged_q.id,
+                                    "type": judged_q.type,
+                                    "content": judged_q.content,
+                                    "options": judged_q.options,
+                                    "answer": judged_q.answer,
+                                    "difficulty": judged_q.difficulty,
+                                    "step_node_map": judged_q.step_node_map,
                                 }
-                                if t.verify_question
+                                if judged_q
                                 else None
                             ),
                         },
@@ -396,7 +408,7 @@ async def api_send_message(
                     judge_line = (
                         f"✓ 答对了！{j.feedback}"
                         if j.correct
-                        else f"✗ 答错了，正确答案是：{j.correct_answer or t.verify_question.answer}。"
+                        else f"✗ 答错了，正确答案是：{j.correct_answer or (judged_q.answer if judged_q else '?')}。"
                     )
                     reply = MessageReply(
                         state=r.state,
@@ -404,6 +416,7 @@ async def api_send_message(
                         degraded=r.degraded,
                         mock=r.mock,
                         correct=j.correct,
+                        judged=True,
                         feedback=j.feedback,
                         judge_method=j.method,
                         correct_answer=None if j.correct else j.correct_answer,

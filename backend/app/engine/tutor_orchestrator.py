@@ -12,6 +12,7 @@ CLI 演示：python -m app.cli tutor [--pack junior_math_eq_ineq] [--seed 42]
 
 from __future__ import annotations
 
+import logging
 import random
 from dataclasses import dataclass, field
 
@@ -24,6 +25,8 @@ from app.engine.state_machine.frustration import assess_frustration
 from app.engine.state_machine.output_sanitizer import OutputSanitizer
 from app.engine.state_machine.state_machine import TutorStateMachine
 from app.engine.state_machine.states import Event, State
+
+logger = logging.getLogger(__name__)
 
 # mock 引导语（确定性，按提示层级递增；均不泄露答案，对齐引导语评估规范）
 _HINTS = [
@@ -75,6 +78,7 @@ class TutorOrchestrator:
         self.tutor_pool: list = list(self.pack.questions)
         self.max_rounds: int = 1
         self.practice_rounds: int = 0
+        self.passed_rounds: int = 0  # 真正答对的题数（与 practice_rounds 区分，见 _finish_question）
         self._used_nodes: set[str] = set()  # M5：本会话已巩固的知识点（循环选题不重复；恢复会话兜底初始化）
         self.review_queue: list[str] = []  # M5：错题复习队列（qid，去重；复习答对移除）
         self.review_tries: dict[str, int] = {}  # M5：错题复习次数（≥2 次未答对 → 移出队列防无限反复）
@@ -229,6 +233,7 @@ class TutorOrchestrator:
         qc = config.get("qcount") if config else None
         self.max_rounds = max(1, int(qc)) if qc is not None else 1
         self.practice_rounds = 0
+        self.passed_rounds = 0
         self._used_nodes: set[str] = set()  # M5：本会话已巩固的知识点（循环选题不重复）
         self.review_queue = []  # M5：错题复习队列（去重；复习答对移除）
         self.review_tries = {}  # M5：错题复习次数（≥2 次未答对 → 移出队列防无限反复）
@@ -396,8 +401,19 @@ class TutorOrchestrator:
             )
         if state == State.IDENTIFY:
             if correct is True:
-                self.sm.step(Event.CLASSIFIED, error_category="concept")
-                return self._hint_turn()
+                # 追问过程中学生自己把题做对了。原先直接 CLASSIFIED→HINT 再给一遍提示，
+                # 是因为转移表没有 (IDENTIFY, ANSWER_CORRECT) 这条路径，只能绕道走 ——
+                # 结果学生已经会了还被要求再爬一遍提示阶梯。现在直接进变式验证。
+                self.sm.step(Event.ANSWER_CORRECT)
+                vq = self._pick_verify()
+                if vq is not None:
+                    self.verify_question = vq
+                    return TurnResult(
+                        state=self.sm.state.value,
+                        message=_MSG_VERIFY,
+                        context=dict(self.sm.context),
+                    )
+                return self._finish_question(True)
             if correct is None:
                 # M4r24h：IDENTIFY 态求助 → 针对性提示，不推进状态机
                 _seek = ("我不会", "讲讲", "帮我", "教教", "求助", "不懂", "怎么解", "提示我")
@@ -411,6 +427,21 @@ class TutorOrchestrator:
             self.sm.step(Event.CLASSIFIED, error_category="operation")
             return self._hint_turn()
         if state == State.HINT:
+            # 提示后学生做对了 → 进变式验证确认是否真会。
+            # 此前这里没有 correct is True 分支：学生答对后四个 if 全部落空，
+            # 一路掉到函数末尾的兜底 return，直接吐 state="done" + "本轮完成" ——
+            # 前端据此关闭作答区，用户表现为「答对后新题无法作答，只能刷新」。
+            if correct is True:
+                self.sm.step(Event.ANSWER_CORRECT)
+                vq = self._pick_verify()
+                if vq is not None:
+                    self.verify_question = vq
+                    return TurnResult(
+                        state=self.sm.state.value,
+                        message=_MSG_VERIFY,
+                        context=dict(self.sm.context),
+                    )
+                return self._finish_question(True)
             # M4r24h：HINT 态输入区分——求助类 → 给针对性提示不推进；
             # 其他（"好，我按提示想想"）→ 正常 HINT_GIVEN → 变式验证
             _seek = ("我不会", "讲讲", "帮我", "教教", "求助", "不懂", "怎么解", "提示我")
@@ -430,9 +461,27 @@ class TutorOrchestrator:
                 return self._finish_question(True)
             self.sm.step(Event.VERIFY_FAIL)
             return self._identify_turn()
-        # DONE
+        if state == State.DONE:
+            # 本轮已结束且还有题（理论上不该发生：_finish_question 收尾会清空 verify_question）。
+            # 显式说明而不是含糊地"本轮完成"，避免前端误关作答区。
+            return TurnResult(
+                state=self.sm.state.value,
+                message="本轮已完成，可以开始下一题。",
+                context=dict(self.sm.context),
+            )
+        # 兜底：非 DONE 态却走到这里 = 上面某个分支漏了当前 (state, correct) 组合。
+        # 旧代码在这里直接返回 state=done「本轮完成」，把逻辑漏洞伪装成正常收尾，
+        # 前端据此关闭作答区，学生表现为「答对后卡住，只能刷新」。这里改为留在原状态、
+        # 继续当前题的引导，把题交还给学生。
+        logger.warning(
+            "tutor_step 落入兜底分支：state=%s correct=%s —— 编排层缺少该组合的处理",
+            self.sm.state.value,
+            correct,
+        )
         return TurnResult(
-            state=self.sm.state.value, message="本轮完成，可以开始下一题。", context=dict(self.sm.context)
+            state=self.sm.state.value,
+            message="这一步还没结束，我们继续看这道题。",
+            context=dict(self.sm.context),
         )
 
     def _hint_turn(self) -> TurnResult:
@@ -513,21 +562,34 @@ class TutorOrchestrator:
         if not self.is_review:
             if passed and self.current_node:
                 self._used_nodes.add(self.current_node)
+            # 计数口径：practice_rounds 是"已消耗的题量额度"（满额即收尾），
+            # 但结束语报的是"巩固了几个知识点"——此前两者共用一个计数，
+            # 答错的题也算进"巩固"，导致「巩固了 5 个」这类虚高数字。
+            # 这里拆开：额度照常推进（否则答错会无限出题），巩固数单独统计。
             self.practice_rounds += 1
+            if passed:
+                self.passed_rounds += 1
         if self.practice_rounds >= self.max_rounds:
-            weak = "、".join((self.weak_nodes or ["—"])[:3])
+            weak = "、".join(
+                self._node_label(n) or n for n in (self.weak_nodes or [])[:3]
+            ) or "—"
             self.verify_question = None
             left = (
                 f"还有 {self.due_count} 道复习到期（按遗忘曲线），可开启新会话复习。"
                 if self.due_count
                 else ""
             )
+            # 答错也要如实报：只报"巩固 N 个"会让学生以为全对通过了
+            tail = (
+                f"🎉 本轮练习完成！巩固了 {self.passed_rounds} 个知识点。"
+                if self.passed_rounds
+                else "🎉 本轮练习完成。"
+            )
+            if self.passed_rounds < self.practice_rounds:
+                tail += f"（{self.practice_rounds - self.passed_rounds} 道没答对，已记入错题本，之后再练）"
             return TurnResult(
                 state=State.DONE.value,
-                message=(
-                    f"🎉 本轮练习完成！巩固了 {self.practice_rounds} 个知识点。"
-                    f"当前薄弱点是：{weak}。{left}"
-                ),
+                message=f"{tail}当前薄弱点是：{weak}。{left}",
                 context=dict(self.sm.context),
             )
         node, q = self._next_question()
@@ -544,7 +606,18 @@ class TutorOrchestrator:
         ctx = dict(self.sm.context)
         ctx["is_review"] = self.is_review  # M5：复习题标记（前端显示"复习"徽标）
         ctx["progress"] = {"practice": self.practice_rounds, "total": self.max_rounds, "review_left": len(self.review_queue)}
-        msg = "这是之前答错的题，再试一次。" if self.is_review else f"很好，这一步掌握了！进入下一个知识点：{node}。先试试这道题。"
+        # 文案必须区分 passed：此前无论答对答错都说"这一步掌握了"——学生答错却收到
+        # 肯定式反馈，既误导判断也污染掌握度语义。
+        # 知识点同样走 _node_label()：否则这里又把内部 id（如 a01）说给用户听。
+        if self.is_review:
+            msg = "这道题之前答错过，我们再试一次。"
+        elif passed:
+            msg = f"很好，这一步掌握了！进入下一个知识点：{self._node_label(node) or node}。先试试这道题。"
+        else:
+            msg = (
+                f"这题我先记到错题本了，之后再练。下一个知识点："
+                f"{self._node_label(node) or node}。先试试这道题。"
+            )
         return TurnResult(
             state=State.ELICIT.value,
             message=msg,
@@ -664,6 +737,7 @@ class TutorOrchestrator:
                 else None
             ),
             "practice_rounds": self.practice_rounds,
+            "passed_rounds": self.passed_rounds,
             "max_rounds": self.max_rounds,
             "current_node": self.current_node,
             "ease_verify": self._ease_verify,
@@ -711,6 +785,8 @@ class TutorOrchestrator:
         # M4r7h：恢复辅导题库与练习轮数
         self.max_rounds = int(state.get("max_rounds", self.max_rounds))
         self.practice_rounds = int(state.get("practice_rounds", 0))
+        # passed_rounds 缺失的老快照回退：宁可少算巩固数，也别把答错的算进去
+        self.passed_rounds = int(state.get("passed_rounds", 0))
         self.current_node = state.get("current_node")
         self._ease_verify = bool(state.get("ease_verify", False))  # M4r20 T3
         qtypes = self.diag_config.get("qtypes") or ["choice", "blank", "open"]
