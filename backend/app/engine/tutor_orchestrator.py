@@ -32,6 +32,10 @@ _HINTS = [
     "换个角度：如果是这个知识点，你会先处理哪一部分？",
 ]
 
+# 变式验证引导语。此前硬编码"请看下方题目"，但 A 刀（辅导页改对话流）已把题目移到
+# 右侧题卡，方位词与实际界面不符——用户反馈"题目在右边却提示看下方"。抽成常量避免再漏改。
+_MSG_VERIFY = "再来一道变式验证，看右侧题目卡。"
+
 
 @dataclass
 class TurnResult:
@@ -326,7 +330,7 @@ class TutorOrchestrator:
                 message="当前配置（题型/难度）下暂无可用题目，请调整配置后再试。",
                 context=dict(self.sm.context),
             )
-        msg = f"我们来看这个知识点：{node}。先试试这道题。"
+        msg = f"我们来看这个知识点：{self._node_label(node) or node}。先试试这道题。"
         ctx = dict(self.sm.context)
         ctx["is_review"] = False  # M5：首次出题为新题
         ctx["progress"] = {"practice": self.practice_rounds, "total": self.max_rounds, "review_left": len(self.review_queue)}
@@ -378,7 +382,7 @@ class TutorOrchestrator:
                     self.verify_question = vq
                     return TurnResult(
                         state=self.sm.state.value,
-                        message="再来一道变式验证，请看下方题目。",
+                        message=_MSG_VERIFY,
                         context=dict(self.sm.context),
                     )
                 return self._finish_question(True)
@@ -449,6 +453,18 @@ class TutorOrchestrator:
             context=dict(self.sm.context),
         )
 
+    def _node_label(self, node_id: str | None) -> str | None:
+        """节点 id → 「知识点名（id）」。
+
+        此前引导语直接把内部 id（如 a01）说给用户听，等于没说是哪个知识点 ——
+        用户反馈"灯泡提示没说清考察了什么"。图谱节点自带 name，这里换成真实名称。
+        """
+        if not node_id:
+            return None
+        n = self.graph.nodes.get(node_id)
+        name = (getattr(n, "name", "") or "").strip()
+        return f"{name}（{node_id}）" if name else node_id
+
     def _gen_targeted_hint(self, level: int) -> str | None:
         """生成结合当前题目的针对性提示。有 key → LLM；无 key → 题目信息模板。
 
@@ -458,6 +474,7 @@ class TutorOrchestrator:
         if q is None:
             return None
         node = self.current_node or next(iter(q.step_node_map.values()), None)
+        node_label = self._node_label(node)
         # 题干去 LaTeX/占位符，取前 60 字
         import re as _re
 
@@ -467,7 +484,7 @@ class TutorOrchestrator:
                 f"你是苏格拉底式辅导老师。学生卡在下面这道题，请给出一个【提示】帮 TA 继续思考，"
                 f"但绝不要直接给出答案或完整步骤。\n"
                 f"题目：{brief}\n"
-                f"涉及知识点：{node}\n"
+                f"涉及知识点：{node_label or node}\n"
                 f"提示层级：{'最模糊' if level == 0 else '中等' if level == 1 else '较具体但无答案'}\n"
                 f"只输出 1-2 句提示，不要解释，不要给答案。"
             )
@@ -481,13 +498,13 @@ class TutorOrchestrator:
         except Exception:
             pass
         # 无 key/失败回退：用题目知识点构造（仍针对性，不泄露答案）
-        if node:
-            return f"这道题围绕「{node}」，先回忆一下这个知识点涉及的关键概念，再对照题目试试。"
+        if node_label:
+            return f"这道题围绕「{node_label}」，先回忆一下这个知识点涉及的关键概念，再对照题目试试。"
         return None
 
     def _verify_turn(self) -> TurnResult:
         self.verify_question = self._pick_verify()
-        msg = "再来一道变式验证，请看下方题目。"
+        msg = _MSG_VERIFY
         return TurnResult(state=self.sm.state.value, message=msg, context=dict(self.sm.context))
 
     def _finish_question(self, passed: bool) -> TurnResult:
@@ -569,6 +586,7 @@ class TutorOrchestrator:
         if q is None:
             return "当前没有题目，先开始作答吧。"
         node = self.current_node or next(iter(q.step_node_map.values()), None)
+        node_label = self._node_label(node)
         # HINT 态：灯泡内容 = 状态机提示（层级递进）
         if self.sm.state == State.HINT:
             level = min(self.sm.context.get("hint_level", 0), len(_HINTS) - 1)
@@ -583,7 +601,7 @@ class TutorOrchestrator:
                 "你是苏格拉底式辅导老师。学生点了求助灯泡，请用 2-3 句简短、易懂的话讲清楚这道题的【思考思路】，"
                 "帮 TA 找到入手点，但不要直接给出最终答案或完整步骤。\n"
                 f"题目：{brief}\n"
-                f"涉及知识点：{node}\n"
+                f"涉及知识点：{node_label or node}\n"
                 "只输出 2-3 句话，不要标题，不要多余解释。"
             )
             resp = self.gateway.generate(
@@ -597,9 +615,9 @@ class TutorOrchestrator:
                     return text
         except Exception:
             pass
-        if node:
+        if node_label:
             return (
-                f"这道题围绕「{node}」：先回忆这个知识点的关键概念，"
+                f"这道题围绕「{node_label}」：先回忆这个知识点的关键概念，"
                 "再看题目给了什么条件、要求什么，从这两个角度找入手点。"
             )
         return "先读题，标出已知条件和要求，再想它考的是哪个知识点、对应什么方法。"

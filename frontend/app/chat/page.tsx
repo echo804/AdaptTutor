@@ -301,12 +301,15 @@ async function resumeSession(id: number) {
       const curQ = st.type === "tutor" ? (st.verify_question ?? st.question) : st.question;
       setMsgs(flow);
       setQuestion(curQ ?? null);
-      // 当前题是否已终结：有历史消息时看最后一轮是否已判分；否则按 state==="done"
-      const lastAnswered = turn.answered;
+      // 当前题是否已终结 —— 以服务端 state 为唯一依据。
+      // 不能用"历史最后一条是否是判题行"（turn.answered）来判断：变式题答对后
+      // 状态机已推进到下一题（state=elicit + 新 qid），但历史最后一条恰好是判题行，
+      // 那样会把新的待答题误判成已终结 → 作答区消失 → 用户看到题却答不了。
       const isDone = !!st.done || st.state === "done";
-      setClosed(!curQ || isDone || lastAnswered);
+      setClosed(!curQ || isDone);
       setGateOpen(isDone);
-      setUnlocked(turn.unlocked && lastAnswered && !isDone ? turn.unlocked : null);
+      // 历史判题行仍可用于展示"已答过"，但不代表当前题终结
+      setUnlocked(turn.unlocked && !isDone && !curQ ? turn.unlocked : null);
       setDiagProgress({ qcount: st.qcount, answered: st.answered });
       setBulbOpen(false);
       setDraftMode(true);
