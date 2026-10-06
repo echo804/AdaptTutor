@@ -42,3 +42,13 @@ logs/
 
 # 生产环境密钥（M6.1：.env.production 含强密钥，必须忽略）
 .env.production
+
+# 本地工作区私有文件（agent 记忆、临时验证脚本，含本机路径与调试信息）
+.workbuddy/
+
+# 含真实服务器地址的运维脚本（个人主机信息，不应进公共仓库）
+scripts/harden_server.sh
+
+# 测试产生的领域包（编辑器/AI 生成流程的中间产物）
+domain_packs/test_editor_*/
+domain_packs/ud[0-9]*/
