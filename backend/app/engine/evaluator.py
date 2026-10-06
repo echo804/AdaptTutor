@@ -103,9 +103,23 @@ def judge_multi(user_choice: str, question: Question) -> JudgeResult:
         if 0 <= idx < len(question.options or []):
             txt = _re2.sub(r"^[A-Z][\.．、]\s*", "", question.options[idx])
             opt_txts.append(f"{l}. {txt}")
+    # 多选反馈要说清"错在哪"：多选了 / 漏选了 / 全错（对应三种不同的补救动作）
+    if correct:
+        fb = _FEEDBACK_CORRECT
+    else:
+        extra = sorted(set(letters) - set(ans_letters))# 多选出来的
+        missed = sorted(set(ans_letters) - set(letters))    # 漏选的
+        if extra and missed:
+            fb = f"多选了 {'、'.join(extra)}，同时漏了 {'、'.join(missed)}。多选要不多不少才完全正确。"
+        elif extra:
+            fb = f"多选了 {'、'.join(extra)}——这些不属于本题的正确答案范围。"
+        elif missed:
+            fb = f"还漏了 {'、'.join(missed)}，再确认一下这几个是不是也符合题意。"
+        else:
+            fb = _FEEDBACK_WRONG
     return JudgeResult(
         correct=correct,
-        feedback=_FEEDBACK_CORRECT if correct else _FEEDBACK_WRONG,
+        feedback=fb,
         method="choice",
         correct_answer=None if correct else (f"{ans_txt}（{'；'.join(opt_txts)}）" if opt_txts else ans_txt),
     )

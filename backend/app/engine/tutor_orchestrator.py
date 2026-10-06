@@ -87,6 +87,8 @@ class TutorOrchestrator:
         self.is_review: bool = False  # M5：当前题是否为错题复习题
         self.current_node: str | None = None  # M4r7i：当前辅导知识点（变式题匹配依据）
         self._ease_verify: bool = False  # M4r20 T3：挫败后变式降档标记
+        # 本会话已下发过的变式题 id —— 避免"答对→出 m002→再答对→又是 m002"的重复循环
+        self._verify_used: set[str] = set()
 
     # ---------- 阶段 1：诊断 ----------
 
@@ -238,6 +240,7 @@ class TutorOrchestrator:
         self.review_queue = []  # M5：错题复习队列（去重；复习答对移除）
         self.review_tries = {}  # M5：错题复习次数（≥2 次未答对 → 移出队列防无限反复）
         self.is_review = False  # M5：当前题是否为错题复习题
+        self._verify_used = set()  # 新会话清空变式题去重记录
         self.sm.reset()
         if not self.path:
             self.build_path()
@@ -274,22 +277,37 @@ class TutorOrchestrator:
         """
         node = self.current_node or (self.path[0] if self.path else None)
         cur = self.verify_question
-        cands = [
+        cur_id = cur.id if cur else None
+        # 避重：排除「当前题」+「本会话已下发过的变式题」。
+        # 此前只排除 cur.id，而 min(..., key=difficulty) 是确定性取最小 ——
+        # 于是「答对 m001 → 出 m002；再答对 m002 → 还是 m002」，
+        # 学生反复做同一道题，体感上就是"题目重复、怎么都过不去"。
+        # 先在未用过的题里挑；全用过了才退回允许重复（宁可重复也不卡死）。
+        used = self._verify_used
+        fresh = [
             q for q in self.tutor_pool
-            if node in q.step_node_map.values() and q.id != (cur.id if cur else None)
+            if node in q.step_node_map.values() and q.id != cur_id and q.id not in used
+        ]
+        cands = fresh or [
+            q for q in self.tutor_pool
+            if node in q.step_node_map.values() and q.id != cur_id
         ]
         base = cur.difficulty if cur else 0.5
+        picked: Question | None = None
         if self._ease_verify:
             # 挫败降档：选明显更低难度的题
             self._ease_verify = False
             lower = [q for q in cands if q.difficulty <= base - 0.15]
-            return min(lower, key=lambda q: q.difficulty) if lower else (
+            picked = min(lower, key=lambda q: q.difficulty) if lower else (
                 min(cands, key=lambda q: q.difficulty) if cands else None
             )
-        if cands:
+        elif cands:
             # 难度递进：选略高于当前题难度的（若存在），否则取最高
             higher = [q for q in cands if q.difficulty >= base - 0.05]
-            return min(higher, key=lambda q: q.difficulty) if higher else min(cands, key=lambda q: q.difficulty)
+            picked = min(higher, key=lambda q: q.difficulty) if higher else min(cands, key=lambda q: q.difficulty)
+        if picked is not None:
+            self._verify_used.add(picked.id)
+            return picked
         # 同节点无其他题 → 生成变式（排除原题，参数化改数字）
         # M4r23：seed 改为随机（此前 hash(node) 固定 → 同一知识点永远同一变式，单调）
         # M5：生成后校验内容/答案与原题是否完全相同（如题干无数字可偏移的文本题）→
@@ -741,6 +759,7 @@ class TutorOrchestrator:
             "max_rounds": self.max_rounds,
             "current_node": self.current_node,
             "ease_verify": self._ease_verify,
+            "verify_used": sorted(self._verify_used),
         }
 
     def restore_state(self, state: dict) -> None:
@@ -789,6 +808,7 @@ class TutorOrchestrator:
         self.passed_rounds = int(state.get("passed_rounds", 0))
         self.current_node = state.get("current_node")
         self._ease_verify = bool(state.get("ease_verify", False))  # M4r20 T3
+        self._verify_used = set(state.get("verify_used") or [])
         qtypes = self.diag_config.get("qtypes") or ["choice", "blank", "open"]
         diff = self.diag_config.get("difficulty", "auto")
         pool = [q for q in self.pack.questions if q.type in qtypes]
